@@ -1,0 +1,72 @@
+{
+  "name": "eaa-chatbot",
+  "version": "1.0.0",
+  "description": "AI-Powered European Accessibility Act Assistant with RAG architecture",
+  "main": "ParserForChuncks/dist/server.js",
+  "type": "module",
+  "keywords": [
+    "accessibility",
+    "european-accessibility-act",
+    "eaa",
+    "chatbot",
+    "ai",
+    "rag",
+    "typescript",
+    "openai",
+    "supabase",
+    "vector-search",
+    "nlp",
+    "accessibility-compliance"
+  ],
+  "author": {
+    "name": "EAA ChatBot Team",
+    "email": "support@eaa-chatbot.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/eaa-chatbot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/eaa-chatbot/issues"
+  },
+  "homepage": "https://github.com/your-username/eaa-chatbot#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "scripts": {
+    "install": "cd ParserForChuncks && npm install",
+    "build": "cd ParserForChuncks && npm run build",
+    "start": "cd ParserForChuncks && npm run start",
+    "dev": "cd ParserForChuncks && npm run dev",
+    "test": "cd ParserForChuncks && npm run test",
+    "build-and-run": "cd ParserForChuncks && npm run build-and-run",
+    "setup": "npm run install && cp env.example ParserForChuncks/.env && echo 'Please edit ParserForChuncks/.env with your API keys'",
+    "clean": "cd ParserForChuncks && rm -rf dist node_modules && npm install",
+    "lint": "cd ParserForChuncks && npx eslint src --ext .ts,.tsx",
+    "format": "cd ParserForChuncks && npx prettier --write src/**/*.{ts,tsx,js,jsx}",
+    "typecheck": "cd ParserForChuncks && npx tsc --noEmit",
+    "docker:build": "docker build -t eaa-chatbot .",
+    "docker:run": "docker run -p 3000:3000 eaa-chatbot",
+    "docs:serve": "cd docs && python -m http.server 8080",
+    "security:audit": "cd ParserForChuncks && npm audit --audit-level moderate",
+    "security:fix": "cd ParserForChuncks && npm audit fix"
+  },
+  "directories": {
+    "lib": "ParserForChuncks/src",
+    "test": "ParserForChuncks/tests",
+    "doc": "docs"
+  },
+  "files": [
+    "ParserForChuncks/",
+    "!ParserForChuncks/node_modules/",
+    "!ParserForChuncks/.env*",
+    "!ParserForChuncks/dist/",
+    "docs/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md"
+  ]
+}
