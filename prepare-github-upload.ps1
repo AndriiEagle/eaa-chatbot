@@ -361,15 +361,15 @@ Write-Host ""
 Write-ColoredMessage "Project Statistics:" "Cyan" "STATS"
 
 $stats = @{
-    "Total Files" = (Get-ChildItem -Recurse -File | Measure-Object).Count
-    "Source Files" = (Get-ChildItem -Recurse -File -Include "*.ts", "*.tsx", "*.js", "*.jsx" | Measure-Object).Count
-    "Documentation Files" = (Get-ChildItem -Recurse -File -Include "*.md" | Measure-Object).Count
-    "Configuration Files" = (Get-ChildItem -Recurse -File -Include "*.json", "*.yml", "*.yaml", "*.toml" | Measure-Object).Count
+    "Total Files" = (Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
+    "Source Files" = (Get-ChildItem -Recurse -File -Include "*.ts", "*.tsx", "*.js", "*.jsx" | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
+    "Documentation Files" = (Get-ChildItem -Recurse -File -Include "*.md" | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
+    "Configuration Files" = (Get-ChildItem -Recurse -File -Include "*.json", "*.yml", "*.yaml", "*.toml" | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
     "Total Lines of Code" = 0
 }
 
-# Count lines of code
-$codeFiles = Get-ChildItem -Recurse -File -Include "*.ts", "*.tsx", "*.js", "*.jsx", "*.css", "*.scss"
+# Count lines of code (excluding node_modules)
+$codeFiles = Get-ChildItem -Recurse -File -Include "*.ts", "*.tsx", "*.js", "*.jsx", "*.css", "*.scss" | Where-Object { $_.FullName -notmatch "node_modules" }
 foreach ($file in $codeFiles) {
     try {
         $stats["Total Lines of Code"] += (Get-Content $file.FullName | Measure-Object -Line).Lines
