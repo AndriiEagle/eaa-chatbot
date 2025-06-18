@@ -360,26 +360,52 @@ if ($LASTEXITCODE -eq 0) {
 Write-Host ""
 Write-ColoredMessage "Project Statistics:" "Cyan" "STATS"
 
-$stats = @{
-    "Total Files" = (Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
-    "Source Files" = (Get-ChildItem -Recurse -File -Include "*.ts", "*.tsx", "*.js", "*.jsx" | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
-    "Documentation Files" = (Get-ChildItem -Recurse -File -Include "*.md" | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
-    "Configuration Files" = (Get-ChildItem -Recurse -File -Include "*.json", "*.yml", "*.yaml", "*.toml" | Where-Object { $_.FullName -notmatch "node_modules" } | Measure-Object).Count
-    "Total Lines of Code" = 0
-}
-
-# Count lines of code (excluding node_modules)
-$codeFiles = Get-ChildItem -Recurse -File -Include "*.ts", "*.tsx", "*.js", "*.jsx", "*.css", "*.scss" | Where-Object { $_.FullName -notmatch "node_modules" }
-foreach ($file in $codeFiles) {
-    try {
-        $stats["Total Lines of Code"] += (Get-Content $file.FullName | Measure-Object -Line).Lines
-    } catch {
-        # Skip files that can't be read
+try {
+    # Safe file counting with explicit exclusions
+    $excludePatterns = @("*node_modules*", "*\.git*", "*dist*", "*build*", "*coverage*")
+    
+    $allFiles = Get-ChildItem -Recurse -File -ErrorAction SilentlyContinue | Where-Object { 
+        $file = $_
+        $shouldExclude = $false
+        foreach ($pattern in $excludePatterns) {
+            if ($file.FullName -like $pattern) {
+                $shouldExclude = $true
+                break
+            }
+        }
+        -not $shouldExclude
     }
-}
-
-foreach ($key in $stats.Keys) {
-    Write-Host "  $key`: $($stats[$key])" -ForegroundColor Gray
+    
+    $sourceFiles = $allFiles | Where-Object { $_.Extension -in @(".ts", ".tsx", ".js", ".jsx") }
+    $docFiles = $allFiles | Where-Object { $_.Extension -eq ".md" }
+    $configFiles = $allFiles | Where-Object { $_.Extension -in @(".json", ".yml", ".yaml", ".toml") }
+    
+    $stats = @{
+        "Total Files" = $allFiles.Count
+        "Source Files" = $sourceFiles.Count
+        "Documentation Files" = $docFiles.Count
+        "Configuration Files" = $configFiles.Count
+        "Total Lines of Code" = 0
+    }
+    
+    # Count lines of code safely
+    $codeFiles = $allFiles | Where-Object { $_.Extension -in @(".ts", ".tsx", ".js", ".jsx", ".css", ".scss") }
+    foreach ($file in $codeFiles | Select-Object -First 100) { # Limit to first 100 files for safety
+        try {
+            $lines = (Get-Content $file.FullName -ErrorAction SilentlyContinue | Measure-Object -Line).Lines
+            if ($lines -gt 0) {
+                $stats["Total Lines of Code"] += $lines
+            }
+        } catch {
+            # Skip files that can't be read
+        }
+    }
+    
+    foreach ($key in $stats.Keys) {
+        Write-Host "  $key`: $($stats[$key])" -ForegroundColor Gray
+    }
+} catch {
+    Write-Host "  Statistics calculation skipped due to file system complexity" -ForegroundColor Yellow
 }
 
 # Display next steps
