@@ -1,0 +1,253 @@
+# ⚡️ План Развития Проекта: AI Accessibility Compliance Chatbot
+
+Этот документ описывает пошаговый план реализации трех ключевых направлений для улучшения чат-бота:
+1.  **Фаза 1: Админ-панель аналитики** (Операционная видимость)
+2.  **Фаза 2: Автоматическая эскалация** (Замыкание бизнес-цикла)
+3.  **Фаза 3: Углубленная память и анализ** (Умный бот)
+
+План составлен от самого простого и быстрого к самому сложному, чтобы обеспечить итерационную ценность на каждом этапе.
+
+---
+
+## Фаза 1: Админ-панель аналитики (Операционная видимость)
+
+**Цель:** Получить быстрый доступ к данным об использовании бота для принятия взвешенных решений о его дальнейшей разработке.
+
+**Стратегия:** Создать простой, защищенный эндпоинт на бэкенде и минималистичный UI на фронтенде для отображения ключевых метрик.
+
+### Шаг 1.1: Бэкенд - Создание контроллера аналитики
+
+1.  **Создать новый файл:** `ParserForChuncks/src/controllers/adminController.ts`.
+2.  **Наполнить файл логикой:**
+
+    ```typescript
+    import { Request, Response } from 'express';
+    import { supabase } from '../services/supabaseService.js';
+
+    // Простая проверка "ключа API" через query-параметр для базовой безопасности
+    const ADMIN_API_KEY = process.env.ADMIN_API_KEY || 'super-secret-key';
+
+    export const getDashboardData = async (req: Request, res: Response) => {
+      // Базовая аутентификация
+      const apiKey = req.query.apiKey as string;
+      if (apiKey !== ADMIN_API_KEY) {
+        return res.status(401).json({ error: 'Unauthorized' });
+      }
+
+      try {
+        // 1. Последние 20 запросов
+        const { data: recentQueries, error: recentError } = await supabase
+          .from('queries')
+          .select('question, answer, created_at')
+          .order('created_at', { ascending: false })
+          .limit(20);
+
+        if (recentError) throw recentError;
+
+        // 2. Топ-10 самых частых вопросов
+        const { data: topQuestions, error: topError } = await supabase.rpc('get_top_questions');
+
+        if (topError) throw topError;
+
+        // 3. Активность по дням за последние 30 дней
+         const { data: dailyActivity, error: activityError } = await supabase.rpc('get_daily_activity');
+
+        if (activityError) throw activityError;
+
+        res.status(200).json({
+          recentQueries,
+          topQuestions,
+          dailyActivity,
+        });
+
+      } catch (error: any) {
+        console.error('Ошибка при получении данных для дашборда:', error);
+        res.status(500).json({ error: 'Internal Server Error', details: error.message });
+      }
+    };
+    ```
+
+### Шаг 1.2: Бэкенд - Создание SQL-функций и нового маршрута
+
+1.  **Создать новый файл SQL-миграции:** `ParserForChuncks/sql/admin_dashboard_functions.sql`.
+2.  **Добавить в него SQL-функции:**
+
+    ```sql
+    -- Функция для получения топ-10 вопросов
+    CREATE OR REPLACE FUNCTION get_top_questions()
+    RETURNS TABLE(question_text TEXT, question_count BIGINT) AS $$
+    BEGIN
+        RETURN QUERY
+        SELECT
+            question AS question_text,
+            COUNT(*) AS question_count
+        FROM
+            queries
+        GROUP BY
+            question
+        ORDER BY
+            question_count DESC
+        LIMIT 10;
+    END;
+    $$ LANGUAGE plpgsql;
+
+    -- Функция для получения активности по дням
+    CREATE OR REPLACE FUNCTION get_daily_activity()
+    RETURNS TABLE(activity_date DATE, query_count BIGINT) AS $$
+    BEGIN
+        RETURN QUERY
+        SELECT
+            DATE(created_at) AS activity_date,
+            COUNT(*) AS query_count
+        FROM
+            queries
+        WHERE
+            created_at >= NOW() - INTERVAL '30 days'
+        GROUP BY
+            activity_date
+        ORDER BY
+            activity_date DESC;
+    END;
+    $$ LANGUAGE plpgsql;
+    ```
+    *Примечание: Эту миграцию нужно будет применить к базе данных Supabase вручную через их UI или через скрипт.*
+
+3.  **Изменить файл `ParserForChuncks/src/server.ts`:**
+    *   Добавить импорт нового контроллера: `import { getDashboardData } from './controllers/adminController.js';`
+    *   Добавить новый маршрут: `app.get('/admin/dashboard', getDashboardData as RequestHandler);`
+
+### Шаг 1.3: Фронтенд - Создание UI для админ-панели
+
+1.  **Создать новый компонент:** `ParserForChuncks/src/client/src/components/AdminDashboard.tsx`.
+2.  **Наполнить его кодом для отображения данных:**
+
+    ```tsx
+    import React, { useState, useEffect } from 'react';
+
+    const AdminDashboard = () => {
+      const [data, setData] = useState<any>(null);
+      const [loading, setLoading] = useState(true);
+      const [error, setError] = useState('');
+
+      useEffect(() => {
+        const fetchData = async () => {
+          try {
+            const apiKey = prompt("Введите ключ доступа для админ-панели:");
+            if (!apiKey) {
+              setError('Ключ доступа не предоставлен.');
+              setLoading(false);
+              return;
+            }
+
+            const response = await fetch(`/admin/dashboard?apiKey=${apiKey}`);
+            if (!response.ok) {
+              throw new Error(`Ошибка ${response.status}: ${await response.text()}`);
+            }
+            const result = await response.json();
+            setData(result);
+          } catch (err: any) {
+            setError(err.message);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchData();
+      }, []);
+
+      if (loading) return <div className="p-4">Загрузка данных...</div>;
+      if (error) return <div className="p-4 text-red-500">Ошибка: {error}</div>;
+      if (!data) return <div className="p-4">Нет данных для отображения.</div>;
+
+      return (
+        <div className="p-6 bg-gray-900 text-white h-screen overflow-y-auto font-sans">
+          <h1 className="text-3xl font-bold mb-6">Админ-панель</h1>
+          
+          <section className="mb-8">
+            <h2 className="text-2xl font-semibold mb-4">Активность за последние 30 дней</h2>
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <table className="w-full">
+                <thead className="border-b border-gray-600">
+                  <tr>
+                    <th className="text-left p-2">Дата</th>
+                    <th className="text-left p-2">Кол-во запросов</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.dailyActivity?.map((item: any) => (
+                    <tr key={item.activity_date} className="border-b border-gray-700 hover:bg-gray-700">
+                      <td className="p-2">{new Date(item.activity_date).toLocaleDateString()}</td>
+                      <td className="p-2">{item.query_count}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          {/* Другие секции как в плане */}
+
+        </div>
+      );
+    };
+
+    export default AdminDashboard;
+    ```
+
+### Шаг 1.4: Фронтенд - Интеграция админ-панели
+
+1.  **Изменить файл `ParserForChuncks/src/client/src/App.tsx`:**
+    *   Добавить импорт: `import AdminDashboard from './components/AdminDashboard';`
+    *   Добавить новое состояние: `const [showAdminPanel, setShowAdminPanel] = useState(false);`
+    *   Добавить `useEffect` для проверки URL на наличие `?admin=true`:
+        ```tsx
+        useEffect(() => {
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('admin') === 'true') {
+            setShowAdminPanel(true);
+          }
+        }, []);
+        ```
+    *   Изменить рендер-логику, чтобы показывать либо чат, либо админ-панель:
+        ```tsx
+        if (showAdminPanel) {
+          return <AdminDashboard />;
+        }
+        
+        return ( /* JSX чата */ );
+        ```
+
+---
+
+## Фаза 2: Автоматическая эскалация
+
+**Цель:** Определять, когда бот не справляется, и автоматически уведомлять систему поддержки для подключения живого специалиста.
+
+### Шаг 2.1: База данных - Расширение схемы сессий
+
+1.  **Создать новый файл SQL-миграции:** `ParserForChuncks/sql/escalation_schema_update.sql`.
+2.  **Добавить в него код:**
+    ```sql
+    ALTER TABLE chat_sessions
+    ADD COLUMN IF NOT EXISTS message_count INT NOT NULL DEFAULT 0;
+
+    ALTER TABLE chat_sessions
+    ADD COLUMN IF NOT EXISTS escalated BOOLEAN NOT NULL DEFAULT FALSE;
+    ```
+
+---
+
+## Фаза 3: Углубленная память и анализ
+
+**Цель:** Сделать память бота адаптивной и заложить основу для проактивного анализа удовлетворенности пользователя.
+
+### Шаг 3.1: База данных и `FactManager` - Адаптивная память
+
+1.  **Создать/изменить файл SQL-миграции:** `ParserForChuncks/sql/fact_management_update.sql`.
+2.  **Добавить в него уникальный индекс:**
+    ```sql
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_user_facts_unique_type_per_user 
+    ON user_facts(user_id, fact_type);
+    ```
+    
+---
+Этот план представляет собой дорожную карту для последовательного и логичного развития проекта. Дальнейшие шаги включают создание и изменение указанных файлов с предложенным кодом.

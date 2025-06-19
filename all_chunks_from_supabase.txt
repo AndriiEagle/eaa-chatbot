@@ -1,0 +1,359 @@
+## 1.1 About the EAA
+
+The European Accessibility Act (EAA) is an important law that makes products and services accessible in the European market. It removes barriers created by different rules in EU countries and improves access for people with disabilities.
+
+The official name is Directive (EU) 2019/882 of the European Parliament and Council. It creates a system that ensures accessible products and services across the EU market. This law makes a big change in how accessibility works in the European Union.
+
+The EAA is not just about following rules. It's a chance to create products and services that work better for everyone, especially the 87 million people with disabilities in the EU.
+
+---
+
+## 1.2 What This Guide Covers
+
+This guide gives a complete and practical explanation of the European Accessibility Act. We cover:
+
+* Main requirements and scope of the EAA, including which products and services must follow the rules.
+* Key definitions and concepts that are important to understand the law.
+* Specific duties for different business roles (manufacturers, importers, distributors, service providers).
+* How to check compliance and how to document that you follow the rules.
+* Exceptions, including when changes would be too costly or change the product too much.
+* Timeline for following the rules and key dates for compliance.
+* Real examples to show how these requirements work in actual situations.
+* How the EAA connects to other laws such as the Web Accessibility Directive.
+
+Each section uses plain language and focuses on practical use rather than legal details.
+
+---
+
+## 1.3 What This Guide Doesn't Cover
+
+While this guide covers a lot, it does have some limits:
+
+* Legal advice — We try to be accurate, but this guide is not legal advice and should not replace talking with qualified legal experts.
+* Country-specific details — We focus on the EU-wide law rather than how individual countries have put it into their national laws.
+* Detailed technical standards — We mention relevant standards, but don't provide full technical details.
+* Other accessibility laws — This guide focuses on the EAA rather than other accessibility rules (though we note important connections).
+* How to make technical solutions — We explain what needs to be accessible but don't give detailed guidance on how to build technical solutions.
+
+For these areas, we suggest looking at specialized resources, technical documents, or talking to professional advisors.
+
+---
+
+## 1.4 How to Use This Guide
+
+This guide is flexible. You can read it from start to finish or look at specific sections as needed:
+
+* Introduction and Purpose — Start here to understand why the EAA matters.
+* Scope and Requirements — These sections help you figure out if and how the EAA applies to your products or services.
+* Obligations chapters — Find the specific section that matches your role in the supply chain.
+* Compliance sections — Learn about the practical steps to show and document that you follow the rules.
+* Examples — Look at these for specific details and real-world applications.
+
+Use the table of contents, section links, and chapter navigation to quickly find the information that matters most to you.
+
+---
+
+## 1.5 Who Should Read This Guide
+
+This guide is written for many different people involved in making products and services accessible:
+
+* Business leaders and decision-makers who need to understand what the EAA means for their organizations.
+* Legal and compliance teams working to make sure their organizations follow the rules.
+* Product managers and designers who need to build accessibility into their products.
+* Developers and engineers implementing technical accessibility solutions.
+* UX and accessibility specialists guiding organizations toward better accessibility practices.
+* Procurement professionals who need to check if products they buy follow the rules.
+
+This guide is also useful for anyone who wants to learn about how the EU is making digital products and services more accessible for everyone.
+
+---
+
+## 1.6 Purpose & Definitions
+
+### 1.6.1 Purpose
+
+This law makes the EU market work better. It creates the same rules for accessible products and services in all EU countries. These rules help remove barriers that stop accessible products and services from moving between countries.
+
+With these rules, more accessible products and services will be available for everyone. People will also have better access to important information.
+
+### 1.6.2 Persons with Disabilities
+
+This law follows the United Nations agreement on rights for people with disabilities. The EU joined this agreement in 2011. All EU countries have agreed to follow it.
+
+The UN agreement states that people with disabilities include those with long-term physical, mental, intellectual, or sensory challenges. These challenges, along with various barriers, can make it hard for them to fully take part in society.
+
+This law helps everyone participate equally. It makes regular products and services more accessible. These products and services are designed to meet the needs of people with disabilities.
+
+### 1.6.3 Persons with Functional Limitations
+
+Other people will also benefit from this law. This includes:
+
+* Older people.
+* Pregnant women.
+* People traveling with luggage.
+
+"People with functional limitations" means anyone who has trouble using or accessing things. These limitations can be due to:
+
+* Physical issues.
+* Mental issues.
+* Intellectual issues.
+* Sensory issues.
+* Age-related problems.
+* Other physical conditions.
+
+These limitations can be permanent or temporary. When these people face barriers, they have a harder time using products and services. Products and services need to be designed for their needs.
+
+### 1.6.4 Internal Market Issues
+
+Different EU countries have different laws about accessible products and services. These differences create problems:
+
+* They block selling products between countries.
+* They make fair competition harder.
+
+After the UN agreement took effect, these differences became more obvious. These barriers are especially hard for small and medium-sized businesses. They cannot easily follow all the different rules across countries.
+
+Because each
+
+---
+
+country has different rules, small businesses avoid selling in other countries. Each country has its own requirements. The rules differ in what they cover and how detailed they are. Companies have to spend extra money to create accessible products for each country.
+
+### 1.6.5 Consumer Issues
+
+People who need accessible products, services, and assistive technology face high prices. This happens because:
+
+* Not enough companies make these products.
+* There is not enough competition to lower prices.
+* Different rules in each country mean good ideas about new technology are not shared well.
+
+### 1.6.6 Harmonization Benefits
+
+Creating the same rules across the EU will help the market work better. These rules will:
+
+* Unite the market for accessible products and services.
+* Lower costs through larger production.
+* Make it easier to sell across borders.
+* Help businesses focus on creating new ideas instead of managing different rules.
+
+We have already seen benefits from making accessibility rules the same across the EU. This has worked well for elevator regulations and transportation rules.
+
+### 1.6.7 Source References
+
+This page primarily references the following sections of Directive (EU) 2019/882:
+
+* Article 1 (Subject matter)
+* Article 3, Point 1 (Definition: persons with disabilities)
+* Recital 1 (Purpose and Internal Market)
+* Recital 3 (Definition Alignment with UN CRPD)
+* Recital 4 (Persons with Functional Limitations)
+* Recital 5, 6 (Internal Market Barriers)
+* Recital 7 (Consumer Issues)
+* Recital 8, 9 (Benefits of Harmonization)
+
+---
+
+## 1.7 Existing Law & Free Movement
+
+### 1.7.1 Existing Union Law
+
+#### 1.7.1.1 Existing Transport Regulations
+
+Some services already follow other EU laws about providing accessible information. If they follow these laws, they also meet the requirements of this Directive:
+
+* Regulation (EC) No 261/2004 - Air passenger rights when denied boarding, canceled, or delayed flights.
+* Regulation (EC) No 1107/2006 - Rights of disabled persons when traveling by air.
+* Regulation (EC) No 1371/2007 - Rail passenger rights and obligations.
+* Regulation (EU) No 1177/2010 - Rights of passengers traveling by sea and inland waterway.
+* Regulation (EU) No 181/2011 - Rights of bus and coach passengers.
+* Acts based on Directive 2008/57/EC - Railway system interoperability.
+
+If this Directive has extra requirements not in those laws, the extra requirements still apply.
+
+#### 1.7.1.2 Additional EAA Requirements
+
+The European Accessibility Act recognizes existing transport regulations. It adds new requirements to make transportation more accessible, such as:
+
+* Websites and mobile apps must meet accessibility standards.
+* Self-service terminals need to be accessible to people with disabilities.
+* E-ticketing systems should be usable by everyone.
+* Real-time travel information must be provided in accessible formats.
+* Digital transport documents should be accessible to all users.
+
+These extra requirements work with existing rules to create better accessibility in passenger transport services.
+
+### 1.7.2 Free Movement Across the EU
+
+#### 1.7.2.1 Free Movement Principle
+
+Article 6 of the European Accessibility Act states a simple rule:
+
+"EU countries cannot block products or services that meet this law's accessibility requirements from being sold in their country."
+
+When products and services follow the accessibility rules in this law, they can be sold in any EU country without extra barriers.
+
+#### 1.7.2.2 Harmonization Benefits
+
+Free movement is key to the EU's single market. Having the same accessibility rules for all EU countries helps with:
+
+* Selling products across all EU borders.
+* Making rules clearer for businesses.
+* Lowering costs to create products.
+*
+
+---
+
+Creating better business competition.
+* Giving people more choices at better prices.
+
+#### 1.7.2.3 Removing Trade Barriers
+
+Before this law, each country had its own accessibility rules. This created these problems for businesses:
+
+* They had to follow different rules in each country.
+* They needed to change products for each market.
+* They paid more for multiple checks.
+* They dealt with many complex laws.
+
+With one set of rules, the European Accessibility Act fixes these problems. Now businesses can:
+
+* Design one product for all EU countries.
+* Offer their services in all EU countries.
+* Save money on development costs.
+* Focus on creating new ideas instead of studying rules.
+
+### 1.7.3 Source References
+
+This page refers to these parts of Directive (EU) 2019/882:
+
+* Article 5 (Existing Union law in the field of passenger transport)
+* Article 6 (Free movement)
+* Recitals 1, 5, 6, 8 (Background on market benefits)
+* Recital 36 (Context on existing transport regulations)
+
+---
+
+## 1.8 Implementation Timeline
+
+### 1.8.1 Key Dates
+
+The European Accessibility Act follows a step-by-step timeline with several important deadlines. Understanding these dates will help you plan how your organization will follow the rules.
+
+* **17 April 2019 - EAA Adoption** 
+ European Accessibility Act adopted by European Parliament and Council
+
+* **28 June 2022 - National Implementation Deadline** 
+ Deadline for EU Member States to adopt and publish laws, regulations and administrative provisions necessary to comply with the EAA
+
+* **28 June 2025 - Application of Requirements** 
+ Member States shall apply the measures regarding the accessibility requirements for products and services
+
+* **28 June 2030 - Service Providers Transition Ends** 
+ End of transition period for service providers to continue providing services using products which were lawfully used before this date
+
+These deadlines are the main milestones in putting the EAA into practice. Each phase has specific requirements for different groups involved in making things accessible.
+
+### 1.8.2 Adoption Phase
+
+April 17, 2019: The European Parliament and Council officially adopted the European Accessibility Act as Directive (EU) 2019/882. This was the start of the implementation process.
+
+Key activities during this phase:
+
+* Publishing the law in the Official Journal of the European Union.
+* Raising awareness among EU countries.
+* Early planning to put the law into national rules.
+* Talking with interested groups at EU and national levels.
+
+This phase created the foundation for a unified approach to accessibility across the European Union.
+
+### 1.8.3 Implementation Phase
+
+June 28, 2022: Deadline for EU Member States to put the EAA into their national laws. By this date, all EU countries had to adopt and publish the laws, rules, and procedures needed to follow the EAA.
+
+What this means:
+
+* Each member country created its own legal system for putting the EAA in place.
+* Countries set up ways to enforce the rules.
+* Specific national requirements may differ while
+
+---
+
+still following the main EAA rules.
+* Organizations should look at both the EU law and their specific national versions.
+
+The process created a network of national laws that put the EAA's requirements in place while allowing for some country-specific adjustments.
+
+### 1.8.4 Transition Periods
+
+June 28, 2025: The date when the accessibility requirements become fully required. From this date, all new products sold and services provided must follow the accessibility requirements of the EAA.
+
+What this means:
+
+* Products designed, made, and sold after this date must be accessible.
+* Services provided to consumers after this date must be accessible.
+* Authorities will start checking if products and services follow the rules.
+* Products or services that don't follow the rules may be restricted or removed from the market.
+
+June 28, 2030: End of the extra time period for service providers. Until this date, service providers can keep using products that were legally used before June 28, 2025.
+
+Additional details:
+
+* Service contracts signed before June 28, 2025, can continue unchanged until they end or for a maximum of 5 years.
+* Self-service machines legally used before June 28, 2025, can continue to be used until the end of their useful life, but not longer than 20 years.
+
+These transition periods give a gradual approach to full compliance, giving organizations time to adapt while ensuring progress toward accessible products and services.
+
+### 1.8.5 Planning Guide
+
+Here's a practical guide to help your organization prepare for each phase of EAA implementation:
+
+#### 1.8.5.1 Now Until June 2025
+
+Assessment and planning phase:
+
+* Make a list of all your products and services that the EAA covers.
+* Check current accessibility levels against EAA requirements.
+* Find gaps where your products or services don't meet the rules.
+* Create a step-by-step plan to fix these gaps before June 2025.
+* Start training staff on accessibility requirements and best practices.
+* Begin updating design and development processes
+
+---
+
+to include accessibility from the start.
+
+#### 1.8.5.2 June 2025 Milestone
+
+Full compliance deadline:
+
+* All new products must meet accessibility requirements when placed on the market.
+* All services must be accessible when provided to consumers.
+* Products designed or made before this date but released later must still follow the rules.
+* Have documentation ready that shows how you follow the accessibility requirements.
+* Make sure your technical files and declarations are complete and accurate.
+
+#### 1.8.5.3 June 2025 - June 2030
+
+Transition management:
+
+* Review service contracts signed before June 2025 and plan for updates when they expire (or by June 2030 at the latest).
+* Start planning replacement of any non-accessible self-service terminals used before June 2025.
+* Keep tracking and fixing accessibility issues that users report.
+* Continue improving accessibility in all products and services.
+* Check that suppliers and partners also follow the EAA requirements.
+
+#### 1.8.5.4 Beyond June 2030
+
+Full implementation:
+
+* All services, including those using pre-2025 products, must be fully accessible.
+* All service contracts must include accessibility provisions.
+* Self-service terminals from before June 2025 should be replaced with accessible versions if they've reached the end of their useful life.
+* Maintain ongoing compliance as accessibility standards and technologies evolve.
+
+**Pro tip:** Don't wait until the deadline to start planning. Organizations that begin early will:
+
+* Spread costs over a longer period.
+* Have more time to test and refine accessibility solutions.
+* Build expertise and processes that make ongoing compliance easier.
+* Gain market advantage by serving customers with disabilities sooner.
+* Reduce the risk of non-compliance penalties.
