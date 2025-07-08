@@ -180,4 +180,10 @@ all_chunks_from_supabase.txt
 # Email drafts and generated content
 drafts/
 generated_emails/
-*.draft 
+*.draft
+
+# Ignore proposal/pitch markdown files
+ParserForChuncks/AGENTIC_AI_SOLUTIONS_DESIGNER_PITCH.md
+ParserForChuncks/BLUECALLOM_AGENTIC_AI_DESIGNER_PITCH.md
+ParserForChuncks/FREE_PRODUCT_PROPOSAL_FOR_BLUECALLOM.md
+ParserForChuncks/ULTIMATE_VALUE_PROPOSITION_BLUECALLOM.md 
