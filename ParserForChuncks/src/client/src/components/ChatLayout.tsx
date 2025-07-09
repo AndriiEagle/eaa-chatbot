@@ -1,11 +1,11 @@
 import React, { useRef, useEffect, CSSProperties, useState } from 'react';
-import { Rnd } from 'react-rnd';
-import { Message } from '../types';
+import { Rnd, RndDragCallback, RndResizeCallback } from 'react-rnd';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
-import { formatTime, getRelevanceColor } from '../utils/stringUtils';
-import WhisperInput from './voice-interface/WhisperInput';
 import LoadingIndicator from './LoadingIndicator';
+import WhisperInput from './voice-interface/WhisperInput';
+import { Message } from '../types';
+import { formatTime, getRelevanceColor } from '../utils/stringUtils';
 
 interface ChatLayoutProps {
   messages: Message[];
@@ -13,6 +13,8 @@ interface ChatLayoutProps {
   onSendMessage: (message: string) => void;
   onCopy: (text: string) => void;
   onSelectSuggestion: (question: string) => void;
+  onSuggestionContextUpdated?: (context: string) => void;
+  messageSentTrigger?: number;
   loaderPhrase: string;
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
@@ -30,6 +32,8 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   onSendMessage,
   onCopy,
   onSelectSuggestion,
+  onSuggestionContextUpdated,
+  messageSentTrigger,
   loaderPhrase,
   input,
   setInput,
@@ -81,7 +85,9 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
     <Rnd
       size={size}
       position={position}
-      onDragStop={(e, d) => { setPosition({ x: d.x, y: d.y }) }}
+      onDragStop={(e, d) => { 
+        setPosition({ x: d.x, y: d.y }) 
+      }}
       onResizeStop={(e, direction, ref, delta, position) => {
         setSize({
           width: ref.style.width,
@@ -186,13 +192,17 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
             )}
             
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
-              <MessageBubble 
-                message={msg}
-                onCopy={onCopy}
-                formatTime={formatTime}
-                getRelevanceColor={getRelevanceColor}
-                onSelectSuggestion={onSelectSuggestion}
-              />
+              {/* Hide MessageBubble for last bot message during loading */}
+              {!(loading && msg.role === 'bot' && i === messages.length - 1) && (
+                <MessageBubble 
+                  message={msg}
+                  onCopy={onCopy}
+                  formatTime={formatTime}
+                  getRelevanceColor={getRelevanceColor}
+                  onSelectSuggestion={onSelectSuggestion}
+                  loading={false}
+                />
+              )}
               
               {/* Show LoadingIndicator only for the last bot message during loading */}
               {msg.role === 'bot' && loading && i === messages.length - 1 && (
@@ -218,7 +228,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
           </div>
         ))}
         
-        {/* Показываем LoadingIndicator, если нет сообщений бота, но идет загрузка */}
+        {/* Show LoadingIndicator if there are no bot messages but loading is active */}
         {loading && (messages.length === 0 || messages[messages.length - 1]?.role !== 'bot') && (
           <div style={{ 
             display: 'flex',
@@ -252,7 +262,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
         )}
       </div>
       
-      {/* Поле ввода */}
+      {/* Input field */}
       <div style={{
         borderTop: '1px solid #333',
         padding: '1.5rem',
@@ -278,6 +288,8 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
           sessionId={sessionId}
           currentInput={input}
           isProactiveAgentEnabled={isProactiveAgentEnabled}
+          onSuggestionContextUpdated={onSuggestionContextUpdated}
+          messageSentTrigger={messageSentTrigger}
         />
       </div>
     </Rnd>

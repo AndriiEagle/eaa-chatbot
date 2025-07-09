@@ -1,5 +1,5 @@
 // userDataAnalysis.ts
-import { UserFact, UserDataAnalysisResult } from '../types/common';
+import { UserFact, UserDataAnalysisResult } from '../types/common.js';
 
 /**
  * Function for analyzing user data

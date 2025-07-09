@@ -59,6 +59,8 @@ type RecordingStatus = 'idle' | 'recording' | 'transcribing';
 
 interface WhisperInputProps {
   onTranscriptReceived: (transcript: string) => void;
+  onSuggestionContextUpdated?: (context: string) => void;
+  messageSentTrigger?: number; // Триггер для сброса счетчика подсказок (увеличивается при отправке сообщения)
   disabled: boolean;
   userId: string;
   sessionId: string;
@@ -73,22 +75,38 @@ interface Suggestion {
   isActive: boolean;
 }
 
-const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disabled, userId, sessionId, currentInput, isProactiveAgentEnabled }) => {
+const WhisperInput: React.FC<WhisperInputProps> = ({ 
+  onTranscriptReceived, 
+  onSuggestionContextUpdated,
+  messageSentTrigger,
+  disabled, 
+  userId, 
+  sessionId, 
+  currentInput, 
+  isProactiveAgentEnabled 
+}) => {
   const [status, setStatus] = useState<RecordingStatus>('idle');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [lastInputLength, setLastInputLength] = useState<number>(0);
+  const [suggestionCount, setSuggestionCount] = useState<number>(0); // Счетчик подсказок
+  const [maxSuggestions] = useState<number>(2); // Максимум 2 подсказки для одного запроса
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const suggestionTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Очищаем все подсказки когда пользователь отправляет сообщение
+  // Сброс счетчика подсказок при изменении messageSentTrigger (отправке сообщения)
   useEffect(() => {
-    if (currentInput.length < lastInputLength) {
-      // Если текст стал короче - значит сообщение отправлено
+    if (messageSentTrigger && messageSentTrigger > 0) {
+      setSuggestionCount(0);
       setSuggestions([]);
+      console.log('🔄 [WhisperInput] Suggestion counter reset due to message sent');
     }
+  }, [messageSentTrigger]);
+
+  // Отслеживание изменений длины ввода
+  useEffect(() => {
     setLastInputLength(currentInput.length);
-  }, [currentInput, lastInputLength]);
+  }, [currentInput]);
 
   // Автоматическое исчезновение старых подсказок через 30 секунд
   useEffect(() => {
@@ -122,10 +140,16 @@ const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disab
   }, [suggestions.length]);
 
   const handleStartRecording = async () => {
-    if (status !== 'idle' || disabled) return;
+    console.log('🎤 [WhisperInput] Попытка начать запись, status:', status, 'disabled:', disabled);
+    if (status !== 'idle' || disabled) {
+      console.log('🎤 [WhisperInput] Запись заблокирована - неправильный статус или отключена');
+      return;
+    }
 
     try {
+      console.log('🎤 [WhisperInput] Запрос доступа к микрофону...');
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('🎤 [WhisperInput] Доступ к микрофону получен');
       mediaRecorderRef.current = new MediaRecorder(stream);
       
       mediaRecorderRef.current.ondataavailable = (event) => {
@@ -159,7 +183,7 @@ const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disab
           }
 
         } catch (error) {
-          console.error('Ошибка при отправке аудио на сервер:', error);
+          console.error('Error sending audio to server:', error);
         } finally {
           setStatus('idle');
           stream.getTracks().forEach(track => track.stop());
@@ -167,16 +191,24 @@ const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disab
       };
 
       audioChunksRef.current = [];
+      console.log('🎤 [WhisperInput] Начинаем запись...');
       mediaRecorderRef.current.start();
       setStatus('recording');
+      console.log('🎤 [WhisperInput] Статус изменен на recording');
       // Подсказки не сбрасываем при записи, они остаются для истории
     } catch (error) {
-      console.error('Ошибка доступа к микрофону:', error);
+      console.error('🎤 [WhisperInput] Ошибка доступа к микрофону:', error);
       setStatus('idle');
     }
   };
 
   const analyzeProactively = async (transcript: string) => {
+    // Проверяем, не превысили ли мы лимит подсказок
+    if (suggestionCount >= maxSuggestions) {
+      console.log('🔄 [ProactiveAgent] Reached maximum suggestions limit, skipping analysis');
+      return;
+    }
+
     try {
       const response = await fetch('/api/v1/agent/proactive-analysis', {
         method: 'POST',
@@ -201,6 +233,13 @@ const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disab
             // Возвращаем массив с ОДНОЙ актуальной подсказкой
             return [newSuggestion];
           });
+          // Увеличиваем счетчик подсказок
+          setSuggestionCount(prev => prev + 1);
+          
+          // Передаем контекст подсказки в родительский компонент
+          if (onSuggestionContextUpdated) {
+            onSuggestionContextUpdated(data.suggestion);
+          }
         }
       }
     } catch (error) {
@@ -209,8 +248,12 @@ const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disab
   };
 
   const handleStopRecording = () => {
+    console.log('🎤 [WhisperInput] Остановка записи, mediaRecorder:', !!mediaRecorderRef.current, 'status:', status);
     if (mediaRecorderRef.current && status === 'recording') {
+      console.log('🎤 [WhisperInput] Останавливаем MediaRecorder');
       mediaRecorderRef.current.stop();
+    } else {
+      console.log('🎤 [WhisperInput] Не удалось остановить запись - неправильное состояние');
     }
   };
 
@@ -268,10 +311,16 @@ const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disab
   };
 
   const handleClick = () => {
-    if (disabled) return;
+    console.log('🎤 [WhisperInput] Кнопка нажата, status:', status, 'disabled:', disabled);
+    if (disabled) {
+      console.log('🎤 [WhisperInput] Кнопка отключена, игнорируем нажатие');
+      return;
+    }
     if (status === 'idle') {
+      console.log('🎤 [WhisperInput] Начинаем запись...');
       handleStartRecording();
     } else {
+      console.log('🎤 [WhisperInput] Останавливаем запись...');
       handleStopRecording();
     }
   };
@@ -369,31 +418,28 @@ const WhisperInput: React.FC<WhisperInputProps> = ({ onTranscriptReceived, disab
                   <button
                     onClick={() => setSuggestions(prev => prev.filter(s => s.id !== suggestion.id))}
                     style={{
-                      background: isActive ? 'rgba(31, 41, 55, 0.2)' : 'rgba(209, 213, 219, 0.2)',
+                      background: 'transparent',
                       border: 'none',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
+                      width: '32px',
+                      height: '32px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       cursor: 'pointer',
                       flexShrink: 0,
                       marginTop: '1px',
-                      opacity: isActive ? 1 : 0.6,
+                      opacity: 1,
                       transition: 'all 0.2s ease'
                     }}
                     title="Close this suggestion"
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'scale(1.1)';
-                      e.currentTarget.style.background = isActive ? 'rgba(31, 41, 55, 0.4)' : 'rgba(209, 213, 219, 0.4)';
+                      e.currentTarget.style.transform = 'scale(1.2)';
                     }}
                     onMouseLeave={(e) => {
                       e.currentTarget.style.transform = 'scale(1)';
-                      e.currentTarget.style.background = isActive ? 'rgba(31, 41, 55, 0.2)' : 'rgba(209, 213, 219, 0.2)';
                     }}
                   >
-                    <X size={14} color={isActive ? '#1f2937' : '#9ca3af'} />
+                    <X size={28} color="#000000" strokeWidth={5} style={{ filter: 'drop-shadow(0 2px 4px rgba(255,255,255,0.8)) drop-shadow(0 0 2px rgba(255,255,255,1))' }} />
                   </button>
                 </div>
               );

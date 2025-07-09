@@ -8,13 +8,13 @@ interface NotificationProps {
 }
 
 /**
- * Компонент для отображения уведомлений пользователю
- * Автоматически скрывается через заданный промежуток времени
+ * Component for displaying notifications to user
+ * Automatically hides after specified timeout
  */
 const Notification: React.FC<NotificationProps> = ({ notification, onClose }) => {
   const { message, type, visible } = notification;
   
-  // Автоматически скрываем уведомление через NOTIFICATION_TIMEOUT мс
+  // Automatically hide notification after NOTIFICATION_TIMEOUT ms
   useEffect(() => {
     if (visible) {
       const timer = setTimeout(onClose, NOTIFICATION_TIMEOUT);
@@ -22,10 +22,10 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose }) =>
     }
   }, [visible, onClose]);
 
-  // Если уведомление не видимо, не рендерим ничего
+  // If notification is not visible, don't render anything
   if (!visible) return null;
   
-  // Цвета для разных типов уведомлений
+  // Colors for different notification types
   const getBackgroundColor = (): string => {
     switch (type) {
       case 'success': return '#10b981';

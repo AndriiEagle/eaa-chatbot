@@ -94,4 +94,32 @@ BEGIN
     messages.embedding <=> query_embedding
   LIMIT match_count;
 END;
-$$; 
+$$;
+
+-- 6. Таблица для хранения результатов анализа фрустрации (СКОПИРОВАНО ИЗ escalation_system_schema.sql)
+CREATE TABLE IF NOT EXISTS frustration_analysis (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT,
+  session_id UUID REFERENCES chat_sessions(id) ON DELETE CASCADE,
+  message_id UUID REFERENCES chat_messages(id) ON DELETE CASCADE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Результаты анализа (0-1 шкала)
+  frustration_level REAL CHECK (frustration_level BETWEEN 0 AND 1),
+  confidence_score REAL CHECK (confidence_score BETWEEN 0 AND 1),
+  
+  -- Детализация анализа
+  detected_patterns JSONB, -- Найденные паттерны недовольства
+  trigger_phrases TEXT[], -- Ключевые фразы-триггеры
+  context_factors JSONB, -- Контекстные факторы (повторные вопросы, время сессии и т.д.)
+  
+  -- Рекомендации системы
+  should_escalate BOOLEAN DEFAULT FALSE,
+  escalation_reason TEXT,
+  
+  -- Метаданные
+  analyzer_version TEXT DEFAULT 'v1.0',
+  processing_time_ms INTEGER
+);
+
+CREATE INDEX IF NOT EXISTS idx_frustration_analysis_user_id ON frustration_analysis(user_id); 

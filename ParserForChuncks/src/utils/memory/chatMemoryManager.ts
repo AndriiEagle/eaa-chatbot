@@ -14,6 +14,7 @@ import { SummaryManager } from './summaryManager.js';
 import { v4 as uuidv4 } from 'uuid';
 import { sendEscalationEmail } from '../../services/emailService.js';
 import { openai } from '../../services/openaiService.js';
+import { supabase } from '../../services/supabaseService.js';
 
 /**
  * Основной класс для управления памятью и контекстом чата
@@ -365,6 +366,53 @@ export class ChatMemoryManager {
       console.error(`❌ [MEMORY] Error calling RPC ${functionName}:`, error);
       throw error;
     }
+  }
+}
+
+/**
+ * Получает контекст для анализа фрустрации (функция экспорт)
+ * @param userId ID пользователя
+ * @param sessionId ID сессии
+ * @returns Контекст с историей сообщений
+ */
+export async function getContext(userId: string, sessionId: string): Promise<string> {
+  try {
+    console.log(`🧠 [MEMORY] Creating context for user ${userId}, session ${sessionId}`);
+    
+    // Загружаем последние 10 сообщений из сессии
+    const { data: messages, error } = await supabase
+      .from('chat_messages')
+      .select('role, content, created_at')
+      .eq('session_id', sessionId)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    
+    if (error) {
+      console.error(`❌ [MEMORY] Error loading messages for session ${sessionId}:`, error);
+      return `User: ${userId}, Session: ${sessionId}, Messages: 0`;
+    }
+    
+    const messageCount = messages?.length || 0;
+    console.log(`📚 [MEMORY] Loaded ${messageCount} messages for context`);
+    
+    if (!messages || messages.length === 0) {
+      return `User: ${userId}, Session: ${sessionId}, Messages: 0`;
+    }
+    
+    // Формируем контекст из последних сообщений
+    const contextMessages = messages
+      .reverse() // показать в хронологическом порядке
+      .map(msg => `${msg.role}: ${msg.content}`)
+      .join('\n');
+    
+    const context = `User: ${userId}\nSession: ${sessionId}\nRecent conversation:\n${contextMessages}`;
+    
+    console.log(`✅ [MEMORY] Context created (${context.length} characters)`);
+    return context;
+    
+  } catch (error) {
+    console.error(`❌ [MEMORY] Exception creating context:`, error);
+    return `User: ${userId}, Session: ${sessionId}, Messages: 0 (error)`;
   }
 }
 

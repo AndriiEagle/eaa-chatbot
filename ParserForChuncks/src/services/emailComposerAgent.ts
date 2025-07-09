@@ -323,7 +323,7 @@ P.S. Technical information:
   }
 
   /**
-   * Saves email to database
+   * Saves email to database and automatically sends it
    */
   private async saveEmailToDatabase(context: EmailGenerationContext, email: EmailDraft): Promise<void> {
     try {
@@ -365,7 +365,7 @@ P.S. Technical information:
         frustrationAnalysisId = frustrationData?.id || null;
       }
 
-      const { error } = await supabase
+      const { data: insertedEmail, error } = await supabase
         .from('escalation_emails')
         .insert({
           session_id: validSessionId,
@@ -374,14 +374,47 @@ P.S. Technical information:
           generated_body: email.body,
           user_context_summary: email.userContextSummary,
           conversation_highlights: email.conversationHighlights.join('\n'),
-          status: 'draft', // Default draft
-          recipient_email: email.recommendedRecipient
-        });
+          status: 'draft', // Start as draft
+          recipient_email: process.env.ESCALATION_EMAIL_RECIPIENT || 'andriipokrovskyi@gmail.com'
+        })
+        .select()
+        .single();
 
       if (error) {
         console.error('❌ [EmailComposer] Error saving email:', error);
-      } else {
-        console.log('✅ [EmailComposer] Email saved to database as draft');
+        return;
+      }
+
+      console.log('✅ [EmailComposer] Email saved to database as draft');
+
+      // 📤 AUTOMATICALLY SEND EMAIL IMMEDIATELY
+      try {
+        console.log('📤 [EmailComposer] Automatically sending email...');
+        
+        // Import and use existing emailService
+        const { sendEscalationEmail } = await import('./emailService.js');
+        
+        await sendEscalationEmail({
+          sessionId: context.sessionId,
+          messageCount: context.recentMessages.length,
+          escalationTime: new Date().toUTCString()
+        });
+
+        // Update status to sent
+        await supabase
+          .from('escalation_emails')
+          .update({
+            status: 'sent',
+            sent_at: new Date().toISOString(),
+            user_approved: true // Auto-approved for immediate frustration response
+          })
+          .eq('id', insertedEmail.id);
+
+        console.log('✅ [EmailComposer] Email automatically sent successfully!');
+
+      } catch (sendError) {
+        console.error('❌ [EmailComposer] Error sending email:', sendError);
+        // Keep as draft if sending fails
       }
 
     } catch (error) {

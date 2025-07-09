@@ -6,6 +6,11 @@ import { generateAISuggestions } from '../controllers/aiSuggestionsController.js
 import { chatMemory } from '../utils/memory/index.js';
 import { RequestHandler, Request, Response } from 'express';
 import { explainTermController } from '../controllers/explainTermController.js';
+import { 
+  generateModernSuggestions, 
+  generateFallbackSuggestions, 
+  checkSuggestionsHealth 
+} from '../controllers/modernSuggestionsController.js';
 
 const router = Router();
 
@@ -25,6 +30,11 @@ router.post('/agent/proactive-analysis', analyzeTextProactively as RequestHandle
 
 // Маршрут для ИИ-генерации подсказок
 router.post('/agent/ai-suggestions', generateAISuggestions as RequestHandler);
+
+// 🚀 MODERN PROFESSIONAL SUGGESTIONS ROUTES
+router.post('/suggestions/modern', generateModernSuggestions as RequestHandler);
+router.post('/suggestions/fallback', generateFallbackSuggestions as RequestHandler);
+router.get('/suggestions/health', checkSuggestionsHealth as RequestHandler);
 
 // Добавляем новый endpoint для объяснения терминов
 router.post('/explain-term', explainTermController);

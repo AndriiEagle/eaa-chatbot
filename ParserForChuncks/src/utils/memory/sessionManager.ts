@@ -1,6 +1,7 @@
 import { ChatSession } from './types.js';
 import { SupabaseClient } from '@supabase/supabase-js';
 import { v4 as uuidv4 } from 'uuid';
+import { supabase } from '../../services/supabaseService.js';
 
 /**
  * Класс для управления сессиями чата
@@ -47,6 +48,52 @@ export class SessionManager {
 
     } catch (error) {
       console.error('❌ [SESSION] Error in createSession:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Создает новую сессию с заданным ID
+   * @param sessionId Заданный ID сессии
+   * @param userId ID пользователя
+   * @param metadata Метаданные сессии
+   * @returns ID созданной сессии
+   */
+  async createSessionWithId(sessionId: string, userId: string, metadata: any = {}): Promise<string> {
+    if (!userId || typeof userId !== 'string') {
+      throw new Error('Missing user ID for session creation');
+    }
+    if (!sessionId || typeof sessionId !== 'string') {
+      throw new Error('Missing session ID for session creation');
+    }
+
+    try {
+      console.log(`📝 [SESSION] Creating session with ID ${sessionId} for user: ${userId}`);
+      
+      const now = new Date().toISOString();
+      
+      const { data, error } = await this.supabase
+        .from('chat_sessions')
+        .insert({
+          id: sessionId,
+          user_id: userId,
+          created_at: now,
+          last_activity: now,
+          metadata: metadata || {}
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ [SESSION] Database error:', error);
+        throw new Error(`Error creating session: ${error.message}`);
+      }
+
+      console.log(`✅ [SESSION] Session created successfully with ID: ${sessionId}`);
+      return sessionId;
+
+    } catch (error) {
+      console.error('❌ [SESSION] Error in createSessionWithId:', error);
       throw error;
     }
   }
@@ -167,5 +214,74 @@ export class SessionManager {
       console.error('❌ [SESSION] Error in deleteSession:', error);
       throw error;
     }
+  }
+}
+
+/**
+ * Проверяет существование сессии (функция экспорт)
+ * @param sessionId ID сессии
+ * @returns true если сессия существует, иначе false
+ */
+export async function checkSessionExists(sessionId: string): Promise<boolean> {
+  try {
+    console.log(`🔍 [SESSION] Checking existence of session: ${sessionId}`);
+    
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .select('id')
+      .eq('id', sessionId)
+      .maybeSingle(); // Используем maybeSingle() вместо single()
+    
+    if (error) {
+      console.error(`❌ [SESSION] Error checking session ${sessionId}:`, error);
+      return false;
+    }
+    
+    const exists = !!data;
+    console.log(`✅ [SESSION] Session ${sessionId} exists: ${exists}`);
+    return exists;
+    
+  } catch (error) {
+    console.error(`❌ [SESSION] Exception checking session ${sessionId}:`, error);
+    return false;
+  }
+}
+
+/**
+ * Создает новую сессию с заданным ID (функция экспорт)
+ * @param sessionId Заданный ID сессии
+ * @param userId ID пользователя
+ * @param metadata Метаданные сессии
+ * @returns ID созданной сессии
+ */
+export async function createSessionWithId(sessionId: string, userId: string, metadata: any = {}): Promise<string> {
+  try {
+    console.log(`📝 [SESSION] Creating session with ID ${sessionId} for user: ${userId}`);
+    
+    const now = new Date().toISOString();
+    
+    const { data, error } = await supabase
+      .from('chat_sessions')
+      .insert({
+        id: sessionId,
+        user_id: userId,
+        created_at: now,
+        last_activity: now,
+        metadata: metadata || {}
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('❌ [SESSION] Database error:', error);
+      throw new Error(`Error creating session: ${error.message}`);
+    }
+
+    console.log(`✅ [SESSION] Session created successfully with ID: ${sessionId}`);
+    return sessionId;
+
+  } catch (error) {
+    console.error('❌ [SESSION] Error in createSessionWithId:', error);
+    throw error;
   }
 } 

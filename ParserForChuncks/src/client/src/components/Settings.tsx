@@ -14,7 +14,7 @@ interface SettingsProps {
 }
 
 /**
- * Компонент настроек приложения
+ * App settings component
  */
 const Settings: React.FC<SettingsProps> = ({
   datasetId,
@@ -93,11 +93,11 @@ const Settings: React.FC<SettingsProps> = ({
   return (
     <div style={styles.container}>
       <div style={styles.title}>
-        Настройки поиска
+        Search Settings
       </div>
       
       <label style={styles.label}>
-        Порог сходства (UI): <span style={styles.mono}>{similarityThreshold}</span>
+        Similarity Threshold (UI): <span style={styles.mono}>{similarityThreshold}</span>
       </label>
       <input
         type="range"
@@ -109,11 +109,11 @@ const Settings: React.FC<SettingsProps> = ({
         style={styles.slider}
       />
       <span style={styles.helpText}>
-        Чем выше — тем точнее, но меньше результатов. Чем ниже — больше, но шумнее.
+        Higher values = more precise, but fewer results. Lower values = more results, but noisier.
       </span>
       
       <label style={{ ...styles.label, marginTop: '0.5rem' }}>
-        Максимум чанков: <span style={styles.mono}>{maxChunks}</span>
+        Max Chunks: <span style={styles.mono}>{maxChunks}</span>
       </label>
       <input
         type="number"
@@ -135,14 +135,14 @@ const Settings: React.FC<SettingsProps> = ({
       <div style={{borderTop: '1px solid #333', margin: '0.75rem 0'}} />
 
       <div style={styles.title}>
-        Экспериментальные функции
+        Experimental Features
       </div>
 
       <ToggleSwitch
-        label="Проактивный ИИ-помощник"
+        label="Proactive AI Assistant"
         enabled={isProactiveAgentEnabled}
         setEnabled={setIsProactiveAgentEnabled}
-        helpText="Агент анализирует вводимый текст и предлагает подсказки в реальном времени."
+        helpText="Agent analyzes input text and provides suggestions in real-time."
       />
       
       <button 
@@ -157,7 +157,7 @@ const Settings: React.FC<SettingsProps> = ({
         }}
         onClick={clearHistory}
       >
-        Очистить чат
+        Clear Chat
       </button>
     </div>
   );

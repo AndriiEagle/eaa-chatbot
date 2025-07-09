@@ -4,6 +4,7 @@
 -- Таблица для хранения результатов анализа фрустрации
 CREATE TABLE frustration_analysis (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id TEXT,
   session_id UUID REFERENCES chat_sessions(id) ON DELETE CASCADE,
   message_id UUID REFERENCES chat_messages(id) ON DELETE CASCADE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
@@ -81,6 +82,7 @@ CREATE TABLE user_behavior_patterns (
 
 -- Индексы для производительности
 CREATE INDEX idx_frustration_analysis_session_id ON frustration_analysis(session_id);
+CREATE INDEX idx_frustration_analysis_user_id ON frustration_analysis(user_id);
 CREATE INDEX idx_frustration_analysis_frustration_level ON frustration_analysis(frustration_level DESC);
 CREATE INDEX idx_frustration_analysis_should_escalate ON frustration_analysis(should_escalate) WHERE should_escalate = true;
 

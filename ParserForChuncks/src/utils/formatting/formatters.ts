@@ -2,14 +2,57 @@
  * Утилиты для форматирования данных и контекста для LLM
  */
 
+// Import proper types for better type safety
+import { isString, isObject, isArray } from '../../types/strict.types.js';
+
+// Helper function to safely check if object has property
+function hasProperty<T extends object, K extends PropertyKey>(obj: T, prop: K): obj is T & Record<K, unknown> {
+  return prop in obj;
+}
+
+// Define specific interfaces for this module
+interface ChunkContent {
+  content: string | object | unknown[];
+  metadata?: ChunkMetadata;
+}
+
+interface ChunkMetadata {
+  title?: string;
+  section_title?: string;
+  source?: string;
+  path?: string;
+  date?: string;
+  tags?: string[];
+  [key: string]: unknown;
+}
+
+interface ProcessedChunk extends ChunkContent {
+  index: number;
+}
+
+interface SourceReference {
+  id: string;
+  content?: unknown;
+  metadata?: ChunkMetadata;
+  section_title?: string;
+  similarity?: number;
+}
+
+interface FormattedSource {
+  title: string;
+  relevance: number;
+  id?: string;
+  text_preview?: string;
+}
+
 /**
  * Предварительная обработка контекста для предотвращения проблем с форматированием объектов
  * @param content Контент для обработки
  * @returns {string} Обработанный контент в виде текста
  */
-function preprocessContent(content: any): string {
+function preprocessContent(content: unknown): string {
   // Если контент - строка, возвращаем как есть
-  if (typeof content === 'string') return content;
+  if (isString(content)) return content;
   
   // Если контент - null или undefined
   if (content === null || content === undefined) {
@@ -17,7 +60,7 @@ function preprocessContent(content: any): string {
   }
   
   // Если контент - массив
-  if (Array.isArray(content)) {
+  if (isArray(content)) {
     if (content.length === 0) return "[]";
     
     // Пробуем определить тип элементов массива
@@ -31,7 +74,7 @@ function preprocessContent(content: any): string {
     } else {
       // Для массива объектов
       return content.map((item, idx) => {
-        if (typeof item === 'object' && item !== null) {
+        if (isObject(item)) {
           const entries = Object.entries(item)
             .map(([key, value]) => {
               // Рекурсивно обрабатываем вложенные объекты и массивы
@@ -49,17 +92,17 @@ function preprocessContent(content: any): string {
   }
   
   // Если контент - объект
-  if (typeof content === 'object' && content !== null) {
+  if (isObject(content)) {
     const entries = Object.entries(content)
       .map(([key, value]) => {
         // Рекурсивно обрабатываем вложенные объекты и массивы
         if (typeof value === 'object' && value !== null) {
-          if (Array.isArray(value)) {
+          if (isArray(value)) {
             if (value.length === 0) return `${key}: []`;
             
             // Если это массив объектов, форматируем каждый объект
             const formattedItems = value.map((v, i) => {
-              if (typeof v === 'object' && v !== null) {
+              if (isObject(v)) {
                 const objEntries = Object.entries(v)
                   .map(([k, vv]) => `${k}: ${typeof vv === 'object' ? preprocessContent(vv) : vv}`)
                   .join(', ');
@@ -101,7 +144,7 @@ function preprocessContent(content: any): string {
  * @returns {string} Отформатированный контекст для запроса к LLM
  */
 export function formatRAGContext(
-  chunks: Array<{ content: string | object | any[]; metadata?: any }>, 
+  chunks: ChunkContent[], 
   question: string
 ): string {
   // Проверяем, есть ли чанки
@@ -110,7 +153,7 @@ export function formatRAGContext(
   }
   
   // Предварительно обрабатываем чанки, чтобы избежать проблем с [object Object]
-  const processedChunks = chunks.map((chunk, index) => {
+  const processedChunks: ProcessedChunk[] = chunks.map((chunk, index) => {
     try {
       // Применяем предварительную обработку контента
       const formattedContent = preprocessContent(chunk.content);
@@ -160,8 +203,8 @@ ${chunksText}
  * @returns {Array} Массив отформатированных источников с добавленными полями для фронтенда
  */
 export function formatSourcesMetadata(
-  chunks: Array<{ id: string; content?: any; metadata?: any; section_title?: string; similarity?: number }>
-): Array<{ title: string; relevance: number; id?: string; text_preview?: string }> {
+  chunks: SourceReference[]
+): FormattedSource[] {
   console.log(`>>> [FORMATTERS] formatSourcesMetadata: получено ${chunks?.length || 0} чанков`);
   if (!chunks || chunks.length === 0) return [];
 
@@ -227,13 +270,8 @@ export function formatSourcesMetadata(
       }
     }
     
-    // Добавляем релевантность в заголовок, если ее нет
-    if (title.indexOf('%') === -1 && chunk.similarity) {
-      const relevance = Math.round(chunk.similarity * 100);
-      if (relevance > 75) {
-        title = `${title} (релевантность ${relevance}%)`;
-      }
-    }
+    // Релевантность отображается отдельно в SourcesList компоненте
+    // Не добавляем ее в заголовок чтобы избежать дублирования
     
     return {
       title, // Заголовок для отображения
@@ -341,20 +379,19 @@ export function formatJsonObjects(text: string | null | undefined): string {
   const jsonRegex = /(\{[\s\S]*?\}|\[[\s\S]*?\])/g;
   
   // Функция для рекурсивного форматирования значений
-  const formatValue = (value: any): string => {
-    if (Array.isArray(value)) {
+  const formatValue = (value: unknown): string => {
+    if (isArray(value)) {
       // Специальная обработка для списка преимуществ доступности
       // Проверяем, похож ли массив на список преимуществ (содержит объекты с title/description)
       const isBenefitsList = value.length > 0 && 
-                            typeof value[0] === 'object' && 
-                            value[0] !== null &&
-                            ('title' in value[0] || 'description' in value[0]);
+                            isObject(value[0]) &&
+                            (hasProperty(value[0], 'title') || hasProperty(value[0], 'description'));
       
       if (isBenefitsList) {
         return value.map((item, idx) => {
-          if (typeof item === 'object' && item !== null) {
-            const title = item.title || '';
-            const description = item.description || '';
+          if (isObject(item)) {
+            const title = hasProperty(item, 'title') ? String(item.title) : '';
+            const description = hasProperty(item, 'description') ? String(item.description) : '';
             
             if (title && description) {
               return `${idx + 1}. **${title}**: ${description}`;
@@ -364,21 +401,21 @@ export function formatJsonObjects(text: string | null | undefined): string {
               return `${idx + 1}. ${description}`;
             }
           }
-          return `${idx + 1}. ${typeof item === 'object' && item !== null ? formatValue(item) : String(item)}`;
+          return `${idx + 1}. ${isObject(item) ? formatValue(item) : String(item)}`;
         }).join('\n\n');
       }
       
       // Стандартная обработка для обычных массивов
       return value.map((item, idx) => 
-        `${idx + 1}. ${typeof item === 'object' && item !== null ? formatValue(item) : String(item)}`
+        `${idx + 1}. ${isObject(item) ? formatValue(item) : String(item)}`
       ).join('\n');
-    } else if (typeof value === 'object' && value !== null) {
+    } else if (isObject(value)) {
       // Преобразуем объект в читаемый формат
       return Object.entries(value)
         .map(([key, val]) => {
           // Заменяем технические ключи на дружественные названия
           const friendlyKey = techParamsMap[key] || key;
-          return `${friendlyKey}: ${typeof val === 'object' && val !== null ? formatValue(val) : String(val)}`;
+          return `${friendlyKey}: ${isObject(val) ? formatValue(val) : String(val)}`;
         })
         .join(', ');
     } else {

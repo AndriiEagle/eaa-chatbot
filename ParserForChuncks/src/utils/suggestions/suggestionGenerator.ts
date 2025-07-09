@@ -72,8 +72,8 @@ export async function generatePersonalizedSuggestions(
   } catch (error) {
     console.error('❌ [AI_SUGGESTIONS] Error calling AI agent:', error);
     
-    // Fallback - minimal suggestions on error
-    console.log('🔄 [AI_SUGGESTIONS] Using fallback suggestions');
+    // Fallback - minimal suggestions on error (English version)
+    console.log('🔄 [AI_SUGGESTIONS] Using fallback suggestions (English)');
     
     const fallbackSuggestions = isFirstInteraction 
       ? [
@@ -96,8 +96,8 @@ export async function generatePersonalizedSuggestions(
 }
 
 /**
- * СИНХРОННАЯ ВЕРСИЯ ДЛЯ ОБРАТНОЙ СОВМЕСТИМОСТИ
- * Возвращает базовые подсказки, если нет возможности вызвать ИИ-агента
+ * SYNCHRONOUS VERSION FOR BACKWARD COMPATIBILITY
+ * Returns basic suggestions if AI agent is not available
  */
 export function generatePersonalizedSuggestionsSync(
   userFacts: any[], 

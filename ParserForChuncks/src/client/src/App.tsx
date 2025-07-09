@@ -34,14 +34,14 @@ function saveHistory(history: Message[]) {
 function getDefaultBotMessage(): Message {
   return {
     role: MessageType.BOT,
-    content: 'Привет! Я помогу вам быстро понять требования European Accessibility Act. Задайте вопрос или уточните пару деталей о компании — и я подскажу, что делать.',
+    content: 'Hello! I\'ll help you quickly understand European Accessibility Act requirements. Ask a question or clarify a few details about your company — and I\'ll guide you on what to do.',
     ts: Date.now(),
     suggestions: [
-      'Веб-сервис в ЕС — подпадаём ли мы под EAA?',
-      'Какой штраф за недоступное мобильное приложение?',
-      'С чего начать аудит доступности?',
-      'Мы продаём SaaS в Германии — что требует EAA?',
-      'Мой бизнес в сфере —'
+      'Web service in EU — are we covered by EAA?',
+      'What\'s the penalty for an inaccessible mobile app?',
+      'Where to start with accessibility audit?',
+      'We sell SaaS in Germany — what does EAA require?',
+      'My business is in the field of —'
     ]
   };
 }
@@ -136,6 +136,12 @@ export default function App() {
     return saved !== null ? JSON.parse(saved) : true; // По умолчанию включен
   });
   
+  // Состояние для контекста подсказок
+  const [suggestionContext, setSuggestionContext] = useState<string>('');
+  
+  // Триггер для сброса счетчика подсказок при отправке сообщения
+  const [messageSentTrigger, setMessageSentTrigger] = useState<number>(0);
+  
   // Обновляем фразу загрузки при изменении состояния loading
   useEffect(() => {
     if (loading) setLoaderPhrase(getRandom(loaderPhrases));
@@ -178,7 +184,7 @@ export default function App() {
 
         const greetingMsg: Message = {
           role: MessageType.BOT,
-          content: data.greeting || 'Привет! Давайте поговорим о European Accessibility Act.',
+          content: data.greeting || 'Hello! Let\'s discuss the European Accessibility Act.',
           ts: Date.now()
         };
 
@@ -193,8 +199,8 @@ export default function App() {
 
         setMessages([greetingMsg, ...(suggestionsMsg ? [suggestionsMsg] : [])]);
       } catch (e) {
-        console.error('Ошибка загрузки приветствия:', e);
-        // Фолбэк на статичное сообщение
+        console.error('Error loading welcome message:', e);
+        // Fallback to static message
         setMessages([getDefaultBotMessage()]);
       }
     };
@@ -303,15 +309,36 @@ export default function App() {
     setNotification((prev: NotificationType) => ({ ...prev, visible: false }));
   };
 
+  // Обработка обновления контекста подсказок
+  const handleSuggestionContextUpdate = (context: string) => {
+    console.log('📝 [App] Получен контекст подсказки:', context);
+    setSuggestionContext(context);
+  };
+
+  // Обработка отправки сообщения (для сброса счетчика подсказок)
+  const handleMessageSent = () => {
+    console.log('📤 [App] Message sent, resetting suggestion counter');
+    setMessageSentTrigger(prev => prev + 1);
+  };
+
   // Отправка сообщения
   const sendMessage = async (inputText: string) => {
     if (!inputText.trim() || loading) return;
+    
+    // Формируем расширенный текст запроса с контекстом подсказок
+    let enhancedQuestion = inputText;
+    if (suggestionContext.trim()) {
+      enhancedQuestion = `${inputText}\n\n[Контекст подсказки: ${suggestionContext}]`;
+      console.log('💡 [App] Добавлен контекст подсказки к запросу:', suggestionContext);
+    }
     
     const userMsg: Message = { role: MessageType.USER, content: inputText, ts: Date.now() };
     const botMsgPlaceholder: Message = { role: MessageType.BOT, content: '...', ts: Date.now() };
     
     setMessages((msgs: Message[]) => [...msgs, userMsg, botMsgPlaceholder]);
     setInput('');
+    setSuggestionContext(''); // Очищаем контекст подсказок после отправки
+    handleMessageSent(); // Сбрасываем счетчик подсказок
     setLoading(true);
 
     try {
@@ -319,7 +346,7 @@ export default function App() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question: userMsg.content,
+          question: enhancedQuestion, // Используем расширенный вопрос с контекстом
           dataset_id: datasetId,
           similarity_threshold: similarityThreshold,
           max_chunks: maxChunks,
@@ -362,6 +389,7 @@ export default function App() {
           return newMsgs;
         });
 
+        setLoading(false); // Убираем загрузку для JSON ответа
       } 
       // СЦЕНАРИЙ 2: Сервер вернул потоковый ответ
       else if (contentType.includes('text/event-stream')) {
@@ -376,7 +404,10 @@ export default function App() {
         // eslint-disable-next-line no-constant-condition
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            setLoading(false); // Убираем загрузку когда стрим завершен
+            break;
+          }
         
           const chunk = decoder.decode(value, { stream: true });
           const lines = chunk.split('\n');
@@ -388,6 +419,7 @@ export default function App() {
                 
                 // Обработка различных типов событий
                 if (data.type === 'done') {
+                  setLoading(false); // Убираем загрузку когда получен done
                   break;
                 } else if (data.type === 'new_answer') {
                   // Множественные ответы
@@ -415,6 +447,11 @@ export default function App() {
                   // Обычный контент - накапливаем
                   const content = data.chunk || data.content;
                   fullContent += content;
+                  
+                  // Убираем индикатор загрузки при первом chunk'е контента
+                  if (fullContent.length <= content.length) {
+                    setLoading(false);
+                  }
                 }
                 
                 // Обновляем UI
@@ -588,12 +625,14 @@ export default function App() {
             onSendMessage={sendMessage}
             onCopy={handleCopy}
             onSelectSuggestion={handleSuggestedQuestion}
+            onSuggestionContextUpdated={handleSuggestionContextUpdate}
             loaderPhrase={loaderPhrase}
             input={input}
             setInput={setInput}
             userId={userId}
             sessionId={sessionId}
             isProactiveAgentEnabled={isProactiveAgentEnabled}
+            messageSentTrigger={messageSentTrigger}
           />
         </main>
       </div>

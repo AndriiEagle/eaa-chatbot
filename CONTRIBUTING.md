@@ -1,6 +1,6 @@
-# 🤝 Contributing to EAA ChatBot
+# Contributing to EAA ChatBot
 
-Спасибо за интерес к участию в развитии EAA ChatBot! Ваш вклад поможет сделать веб более доступным для всех.
+Thank you for considering contributing to the EAA ChatBot project! This document provides guidelines and information for contributors.
 
 ## 📋 Содержание
 

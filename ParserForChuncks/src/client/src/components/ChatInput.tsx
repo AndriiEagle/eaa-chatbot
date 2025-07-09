@@ -9,11 +9,11 @@ interface ChatInputProps {
 }
 
 /**
- * Компонент для ввода сообщений пользователем
+ * Component for user message input
  */
 const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, loading, input, setInput }) => {
   
-  // Стили для компонента
+  // Component styles
   const styles = {
     form: {
       display: 'flex',

@@ -24,6 +24,41 @@ export interface EnhancedResponse {
 }
 
 /**
+ * Результат обработки запроса через оркестратор
+ */
+export interface ProcessingResult {
+  answer: string;
+  sources: unknown[];
+  performance: {
+    embedding_ms: number;
+    search_ms: number;
+    generate_ms: number;
+    total_ms: number;
+  };
+  session_id: string;
+  query_id: string;
+  suggestions: string[];
+  suggestions_header: string;
+  clarificationQuestions?: string[];
+  infoTemplates?: string[];
+  results?: QuestionResult[];
+}
+
+/**
+ * Результат обработки отдельного вопроса
+ */
+export interface QuestionResult {
+  question: string;
+  answer: string;
+  sources: unknown[];
+  performance: {
+    embedding_ms: number;
+    search_ms: number;
+    generate_ms?: number;
+  };
+}
+
+/**
  * Результат предварительной обработки запроса
  */
 export interface PreprocessResult {

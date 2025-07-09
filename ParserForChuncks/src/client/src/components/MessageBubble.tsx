@@ -8,166 +8,167 @@ import { copyPhrases } from '../constants/phrases';
 import PreliminaryAnalysisDisplay from './PreliminaryAnalysisDisplay';
 
 /**
- * Форматирует текст сообщения, выделяя ключевые параметры
+ * Formats message text, highlighting key parameters
  */
 const formatMessageText = (text: string) => {
-  // Заменяем технические параметры более понятными названиями
+  // Replace technical parameters with more understandable names
   const techParamsMap: Record<string, string> = {
-    'service_types': 'Типы услуг',
-    'customer_base': 'Целевая аудитория',
-    'business_type': 'Тип бизнеса',
-    'business_size': 'Размер бизнеса',
-    'web_presence': 'Веб-присутствие',
-    'physical_location': 'Физическое местоположение',
-    'product_types': 'Типы продукции',
-    'delivery': 'Доставка'
+    'service_types': 'Service Types',
+    'customer_base': 'Target Audience',
+    'business_type': 'Business Type',
+    'business_size': 'Business Size',
+    'web_presence': 'Web Presence',
+    'physical_location': 'Physical Location',
+    'product_types': 'Product Types',
+    'delivery': 'Delivery'
   };
   
   let formattedText = text;
   
-  // Заменяем технические названия на дружественные формулировки
+  // Replace technical names with friendly formulations
   Object.entries(techParamsMap).forEach(([technical, friendly]) => {
     const regex = new RegExp(`\\b${technical}\\b`, 'g');
     formattedText = formattedText.replace(regex, friendly);
   });
   
-  // Возвращаем отформатированный текст
+  // Return formatted text
   return formattedText;
 };
 
 /**
- * Улучшенная функция обработки объектов в тексте
+ * Enhanced function for processing objects in text
  */
 const processObjectStrings = (text: string): string => {
   if (!text || typeof text !== 'string') return String(text || '');
 
-  console.log('[MessageBubble] processObjectStrings - INPUT:', JSON.stringify(text.substring(0, 200))); // Логируем входящий текст
+  console.log('[MessageBubble] processObjectStrings - INPUT:', JSON.stringify(text.substring(0, 200))); // Log input text
 
   let processedText = text;
 
-  // Обнаружение списков преимуществ доступности и замена [object Object]
-  if (processedText.toLowerCase().includes('преимуществ') || 
-      processedText.toLowerCase().includes('выгод') ||
-      processedText.toLowerCase().includes('соблюдение требований')) {
+  // Detection of accessibility benefits lists and replacement of [object Object]
+  if (processedText.toLowerCase().includes('benefit') || 
+      processedText.toLowerCase().includes('advantage') ||
+      processedText.toLowerCase().includes('compliance')) {
     
-    console.log('[MessageBubble] processObjectStrings - Обнаружен контекст преимуществ доступности');
+    console.log('[MessageBubble] processObjectStrings - Accessibility benefits context detected');
     
-    // Обработка нумерованных списков объектов в разных форматах
-    // 1. Формат: "1. [object Object]\n2. [object Object]"
+    // Processing numbered lists of objects in different formats
+    // 1. Format: "1. [object Object]\n2. [object Object]"
     const listPattern = /((?:\d+\.\s*\[object Object\][\s\n]*)+)/g;
     
-    // 2. HTML-списки: "<li>[object Object]</li>"
+    // 2. HTML lists: "<li>[object Object]</li>"
     const htmlListPattern = /(<li[^>]*>\s*\[object Object\]\s*<\/li>)/gi;
 
-    // 3. Маркированные списки: "- [object Object]" или "• [object Object]"
+    // 3. Bullet lists: "- [object Object]" or "• [object Object]"
     const bulletListPattern = /(?:[-•*]\s*\[object Object\][\s\n]*)+/g;
     
     if (listPattern.test(processedText) || htmlListPattern.test(processedText) || bulletListPattern.test(processedText)) {
-      console.log('[MessageBubble] processObjectStrings - Найден список [object Object] в контексте доступности');
+      console.log('[MessageBubble] processObjectStrings - Found [object Object] list in accessibility context');
       
       const benefitsTexts = [
-        "Расширение клиентской базы за счет доступности сервиса для людей с инвалидностью",
-        "Повышение репутации компании как социально ответственного бизнеса",
-        "Снижение юридических рисков, связанных с несоответствием требованиям EAA",
-        "Улучшение пользовательского опыта для всех клиентов без исключения",
-        "Повышение уровня удовлетворенности клиентов и их лояльности",
-        "Возможность выхода на новые рынки и аудитории"
+        "Expanding customer base by making service accessible to people with disabilities",
+        "Improving company reputation as a socially responsible business",
+        "Reducing legal risks related to non-compliance with EAA requirements",
+        "Improving user experience for all customers without exception",
+        "Increasing customer satisfaction and loyalty",
+        "Opportunity to enter new markets and audiences"
       ];
       
-      // Заменяем все форматы списков преимуществ
+      // Replace all benefit list formats
       processedText = processedText.replace(listPattern, (match) => {
         const count = (match.match(/\d+\./g) || []).length;
         return Array.from({length: count}, (_, i) => {
-          const benefit = i < benefitsTexts.length ? benefitsTexts[i] : `Преимущество доступности ${i+1}`;
+          const benefit = i < benefitsTexts.length ? benefitsTexts[i] : `Accessibility benefit ${i+1}`;
           return `${i+1}. ${benefit}`;
         }).join("\n");
       });
       
       processedText = processedText.replace(htmlListPattern, (match, p1, offset, string) => {
-        // Подсчитываем количество элементов списка рядом с текущим
+        // Count list items near the current one
         const listItems = string.match(/<li[^>]*>\s*\[object Object\]\s*<\/li>/gi) || [];
         const count = Math.min(listItems.length, benefitsTexts.length);
         
-        // Возвращаем первый элемент из списка преимуществ для этого вхождения
+        // Return first element from benefits list for this occurrence
         const index = listItems.indexOf(match);
         if (index >= 0 && index < benefitsTexts.length) {
           return `<li>${benefitsTexts[index]}</li>`;
         }
-        return `<li>Преимущество доступности</li>`;
+        return `<li>Accessibility benefit</li>`;
       });
       
       processedText = processedText.replace(bulletListPattern, (match) => {
         const count = (match.match(/[-•*]\s*\[object Object\]/g) || []).length;
         return Array.from({length: count}, (_, i) => {
-          const benefit = i < benefitsTexts.length ? benefitsTexts[i] : `Преимущество доступности ${i+1}`;
+          const benefit = i < benefitsTexts.length ? benefitsTexts[i] : `Accessibility benefit ${i+1}`;
           return `- ${benefit}`;
         }).join("\n");
       });
     }
   }
 
-  // 1. Замена для нумерованных/маркированных списков типа "1. [object Object]" или "- [object Object]"
+  // 1. Replacement for numbered/bulleted lists like "1. [object Object]" or "- [object Object]"
   const listItemObjectPattern = /^(\s*[\d]+\.\s*|\s*[-•*]\s*)(\[object Object\])/gmi;
   if (listItemObjectPattern.test(processedText)) {
-    console.log('[MessageBubble] processObjectStrings - Нашел элемент списка с [object Object]');
-    processedText = processedText.replace(listItemObjectPattern, '$1(пункт списка)');
+    console.log('[MessageBubble] processObjectStrings - Found list item with [object Object]');
+    processedText = processedText.replace(listItemObjectPattern, '$1(list item)');
   }
 
-  // 2. Если вся строка (после trim) это "[object Object]"
+  // 2. If the entire string (after trim) is "[object Object]"
   if (processedText.trim() === '[object Object]') {
     console.log('[MessageBubble] processObjectStrings - Matched: Full string [object Object]');
-    processedText = '(содержимое объекта)'; // Более нейтральная замена
+    processedText = '(object content)'; // More neutral replacement
   }
 
-  // 3. Обработка специфического паттерна, связанного с preliminaryAnalysis
-  const dataCompletenessPattern = /\[object Object\]\s*\(на основе (\d+)% имеющихся данных\)/g;
+  // 3. Processing specific pattern related to preliminaryAnalysis
+  const dataCompletenessPattern = /\[object Object\]\s*\(based on (\d+)% of available data\)/g;
   if (processedText.match(dataCompletenessPattern)) {
     console.log('[MessageBubble] processObjectStrings - Matched: dataCompletenessPattern');
     processedText = processedText.replace(dataCompletenessPattern, (_, percent) => {
-      return `(Информация о полноте данных (${percent}%) была представлена ранее).`;
+      return `(Data completeness information (${percent}%) was presented earlier).`;
     });
   }
 
-  // 4. Проверяем наличие текста вида "Предварительный анализ: [object Object]" 
-  const preliminaryAnalysisPattern = /(предварительн[а-я]+\s+анализ[а-я]*)\s*[:]\s*\[object Object\]/gi;
+  // 4. Check for text like "Preliminary analysis: [object Object]" 
+  const preliminaryAnalysisPattern = /(preliminary\s+analysis)\s*[:]\s*\[object Object\]/gi;
   if (preliminaryAnalysisPattern.test(processedText)) {
     console.log('[MessageBubble] processObjectStrings - Matched: preliminaryAnalysisPattern');
     processedText = processedText.replace(preliminaryAnalysisPattern, 
-      '$1 был отображен отдельно');
+      '$1 was displayed separately');
   }
 
-  // 5. Общая замена всех оставшихся вхождений "[object Object]" (регистронезависимо)
+  // 5. General replacement of all remaining "[object Object]" occurrences (case insensitive)
   if (processedText.includes('[object Object]') || processedText.toLowerCase().includes('[object object]')) {
     console.log('[MessageBubble] processObjectStrings - Matched: Includes [object Object]');
-    processedText = processedText.replace(/\[object Object\]/gi, '(информация)');
+    processedText = processedText.replace(/\[object Object\]/gi, '(information)');
   }
   
-  // 6. Обработка HTML-разметки, содержащей [object Object]
+  // 6. Processing HTML markup containing [object Object]
   const htmlTagsWithObjectPattern = /<([a-z][a-z0-9]*)[^>]*>\s*\[object Object\]\s*<\/\1>/gi;
   if (htmlTagsWithObjectPattern.test(processedText)) {
     console.log('[MessageBubble] processObjectStrings - Matched: HTML tags with [object Object]');
     processedText = processedText.replace(htmlTagsWithObjectPattern, (match, tag) => {
-      return `<${tag}>(информация в формате ${tag})</${tag}>`;
+      return `<${tag}>(information in ${tag} format)</${tag}>`;
     });
   }
   
   if (processedText !== text) {
-    console.log('[MessageBubble] processObjectStrings - OUTPUT изменился:', 
+    console.log('[MessageBubble] processObjectStrings - OUTPUT changed:', 
       JSON.stringify(processedText.substring(0, 200)));
   }
   return processedText;
 };
 
 /**
- * Компонент для отображения сообщения в чате
- * Обрабатывает как обычные сообщения, так и множественные ответы
+ * Component for displaying chat message
+ * Handles both regular messages and multiple responses
  */
 const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({ 
   message, 
   onCopy, 
   formatTime, 
   getRelevanceColor,
-  onSelectSuggestion 
+  onSelectSuggestion,
+  loading = false
 }) => {
   const [showCopyPhrase, setShowCopyPhrase] = useState(false);
   const [copyPhrase, setCopyPhrase] = useState('');
@@ -176,12 +177,12 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
   const isUser = role === 'user';
   const showPerformance = !isUser && message.performance && formatTime;
 
-  // Функция для получения случайной фразы из массива
+  // Function for getting random phrase from array
   const getRandomPhrase = () => {
     return copyPhrases[Math.floor(Math.random() * copyPhrases.length)];
   };
   
-  // Обработчик нажатия на кнопку копирования
+  // Copy button click handler
   const handleCopy = useCallback((textToProcess?: string) => {
     const textToCopy = textToProcess || (typeof message.content === 'string' ? message.content : JSON.stringify(message.content));
     navigator.clipboard.writeText(textToCopy).then(() => {
@@ -191,7 +192,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     });
   }, [message.content, isUser, onCopy]);
 
-  // Стили для элементов сообщения
+  // Styles for message elements
   const styles = {
     userBubble: {
       backgroundColor: '#3b82f6',
@@ -286,46 +287,46 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     } as CSSProperties
   };
 
-  // Функция для рендеринга обычного (одиночного) ответа
+  // Function for rendering regular (single) response
   const renderSingleMessage = () => {
-    let mainContent = message.content; // Исходный контент
+    let mainContent = message.content; // Original content
 
     if (isUser) {
-      // Для пользователя просто отображаем его контент
+      // For user, simply display their content
       mainContent = formatMessageText(mainContent as string);
     } else {
-      // Для бота сначала обработаем preliminaryAnalysis, если он есть
-      // mainContent будет отформатирован ниже, если он не пустой
+      // For bot, first process preliminaryAnalysis if it exists
+      // mainContent will be formatted below if it's not empty
       if (typeof mainContent === 'string') {
          mainContent = formatMessageText(mainContent);
          mainContent = processObjectStrings(mainContent);
       } else if (mainContent === null || mainContent === undefined) {
-        mainContent = ''; // Если контента нет, делаем его пустой строкой
+        mainContent = ''; // If no content, make it empty string
       } else {
-        // Если content не строка (маловероятно для основного ответа, но для полноты)
+                  // If content is not string (unlikely for main response, but for completeness)
         mainContent = JSON.stringify(mainContent, null, 2);
       }
     }
 
-    // Проверяем, нужно ли отображать основной текст после блока PreliminaryAnalysis
+          // Check if we need to display main text after PreliminaryAnalysis block
     let showMainContentAfterAnalysis = true;
     if (message.preliminaryAnalysis && typeof message.content === 'string') {
-      // Простое условие: если основной контент почти такой же, как часть preliminaryAnalysis.summary, не показываем его
+              // Simple condition: if main content is almost same as part of preliminaryAnalysis.summary, don't show it
       const paSummary = message.preliminaryAnalysis.summary || '';
       if (message.content.includes(paSummary.substring(0, Math.min(paSummary.length, 50)))) {
-          if (message.content.length < paSummary.length + 100) { // Если основной контент ненамного длиннее саммари
+          if (message.content.length < paSummary.length + 100) { // If main content is not much longer than summary
             showMainContentAfterAnalysis = false;
           }
       }
-       // Если основной контент это просто повторение запроса на уточнение, который уже есть в preliminaryAnalysis
+               // If main content is just repetition of clarification request that already exists in preliminaryAnalysis
       if (message.preliminaryAnalysis.humanReadableMissingData && 
           message.preliminaryAnalysis.humanReadableMissingData.some(missing => message.content.includes(missing))) {
-        if (message.content.toLowerCase().includes('пожалуйста, уточните') || message.content.toLowerCase().includes('для предоставления точного ответа мне нужна дополнительная информация')) {
+        if (message.content.toLowerCase().includes('please clarify') || message.content.toLowerCase().includes('for an accurate answer, i need additional information')) {
             showMainContentAfterAnalysis = false;
         }
       }
     }
-    if (mainContent === 'Данные анализа были обработаны.' || mainContent === 'Предварительный анализ (на основе 100% данных) был показан выше.') {
+    if (mainContent === 'Analysis data has been processed.' || mainContent === 'Preliminary analysis (based on 100% data) was shown above.') {
         showMainContentAfterAnalysis = false;
     }
     
@@ -335,7 +336,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           <PreliminaryAnalysisDisplay analysisData={message.preliminaryAnalysis} />
         )}
         
-        {/* Отображаем основной контент, если он есть и не является дубликатом preliminaryAnalysis */}
+        {/* Display main content if it exists and is not duplicate of preliminaryAnalysis */}
         {(mainContent && showMainContentAfterAnalysis && mainContent.trim() !== '') && (
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
@@ -364,22 +365,22 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           </ReactMarkdown>
         )}
 
-        {/* ... (остальная часть renderSingleMessage: источники, производительность, suggestions, кнопка копирования) ... */}
+        {/* ... (rest of renderSingleMessage: sources, performance, suggestions, copy button) ... */}
         {message.sources && message.sources.length > 0 && (
           <SourcesList sources={message.sources} />
         )}
         {message.performance && formatTime && (
           <div style={styles.performanceStats}>
-            Время: эмб: {formatTime(message.performance.embedding_ms)} | 
-            поиск: {formatTime(message.performance.search_ms)} | 
-            ответ: {formatTime(message.performance.generate_ms)} | 
-            всего: {formatTime(message.performance.total_ms)}
+            Time: emb: {formatTime(message.performance.embedding_ms)} | 
+            search: {formatTime(message.performance.search_ms)} | 
+            answer: {formatTime(message.performance.generate_ms)} | 
+            total: {formatTime(message.performance.total_ms)}
           </div>
         )}
         {((message.clarificationQuestions ?? []).length > 0 || (message.infoTemplates ?? []).length > 0) && (
           <div style={{ marginTop: '0.75rem' }}>
             <div style={styles.suggestedHeader}>
-              {message.suggestions_header || 'Уточните для меня:'}
+              {message.suggestions_header || 'Please clarify for me:'}
             </div>
             {(message.clarificationQuestions ?? []).length > 0 && (
               <div style={{ marginBottom: (message.infoTemplates ?? []).length > 0 ? '0.5rem' : 0 }}>
@@ -415,7 +416,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
         )}
         {message.suggestions && message.suggestions.length > 0 && (
           <div style={{ marginTop: '0.75rem' }}>
-            <div style={styles.suggestedHeader}>Попробуйте спросить:</div>
+            <div style={styles.suggestedHeader}>Try asking:</div>
             <div>
               {message.suggestions.map((q, idx) => (
                 <div 
@@ -431,7 +432,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
             </div>
           </div>
         )}
-        {message.role === MessageType.BOT && message.content && message.content !== 'Ошибка запроса к серверу.' && (
+        {message.role === MessageType.BOT && message.content && message.content !== 'Server request error.' && !loading && (
           <>
             {showCopyPhrase && (
               <div style={styles.copyPhraseContainer}>
@@ -451,14 +452,14 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     );
   };
   
-  // Функция для рендеринга множественных ответов
+  // Function for rendering multiple responses
   const renderMultiMessage = () => {
     if (!message.answers || !message.isMulti) return null;
     
     return (
       <div style={{ width: '100%' }}>
         <h3 style={styles.multiHeader}>
-          Ответы на множественные вопросы ({message.answers.length})
+          Answers to multiple questions ({message.answers.length})
         </h3>
         
         {message.answers.map((item, idx) => (
@@ -467,7 +468,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
             style={idx < message.answers!.length - 1 ? styles.answerContainer : styles.lastAnswerContainer}
           >
             <div style={styles.questionTitle}>
-              Вопрос {idx+1}: {item.question}
+              Question {idx+1}: {item.question}
             </div>
             
             <div style={{ marginBottom: '0.5rem' }}>
@@ -506,18 +507,18 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
         
         {message.performance && formatTime && (
           <div style={styles.performanceStats}>
-            Общее время: эмб: {formatTime(message.performance.embedding_ms)} | 
-            поиск: {formatTime(message.performance.search_ms)} | 
-            ответ: {formatTime(message.performance.generate_ms)} | 
-            всего: {formatTime(message.performance.total_ms)}
+            Total time: emb: {formatTime(message.performance.embedding_ms)} | 
+            search: {formatTime(message.performance.search_ms)} | 
+            answer: {formatTime(message.performance.generate_ms)} | 
+            total: {formatTime(message.performance.total_ms)}
           </div>
         )}
         
-        {/* ДОБАВЛЯЕМ ОТОБРАЖЕНИЕ ПОДСКАЗОК ДЛЯ МНОЖЕСТВЕННЫХ ОТВЕТОВ */}
+        {/* ADD SUGGESTIONS DISPLAY FOR MULTIPLE RESPONSES */}
         {((message.clarificationQuestions ?? []).length > 0 || (message.infoTemplates ?? []).length > 0) && (
           <div style={{ marginTop: '0.75rem' }}>
             <div style={styles.suggestedHeader}>
-              {message.suggestions_header || 'Попробуйте спросить:'}
+              {message.suggestions_header || 'Try asking:'}
             </div>
             {(message.clarificationQuestions ?? []).length > 0 && (
               <div style={{ marginBottom: (message.infoTemplates ?? []).length > 0 ? '0.5rem' : 0 }}>
@@ -552,25 +553,29 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
           </div>
         )}
         
-        {showCopyPhrase && (
-          <div style={styles.copyPhraseContainer}>
-            {copyPhrase}
-          </div>
+        {!loading && (
+          <>
+            {showCopyPhrase && (
+              <div style={styles.copyPhraseContainer}>
+                {copyPhrase}
+              </div>
+            )}
+            <button
+              style={styles.copyButton}
+              onClick={() => handleCopy(message.answers?.map(a => 
+                `Question: ${a.question}\nAnswer: ${a.answer}`
+              ).join('\n\n') || '')}
+              title="Copy all answers"
+            >
+              ⧉
+            </button>
+          </>
         )}
-        <button
-          style={styles.copyButton}
-          onClick={() => handleCopy(message.answers?.map(a => 
-            `Вопрос: ${a.question}\nОтвет: ${a.answer}`
-          ).join('\n\n') || '')}
-          title="Copy all answers"
-        >
-          ⧉
-        </button>
       </div>
     );
   };
 
-  // Добавляем стили для анимации
+  // Add animation styles
   const animationStyle = `
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -578,7 +583,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
     }
   `;
   
-  // Основной рендеринг компонента
+  // Main component rendering
   return (
     <div 
       style={{ 
