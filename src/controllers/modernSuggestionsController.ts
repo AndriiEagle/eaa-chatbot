@@ -193,7 +193,7 @@ export const checkSuggestionsHealth = async (req: Request, res: Response) => {
     // Test basic functionality
     const testResult = await suggestionService.generateRevolutionarySuggestions({
       userId: 'health-check',
-      sessionId: 'health-check-session',
+      sessionId: 'a0b1c2d3-e4f5-6789-abcd-ef0123456789', // Valid UUID for health check
       currentQuestion: 'test'
     });
 

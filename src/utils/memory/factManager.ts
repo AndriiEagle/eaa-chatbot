@@ -171,38 +171,56 @@ export class FactManager {
         messages: [
           {
             role: 'system',
-            content: `You are a text analyst. Your task is to analyze user messages and extract business/organization facts from them.
+            content: `You are a professional business analyst. Extract comprehensive business facts from user messages.
 
-Extract the following types of information:
-- business_type: type of business or organization (e.g., restaurant, bank, online store, educational institution)
-- business_location: country, region, or city where the business is located
-- business_size: business size (small, medium, large, startup, etc.)
-- business_digital_presence: digital presence (website, mobile app, e-commerce, social media, etc.)
-- business_sector: economic sector (B2B, B2C, government, nonprofit, etc.)
-- customer_base: target customers (individuals, businesses, students, tourists, etc.)
-- service_types: types of services or products offered
-- compliance_status: any mention of accessibility compliance, standards, or regulations
+🎯 CRITICAL REQUIREMENTS:
+1. ALL FACTS MUST BE IN ENGLISH LANGUAGE ONLY
+2. Extract ALL possible business information, not just obvious ones
+3. Be thorough - extract multiple facts per category when possible
+4. Use standardized business terminology
 
-For each extracted fact, specify confidence level from 0 to 1, where:
-- 0.9-1.0: fact is explicitly and directly mentioned
-- 0.7-0.8: fact is strongly implied
-- 0.5-0.6: fact is probably correct but there's ambiguity
-- < 0.5: too uncertain, don't include in results
+📊 EXTRACT THESE FACT TYPES:
+- business_type: specific business type (e.g., "restaurant", "online retailer", "software company", "consulting firm")
+- business_location: specific location (e.g., "Berlin, Germany", "San Francisco, USA", "London, UK")
+- business_size: company size (e.g., "small business", "startup", "medium enterprise", "large corporation")
+- business_digital_presence: digital channels (e.g., "website", "mobile app", "e-commerce platform", "social media")
+- business_sector: market sector (e.g., "B2B", "B2C", "B2B2C", "government", "nonprofit")
+- customer_base: target customers (e.g., "individual consumers", "small businesses", "enterprise clients", "tourists")
+- service_types: products/services (e.g., "food service", "consulting", "software development", "retail sales")
+- compliance_status: compliance requirements (e.g., "GDPR compliant", "accessibility standards", "financial regulations")
+- industry: specific industry (e.g., "hospitality", "technology", "healthcare", "finance", "education")
+- business_model: revenue model (e.g., "subscription", "one-time sales", "commission-based", "freemium")
+- technology_stack: tech used (e.g., "React", "Node.js", "WordPress", "Shopify", "custom platform")
+- target_market: market focus (e.g., "local market", "international", "niche market", "mass market")
 
-Return JSON array of objects in this format:
+🔍 EXTRACTION RULES:
+- Extract facts from ANY language input but ALWAYS output in English
+- If location mentioned in another language, translate to English
+- If business type mentioned in another language, use English equivalent
+- Be specific - "restaurant" not "food business"
+- Extract multiple facts when possible
+- Use confidence levels properly:
+  * 0.9-1.0: explicitly stated facts
+  * 0.7-0.8: strongly implied facts
+  * 0.5-0.6: reasonably inferred facts
+
+Return JSON in this exact format:
 {
   "facts": [
     {
-      "fact_type": "fact_type",
-      "fact_value": "value",
-      "confidence": 0.0-1.0
+      "fact_type": "business_type",
+      "fact_value": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "fact_type": "business_location", 
+      "fact_value": "Berlin, Germany",
+      "confidence": 0.8
     }
   ]
 }
 
-If no facts can be extracted with confidence >= 0.5, return {"facts": []}.
-
-Analyze messages in any language (English, Russian, etc.) and extract facts accordingly.`
+If message contains business info, extract ALL applicable facts. Be thorough!`
           },
           {
             role: 'user',
@@ -226,18 +244,21 @@ Analyze messages in any language (English, Russian, etc.) and extract facts acco
         return;
       }
 
-      // Отфильтровываем факты с низкой уверенностью
-      const validFacts = extractedFacts.filter(fact => fact.confidence >= 0.5);
+      // Отфильтровываем факты с низкой уверенностью (lowered threshold to extract more facts)
+      const validFacts = extractedFacts.filter(fact => fact.confidence >= 0.4);
       
       if (validFacts.length === 0) {
-        console.log(`ℹ️ [MEMORY] No facts extracted with sufficient confidence`);
+        console.log(`ℹ️ [MEMORY] No facts extracted with sufficient confidence (≥0.4)`);
+        console.log(`🔍 [MEMORY] Raw AI response:`, JSON.stringify(extractedFacts, null, 2));
         return;
       }
 
       // Сохраняем извлеченные факты
-      console.log(`✅ [MEMORY] Extracted ${validFacts.length} business facts`);
+      console.log(`✅ [MEMORY] Extracted ${validFacts.length} business facts:`);
       
       for (const fact of validFacts) {
+        console.log(`  📊 ${fact.fact_type}: "${fact.fact_value}" (confidence: ${fact.confidence})`);
+        
         // Используем переданный messageId вместо генерации нового UUID
         await this.saveUserFact(
           userId,
