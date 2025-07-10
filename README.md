@@ -9,6 +9,31 @@
 
 > **Revolutionary AI-powered consultation platform for European Accessibility Act (EAA) compliance with RAG architecture, multi-agent AI system, voice input, and intelligent compliance guidance.**
 
+## 🚨 IMPORTANT: API Keys Required
+
+**⚠️ THIS APPLICATION WILL NOT START WITHOUT VALID API KEYS!**
+
+This project requires API keys from:
+- **OpenAI** (for GPT-4o-mini and embeddings)
+- **Supabase** (for vector database and storage)
+
+**The application will immediately exit with an error message if these keys are not provided.**
+
+### 🔑 Getting Your API Keys
+
+1. **OpenAI API Key**: Visit [OpenAI Platform](https://platform.openai.com/api-keys)
+2. **Supabase Keys**: Go to [Supabase Dashboard](https://supabase.com/dashboard) → Your Project → Settings → API
+
+### 📋 Required Environment Variables
+
+```env
+OPENAI_API_KEY=your_openai_api_key_here
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your_supabase_service_key_here
+```
+
+**Without these keys properly configured, you will see a detailed error message and the application will not start.**
+
 ## 🌟 Key Features
 
 - **🧠 RAG Architecture** - Retrieval-Augmented Generation with vector search
@@ -44,18 +69,18 @@ cd eaa-chatbot/ParserForChuncks
 npm install
 ```
 
-3. **Environment setup**
+3. **Environment setup (CRITICAL STEP)**
 ```bash
-cp .env.example .env
+cp env.example .env
 ```
 
-Configure your `.env` file:
+**⚠️ MANDATORY: Configure your `.env` file with valid API keys:**
 ```env
-# OpenAI Configuration
+# OpenAI Configuration (REQUIRED)
 OPENAI_API_KEY=your_openai_api_key_here
 
-# Supabase Configuration
-SUPABASE_URL=your_supabase_url_here
+# Supabase Configuration (REQUIRED)
+SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SERVICE_KEY=your_supabase_service_key_here
 
 # Server Configuration
@@ -68,6 +93,8 @@ SMTP_PORT=587
 SMTP_USER=your_email
 SMTP_PASS=your_password
 ```
+
+**🚨 IMPORTANT**: Replace the placeholder values with your actual API keys. The application will not start without them and will display a detailed error message if they're missing.
 
 4. **Build and start**
 ```bash
