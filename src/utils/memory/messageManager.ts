@@ -10,8 +10,17 @@ import { v4 as uuidv4 } from 'uuid';
 export class MessageManager {
   constructor(
     private supabase: SupabaseClient,
-    private openai: OpenAI
+    private openai: OpenAI,
+    private factManager?: any // Add factManager reference for automatic fact extraction
   ) {}
+
+  /**
+   * Sets the fact manager instance for automatic fact extraction
+   * This is called by ChatMemoryManager during initialization
+   */
+  setFactManager(factManager: any): void {
+    this.factManager = factManager;
+  }
   
   /**
    * Сохраняет сообщение в истории чата
@@ -67,6 +76,18 @@ export class MessageManager {
       }
 
       console.log(`✅ [MESSAGES] Message saved successfully: ${id}`);
+
+      // 🎯 AUTOMATIC FACT EXTRACTION FOR USER MESSAGES
+      if (role === 'user' && this.factManager) {
+        try {
+          console.log(`🔍 [MESSAGES] Starting automatic fact extraction for user message...`);
+          await this.factManager.extractFactsFromUserMessage(content, sessionId, id);
+        } catch (factError) {
+          console.warn('⚠️ [MESSAGES] Failed to extract facts from user message (non-critical):', factError);
+          // Don't throw error for fact extraction failure - it's not critical for message saving
+        }
+      }
+
       return id;
 
     } catch (error) {

@@ -155,8 +155,8 @@ export class FactManager {
 
       const userId = sessionData.user_id;
 
-      // Проверяем, содержит ли сообщение информацию о бизнесе
-      const containsBusinessInfo = /компан|бизнес|организац|предприяти|фирм|работа|сайт|магазин|банк|финанс|транспорт|отрасл|индустр/i.test(messageContent);
+      // Проверяем, содержит ли сообщение информацию о бизнесе (English and Russian)
+      const containsBusinessInfo = /компан|бизнес|организац|предприяти|фирм|работа|сайт|магазин|банк|финанс|транспорт|отрасл|индустр|company|business|organization|enterprise|firm|work|website|shop|store|bank|financ|transport|industry|startup|corporat|retail|ecommerce|e-commerce|application|app|platform|service|customer|client|market|sale|revenue|product|digital|technology|tech/i.test(messageContent);
       
       if (!containsBusinessInfo) {
         console.log(`ℹ️ [MEMORY] Message does not contain business information, skipping fact extraction`);
@@ -171,31 +171,38 @@ export class FactManager {
         messages: [
           {
             role: 'system',
-            content: `Ты аналитик текста. Твоя задача - проанализировать сообщение пользователя и извлечь из него факты о бизнесе/организации пользователя. 
+            content: `You are a text analyst. Your task is to analyze user messages and extract business/organization facts from them.
 
-Извлекай следующие типы информации:
-- business_type: тип бизнеса или организации
-- business_location: страна, регион или город расположения бизнеса
-- business_size: размер бизнеса (малый, средний, крупный, стартап и т.д.)
-- business_digital_presence: какое присутствие в интернете (веб-сайт, мобильное приложение, электронный магазин и т.д.)
-- business_sector: сектор экономики (B2B, B2C, государственный и т.д.)
+Extract the following types of information:
+- business_type: type of business or organization (e.g., restaurant, bank, online store, educational institution)
+- business_location: country, region, or city where the business is located
+- business_size: business size (small, medium, large, startup, etc.)
+- business_digital_presence: digital presence (website, mobile app, e-commerce, social media, etc.)
+- business_sector: economic sector (B2B, B2C, government, nonprofit, etc.)
+- customer_base: target customers (individuals, businesses, students, tourists, etc.)
+- service_types: types of services or products offered
+- compliance_status: any mention of accessibility compliance, standards, or regulations
 
-Для каждого извлеченного факта укажи степень уверенности от 0 до 1, где:
-- 0.9-1.0: факт явно и прямо упомянут
-- 0.7-0.8: факт сильно подразумевается
-- 0.5-0.6: факт вероятно верен, но есть неоднозначность
-- < 0.5: слишком неопределенно, не включай в результат
+For each extracted fact, specify confidence level from 0 to 1, where:
+- 0.9-1.0: fact is explicitly and directly mentioned
+- 0.7-0.8: fact is strongly implied
+- 0.5-0.6: fact is probably correct but there's ambiguity
+- < 0.5: too uncertain, don't include in results
 
-Верни массив объектов в формате JSON:
-[
-  {
-    "fact_type": "тип_факта",
-    "fact_value": "значение",
-    "confidence": число_от_0_до_1
-  }
-]
+Return JSON array of objects in this format:
+{
+  "facts": [
+    {
+      "fact_type": "fact_type",
+      "fact_value": "value",
+      "confidence": 0.0-1.0
+    }
+  ]
+}
 
-Если не удалось извлечь никаких фактов с уверенностью >= 0.5, верни пустой массив [].`
+If no facts can be extracted with confidence >= 0.5, return {"facts": []}.
+
+Analyze messages in any language (English, Russian, etc.) and extract facts accordingly.`
           },
           {
             role: 'user',
@@ -212,6 +219,8 @@ export class FactManager {
         const content = completion.choices[0].message.content || '{"facts": []}';
         const response = JSON.parse(content);
         extractedFacts = response.facts || [];
+        
+        console.log(`🔍 [MEMORY] AI extracted ${extractedFacts.length} potential facts from message`);
       } catch (e) {
         console.error('❌ [MEMORY] Error parsing fact extraction results:', e);
         return;
