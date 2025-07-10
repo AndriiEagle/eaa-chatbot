@@ -18,12 +18,22 @@ export class FrustrationService {
     this.emailComposer = new EmailComposerAgent();
   }
 
-  async analyzeAndHandle(userId: string, sessionId: string, question: string, answer: string): Promise<void> {
+  async analyzeAndHandle(userId: string, sessionId: string, question: string, answer: string): Promise<string | null> {
     logger.info('Analyzing frustration', { userId, sessionId });
 
     try {
-      // Get recent messages for context
+      // Получение контекста с улучшенным логированием
+      console.log(`📚 [FrustrationAgent] Loading context for session ${sessionId}`);
       const sessionMessages = await chatMemory.getSessionMessages(sessionId);
+      console.log(`📚 [FrustrationAgent] Loaded ${sessionMessages.length} recent messages`);
+
+      // Убеждаемся, что контекст не пустой
+      if (sessionMessages.length === 0) {
+        console.log(`⚠️ [FrustrationAgent] No recent messages found, this might be first message in session`);
+      }
+
+      const contextSummary = sessionMessages.map(msg => `${msg.role}: ${msg.content.substring(0, 50)}...`).join('; ');
+      console.log(`📝 [FrustrationAgent] Context summary: ${contextSummary}`);
       
       // Call with correct signature: (currentMessage, recentMessages, sessionId, userId)
       const frustrationResult = await this.frustrationAgent.analyzeFrustration(
@@ -34,10 +44,13 @@ export class FrustrationService {
       );
       
       if (frustrationResult.shouldEscalate) {
-        await this.handleEscalation(userId, sessionId, question, answer, frustrationResult);
+        return await this.handleEscalation(userId, sessionId, question, answer, frustrationResult);
       }
+      
+      return null; // No escalation needed
     } catch (error) {
       logger.error('Error in frustration analysis', { error, userId, sessionId });
+      return null;
     }
   }
 
@@ -47,7 +60,7 @@ export class FrustrationService {
     question: string, 
     answer: string, 
     frustrationResult: any
-  ): Promise<void> {
+  ): Promise<string> {
     logger.warn('High frustration detected - escalating', { 
       userId, 
       sessionId, 
@@ -75,9 +88,30 @@ export class FrustrationService {
         sessionId,
         subject: emailDraft.subject 
       });
+
+      // 🎯 RETURN NOTIFICATION MESSAGE FOR USER
+      return `
+🚨 **Ваш вопрос передан менеджеру!**
+
+Мы заметили, что у вас возникли трудности с получением нужной информации. Ваш запрос был автоматически передан нашему менеджеру по работе с клиентами.
+
+📧 **Что происходит сейчас:**
+• Менеджер получил подробную информацию о вашем вопросе
+• В ближайшее время с вами свяжется специалист
+• Вы получите персональную помощь по вашему вопросу
+
+⏰ **Время ответа:** обычно 2-4 часа в рабочее время
+
+А пока я продолжу отвечать на ваши вопросы!
+      `.trim();
       
     } catch (error) {
       logger.error('Error in frustration escalation', { error, userId, sessionId });
+      return `
+🚨 **Ваш вопрос передан менеджеру!**
+
+Мы заметили сложности с получением нужной информации и передали ваш запрос менеджеру. Скоро с вами свяжется специалист для персональной помощи.
+      `.trim();
     }
   }
 } 

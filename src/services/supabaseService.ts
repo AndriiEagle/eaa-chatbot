@@ -21,7 +21,7 @@ export async function findRelevantChunks(
   matchCount: number
 ) {
   const { data: chunks, error } = await supabase.rpc('match_documents', {
-    dataset: datasetId,
+    dataset: String(datasetId),
     query_embedding: queryEmbedding,
     similarity_threshold: similarityThreshold,
     match_count: matchCount,

@@ -2,6 +2,7 @@ import { openai } from './openaiService.js';
 import { supabase } from './supabaseService.js';
 import { ChatMessage } from '../utils/memory/types.js';
 import { FRUSTRATION_DETECTION_SYSTEM_PROMPT } from '../config/prompts.js';
+import { extractJson } from '../utils/formatting/extractJson.js';
 
 // Interfaces for safe agent operation
 export interface FrustrationAnalysis {
@@ -15,6 +16,10 @@ export interface FrustrationAnalysis {
     messageCount: number;
     negativeKeywordsCount: number;
     hasSwearing: boolean;
+    hasExcessiveExclamations: boolean;
+    hasAllCaps: boolean;
+    exclamationCount: number;
+    allCapsWords: string[];
   };
   shouldEscalate: boolean; // Recommendation for escalation
   escalationReason?: string; // Reason for escalation
@@ -39,9 +44,9 @@ export class FrustrationDetectionAgent {
   private readonly SYSTEM_PROMPT = FRUSTRATION_DETECTION_SYSTEM_PROMPT;
 
   private readonly DEFAULT_THRESHOLDS: SafetyThresholds = {
-    minimumFrustrationLevel: 0.7, // Very high threshold!
-    minimumConfidence: 0.8, // High AI confidence
-    minimumTriggers: 2 // Minimum 2 triggers for escalation
+    minimumFrustrationLevel: 0.6, // Lowered from 0.7 - more sensitive detection
+    minimumConfidence: 0.7,       // Lowered from 0.8 - trust advanced AI analysis
+    minimumTriggers: 1            // Lowered from 2 - AI analysis is primary
   };
 
   constructor(private customThresholds?: Partial<SafetyThresholds>) {}
@@ -63,7 +68,7 @@ export class FrustrationDetectionAgent {
   ): Promise<FrustrationAnalysis> {
     const startTime = Date.now();
     
-    console.log('\n�� [FrustrationAgent] Starting frustration analysis...');
+    console.log('\n [FrustrationAgent] Starting frustration analysis...');
     console.log(`📝 Current message: "${currentMessage}"`);
     console.log(`📚 Context: ${recentMessages.length} recent messages`);
 
@@ -102,19 +107,56 @@ export class FrustrationDetectionAgent {
   private prepareConversationContext(currentMessage: string, recentMessages: ChatMessage[]): string {
     const historyText = recentMessages
       .slice(-8) // Take a maximum of 8 recent messages
-      .map(msg => `${msg.role === 'user' ? 'USER' : 'BOT'}: ${msg.content}`)
+      .map((msg, index) => {
+        const timestamp = index === recentMessages.length - 1 ? '[MOST RECENT]' : `[${index + 1}]`;
+        return `${timestamp} ${msg.role === 'user' ? 'USER' : 'BOT'}: ${msg.content}`;
+      })
       .join('\n');
 
+    // Calculate conversation metrics for AI
+    const userMessages = recentMessages.filter(msg => msg.role === 'user');
+    const conversationLength = recentMessages.length;
+    const userQuestionCount = userMessages.length;
+    const averageMessageLength = userMessages.reduce((sum, msg) => sum + msg.content.length, 0) / Math.max(userMessages.length, 1);
+
     return `
-=== CONVERSATION CONTEXT ===
+=== CONVERSATION ANALYSIS REQUEST ===
+
+CONVERSATION HISTORY:
 ${historyText}
 
-=== CURRENT MESSAGE (ANALYZE THIS) ===
-USER: ${currentMessage}
+CURRENT MESSAGE TO ANALYZE:
+[ANALYZING NOW] USER: ${currentMessage}
 
-=== TASK ===
-Analyze the user's frustration level in the current message, considering the conversation context.
+CONVERSATION METRICS:
+- Total messages in conversation: ${conversationLength}
+- User questions asked: ${userQuestionCount}
+- Average user message length: ${Math.round(averageMessageLength)} characters
+- User engagement pattern: ${this.getEngagementPattern(userMessages)}
+
+ANALYSIS TASK:
+Perform deep psychological analysis of the user's emotional state based on:
+1. The ENTIRE conversation flow and evolution
+2. Language patterns and emotional progression
+3. Unmet needs and repeated concerns
+4. Cultural and linguistic context (Russian/English)
+5. User's patience level and satisfaction trajectory
+
+Focus on understanding the USER'S PERSPECTIVE and emotional journey, not just keyword detection.
+
+IMPORTANT: Consider whether the user's frustration (if any) is:
+- Justified based on their experience
+- Escalating or de-escalating
+- Technical confusion vs emotional frustration
+- Requiring human intervention vs more patient bot assistance
 `;
+  }
+
+  private getEngagementPattern(userMessages: ChatMessage[]): string {
+    if (userMessages.length <= 1) return 'Initial contact';
+    if (userMessages.length <= 3) return 'Early engagement';
+    if (userMessages.length <= 6) return 'Active conversation';
+    return 'Extended interaction';
   }
 
   /**
@@ -143,7 +185,8 @@ Analyze the user's frustration level in the current message, considering the con
       console.log('✅ [FrustrationAgent] AI analysis completed');
 
       try {
-        return JSON.parse(responseText);
+        const cleanedJson = extractJson(responseText);
+        return JSON.parse(cleanedJson);
       } catch (parseError) {
         console.error('❌ [FrustrationAgent] JSON parsing error:', parseError);
         console.error('Raw response:', responseText);
@@ -166,20 +209,34 @@ Analyze the user's frustration level in the current message, considering the con
     // Look for repeated questions
     const repeatedQuestions = this.detectRepeatedQuestions(userMessages);
     
-    // Count negative keywords
+    // Count negative keywords (English + Russian)
     const negativeKeywords = [
+      // English
       'doesn\'t work', 'not helping', 'useless', 'in vain', 'bad', 
-      'terrible', 'awful', 'disappointed', 'don\'t understand'
+      'terrible', 'awful', 'disappointed', 'don\'t understand',
+      // Russian
+      'не работает', 'не помогает', 'бесполезно', 'зря', 'плохо',
+      'ужасно', 'неверно', 'не понимаю', 'не получается', 'третий раз',
+      'четвертый раз', 'пятый раз', 'опять', 'снова', 'всё время',
+      'не то', 'не так', 'ошибка', 'неправильно'
     ];
     const negativeKeywordsCount = negativeKeywords.filter(keyword => 
       currentMessage.toLowerCase().includes(keyword)
     ).length;
     
-    // Check for swear words (basic list)
-    const swearWords = ['fuck', 'shit', 'damn', 'hell'];
+    // Check for swear words (basic list - English + Russian)
+    const swearWords = ['fuck', 'shit', 'damn', 'hell', 'херня', 'блять', 'черт', 'дерьмо'];
     const hasSwearing = swearWords.some(word => 
       currentMessage.toLowerCase().includes(word)
     );
+
+    // Check for excessive exclamation marks (sign of frustration)
+    const exclamationCount = (currentMessage.match(/!/g) || []).length;
+    const hasExcessiveExclamations = exclamationCount >= 3;
+
+    // Check for ALL CAPS words (sign of shouting/frustration)
+    const allCapsWords = currentMessage.match(/\b[А-ЯA-Z]{3,}\b/g) || [];
+    const hasAllCaps = allCapsWords.length > 0;
 
     // Approximate session duration (by message count)
     const sessionDuration = messageCount * 2; // Approx. 2 minutes per message
@@ -189,7 +246,11 @@ Analyze the user's frustration level in the current message, considering the con
       sessionDuration,
       messageCount,
       negativeKeywordsCount,
-      hasSwearing
+      hasSwearing,
+      hasExcessiveExclamations,
+      hasAllCaps,
+      exclamationCount,
+      allCapsWords
     };
   }
 
@@ -244,6 +305,7 @@ Analyze the user's frustration level in the current message, considering the con
     
     console.log('🛡️ [FrustrationAgent] Applying safety checks...');
     console.log(`📊 AI analysis - level: ${aiAnalysis.frustration_level}, confidence: ${aiAnalysis.confidence}`);
+    console.log(`🧠 AI reasoning: ${aiAnalysis.reasoning || 'No reasoning provided'}`);
     
     // Parse AI result with checks
     const frustrationLevel = Math.max(0, Math.min(1, aiAnalysis.frustration_level || 0));
@@ -251,33 +313,43 @@ Analyze the user's frustration level in the current message, considering the con
     const detectedPatterns = Array.isArray(aiAnalysis.patterns) ? aiAnalysis.patterns : [];
     const triggerPhrases = Array.isArray(aiAnalysis.triggers) ? aiAnalysis.triggers : [];
     
-    // 🚨 KEY CHECK: Should we escalate?
+    // 🎯 PRIORITY: AI ANALYSIS FIRST, CONTEXTUAL FACTORS AS SUPPORT
     let shouldEscalate = false;
     let escalationReason = '';
     
-    // Check 1: Is the frustration level high enough?
-    if (frustrationLevel < thresholds.minimumFrustrationLevel) {
-      console.log(`⚡ [Safety] Frustration level ${frustrationLevel.toFixed(2)} is below threshold ${thresholds.minimumFrustrationLevel}`);
-    } 
-    // Check 2: Is the AI confident enough?
-    else if (confidenceScore < thresholds.minimumConfidence) {
-      console.log(`⚡ [Safety] AI confidence ${confidenceScore.toFixed(2)} is below threshold ${thresholds.minimumConfidence}`);
-    }
-    // Check 3: Are there enough triggers?
-    else if (triggerPhrases.length < thresholds.minimumTriggers) {
-      console.log(`⚡ [Safety] Trigger count ${triggerPhrases.length} is below minimum ${thresholds.minimumTriggers}`);
-    }
-    // Check 4: Are there contextual factors?
-    else if (!contextFactors.hasSwearing && !contextFactors.repeatedQuestions && contextFactors.negativeKeywordsCount < 2) {
-      console.log(`⚡ [Safety] Not enough contextual factors to escalate`);
-    }
-    // ✅ ALL CHECKS PASSED - ESCALATION IS POSSIBLE
-    else {
-      shouldEscalate = true;
-      escalationReason = `High frustration level (${frustrationLevel.toFixed(2)}) with AI confidence ${confidenceScore.toFixed(2)}. Detected triggers: ${triggerPhrases.join(', ')}`;
+    // 🧠 PRIMARY CHECK: AI Analysis Results
+    if (frustrationLevel >= thresholds.minimumFrustrationLevel && confidenceScore >= thresholds.minimumConfidence) {
       
-      console.log('🚨 [FrustrationAgent] ESCALATION RECOMMENDED!');
-      console.log(`📋 Reason: ${escalationReason}`);
+      // ✅ AI DETECTED HIGH FRUSTRATION - Now verify with contextual support
+      const supportingFactors = [];
+      
+      if (contextFactors.hasSwearing) supportingFactors.push('профанизм');
+      if (contextFactors.repeatedQuestions) supportingFactors.push('повторные вопросы');
+      if (contextFactors.hasExcessiveExclamations) supportingFactors.push('избыточные восклицания');
+      if (contextFactors.hasAllCaps) supportingFactors.push('заглавные буквы');
+      if (contextFactors.negativeKeywordsCount >= 2) supportingFactors.push(`${contextFactors.negativeKeywordsCount} негативных слов`);
+      
+      // 🚨 ESCALATE: AI confirms high frustration + at least some supporting evidence
+      if (supportingFactors.length > 0 || triggerPhrases.length >= thresholds.minimumTriggers) {
+        shouldEscalate = true;
+        escalationReason = `ИИ-анализ показал высокую фрустрацию (${frustrationLevel.toFixed(2)}) с уверенностью ${confidenceScore.toFixed(2)}. Поддерживающие факторы: ${supportingFactors.join(', ')}. Триггеры: ${triggerPhrases.join(', ')}`;
+        
+        console.log('🚨 [FrustrationAgent] ESCALATION RECOMMENDED BY AI!');
+        console.log(`📋 AI Reasoning: ${aiAnalysis.reasoning}`);
+        console.log(`🔍 Supporting factors: ${supportingFactors.join(', ')}`);
+      } else {
+        console.log(`⚡ [Safety] AI detected high frustration but no supporting contextual evidence`);
+        escalationReason = `AI detected frustration but insufficient supporting evidence`;
+      }
+      
+    } else {
+      // 📊 Log why escalation was NOT triggered
+      if (frustrationLevel < thresholds.minimumFrustrationLevel) {
+        console.log(`⚡ [Safety] AI frustration level ${frustrationLevel.toFixed(2)} below threshold ${thresholds.minimumFrustrationLevel}`);
+      }
+      if (confidenceScore < thresholds.minimumConfidence) {
+        console.log(`⚡ [Safety] AI confidence ${confidenceScore.toFixed(2)} below threshold ${thresholds.minimumConfidence}`);
+      }
     }
 
     return {
@@ -363,7 +435,11 @@ Analyze the user's frustration level in the current message, considering the con
         sessionDuration: 0,
         messageCount: 0,
         negativeKeywordsCount: 0,
-        hasSwearing: false
+        hasSwearing: false,
+        hasExcessiveExclamations: false,
+        hasAllCaps: false,
+        exclamationCount: 0,
+        allCapsWords: []
       },
       shouldEscalate: false, // NEVER escalate on error
       escalationReason: 'Analysis error - escalation blocked for safety reasons'

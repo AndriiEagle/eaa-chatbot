@@ -2,7 +2,7 @@ import React, { CSSProperties } from 'react';
 import { SessionsListProps } from '../types';
 
 /**
- * Компонент для отображения списка сессий чата
+ * Component for displaying chat sessions list
  */
 const SessionsList: React.FC<SessionsListProps> = ({
   sessions,
@@ -11,7 +11,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
   onDeleteSession,
   onCreateNewSession
 }) => {
-  // Форматирование даты
+  // Date formatting
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Recently';
     

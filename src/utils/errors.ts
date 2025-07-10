@@ -3,8 +3,8 @@
  * Replaces catch (error: any) with type-safe error handling
  */
 
-import { logger } from './logger';
-import { ApplicationError, ErrorDetails } from '../types/strict.types';
+import { logger } from './logger.js';
+import { ApplicationError, ErrorDetails } from '../types/strict.types.js';
 
 // Base application error class
 export class AppError extends Error {

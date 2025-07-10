@@ -1,4 +1,5 @@
 import { chatMemory } from '../utils/memory/index.js';
+import { getContext } from '../utils/memory/chatMemoryManager.js';
 import { logger } from '../utils/logger.js';
 
 /**
@@ -13,7 +14,7 @@ export class MemoryService {
     logger.info('Getting context for request', { userId, sessionId });
     
     try {
-      return await chatMemory.createContextForRequest?.(userId, sessionId, question) || '';
+      return await getContext(userId, sessionId);
     } catch (error) {
       logger.error('Error getting context', { error, userId, sessionId });
       return '';

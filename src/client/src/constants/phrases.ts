@@ -1,32 +1,32 @@
-// Фразы для индикатора загрузки
+// Loading indicator phrases
 export const loaderPhrases = [
-  '⚙️ Грею извилины, потерпи.',
-  '🧠 Секунду, консультируюсь с сатаной.',
-  '📡 Ловлю сигнал из преисподней...',
-  '🕳 Подбираю слова, чтоб тебе стало неловко.',
-  '🧬 Генерирую ересь на молекулярном уровне.',
-  '⏳ Твоя мать ждала тебя 9 месяцев, подожди и ты.',
-  '💉 Подмешиваю токсин остроумия.',
-  '💀 Обрабатываю данные, как будто ты что-то стоящее сказал.',
-  '🦴 Шучу, я уже всё знаю, просто драму нагнетаю.',
-  '⚰️ Бот думает... А ты пока подумай, зачем ты живёшь.'
+  '⚙️ Warming up my brain, please wait.',
+  '🧠 One second, consulting with Satan.',
+  '📡 Catching signal from hell...',
+  '🕳 Choosing words to make you uncomfortable.',
+  '🧬 Generating heresy at molecular level.',
+  '⏳ Your mother waited 9 months for you, now you wait.',
+  '💉 Mixing toxin of wit.',
+  '💀 Processing data as if you said something worthwhile.',
+  '🦴 Just kidding, I already know everything, just building drama.',
+  '⚰️ Bot is thinking... Meanwhile, think about why you exist.'
 ];
 
-// Фразы для уведомления о копировании
+// Copy notification phrases
 export const copyPhrases = [
-  '📎 Выдаю базу этому кожаному мешку.',
-  '🧠 Клонирование завершено, жалкое создание.',
-  '🎯 Да, ты нажал. Великий ты мой гений!',
-  '💉 Впрыснул тебе истину, держись.',
-  '📤 Твоё эго уже вставило это в резюме.',
-  '🦍 Нажал? Молодец, шимпанзе с моторикой!',
-  '📦 Унёс в пещеру, хозяин.',
-  '💾 Записал на дискета из ада.',
-  '📎 Ну вот, ещё один байт в пользу идиократии.',
-  '🧨 Копия есть. Мозгов всё так же нет.'
+  '📎 Delivering knowledge to this leather bag.',
+  '🧠 Cloning completed, pathetic creature.',
+  '🎯 Yes, you clicked. Great genius you are!',
+  '💉 Injected you with truth, hold on.',
+  '📤 Your ego already put this in resume.',
+  '🦍 Clicked? Good job, chimp with motor skills!',
+  '📦 Carried to cave, master.',
+  '💾 Saved on hell\'s floppy disk.',
+  '📎 Well, another byte in favor of idiocracy.',
+  '🧨 Copy done. Still no brains though.'
 ];
 
-// Настройки по умолчанию
+// Default settings
 export const defaultSettings = {
   datasetId: localStorage.getItem('dataset_id') || '',
   threshold: parseFloat(localStorage.getItem('similarity_threshold') || '0.7'),

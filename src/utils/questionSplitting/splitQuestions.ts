@@ -112,11 +112,11 @@ export async function smartSplitQuestions(input: string): Promise<string[]> {
  * @returns Array of semantically split questions
  */
 export async function semanticSplitQuestions(input: string): Promise<string[]> {
-  const splitPrompt = `Разбей этот текст на уникальные, не дублирующие друга друга вопросы. Каждый вопрос должен быть отдельным элементом в результирующем массиве. Верни только JSON массив строк, без комментариев.\n\nВНИМАНИЕ: Если текст содержит несколько вопросов, обязательно разбей их, даже если они связаны по смыслу. Будь внимателен к вопросительным знакам и смысловым разделениям.`;
+  const splitPrompt = `Break this text into unique, non-duplicating questions. Each question should be a separate element in the resulting array. Return only a JSON array of strings, without comments.\n\nIMPORTANT: If the text contains multiple questions, be sure to break them down, even if they are related in meaning. Pay attention to question marks and semantic divisions.`;
   
   const messages: ChatCompletionMessageParam[] = [
-    { role: 'system', content: 'Ты — ассистент, который помогает разбивать длинные пользовательские запросы на уникальные вопросы.' },
-    { role: 'user', content: `${splitPrompt}\n\nТекст: ${input}` }
+    { role: 'system', content: 'You are an assistant that helps break down long user queries into unique questions.' },
+    { role: 'user', content: `${splitPrompt}\n\nText: ${input}` }
   ];
   
   console.log('🔍 [DEBUG] Sending request to GPT for semantic splitting');

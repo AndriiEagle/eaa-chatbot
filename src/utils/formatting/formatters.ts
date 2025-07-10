@@ -3,7 +3,7 @@
  */
 
 // Import proper types for better type safety
-import { isString, isObject, isArray } from '../../types/strict.types';
+import { isString, isObject, isArray } from '../../types/strict.types.js';
 
 // Helper function to safely check if object has property
 function hasProperty<T extends object, K extends PropertyKey>(obj: T, prop: K): obj is T & Record<K, unknown> {
@@ -270,13 +270,8 @@ export function formatSourcesMetadata(
       }
     }
     
-    // Добавляем релевантность в заголовок, если ее нет
-    if (title.indexOf('%') === -1 && chunk.similarity) {
-      const relevance = Math.round(chunk.similarity * 100);
-      if (relevance > 75) {
-        title = `${title} (релевантность ${relevance}%)`;
-      }
-    }
+    // Релевантность отображается отдельно в SourcesList компоненте
+    // Не добавляем ее в заголовок чтобы избежать дублирования
     
     return {
       title, // Заголовок для отображения

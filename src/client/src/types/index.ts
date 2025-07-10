@@ -86,4 +86,5 @@ export interface MessageBubbleProps {
   formatTime: (ms: number) => string;
   getRelevanceColor: (score: number) => string;
   onSelectSuggestion: (question: string) => void;
+  loading?: boolean;
 } 

@@ -1,11 +1,11 @@
 import OpenAI from 'openai';
-import { SuggestionRepository } from '../../repositories/suggestion.repository';
-import { AIUserPersonaAnalyzer } from './analyzers/ai-user-persona.analyzer';
-import { AIBehaviorPatternAnalyzer } from './analyzers/ai-behavior-pattern.analyzer';
-import { AIFrustrationAnalyzer } from './analyzers/ai-frustration.analyzer';
-import { BusinessMaturityAnalyzer } from './analyzers/business-maturity.analyzer';
-import { ConversationStageAnalyzer } from './analyzers/conversation-stage.analyzer';
-import { NeedsPredictor } from './analyzers/needs.predictor';
+import { SuggestionRepository } from '../../repositories/suggestion.repository.js';
+import { AIUserPersonaAnalyzer } from './analyzers/ai-user-persona.analyzer.js';
+import { AIBehaviorPatternAnalyzer } from './analyzers/ai-behavior-pattern.analyzer.js';
+import { AIFrustrationAnalyzer } from './analyzers/ai-frustration.analyzer.js';
+import { BusinessMaturityAnalyzer } from './analyzers/business-maturity.analyzer.js';
+import { ConversationStageAnalyzer } from './analyzers/conversation-stage.analyzer.js';
+import { NeedsPredictor } from './analyzers/needs.predictor.js';
 import { 
   RevolutionaryContext, 
   SmartSuggestion, 
@@ -14,7 +14,7 @@ import {
   FrustrationProfile, 
   ConversationStage,
   PredictedNeed
-} from './suggestion.types';
+} from './suggestion.types.js';
 
 export interface SuggestionRequest {
   userId: string;

@@ -1,7 +1,7 @@
 /**
  * 🎤 Advanced Whisper Voice Processing Service
  * State-of-the-art speech processing with chunking, noise reduction, and optimization
- * Передовая обработка речи с разбивкой на чанки, шумоподавлением и оптимизацией
+ * Advanced speech processing with chunking, noise suppression and optimization
  */
 
 import React from 'react';
@@ -108,7 +108,7 @@ class WhisperAdvancedProcessor {
 
   /**
    * Process long-form audio with intelligent chunking
-   * Обработка длинного аудио с умной разбивкой на части
+   * Processing long audio with intelligent chunking
    */
   async processLongAudio(
     audioBlob: Blob,
@@ -119,7 +119,7 @@ class WhisperAdvancedProcessor {
     this.isProcessing = true;
 
     try {
-      // Stage 1: Preprocess audio - Стадия 1: Предобработка аудио
+      // Stage 1: Preprocess audio
       onProgress?.({
         stage: 'preprocessing',
         progress: 10,
@@ -128,7 +128,7 @@ class WhisperAdvancedProcessor {
 
       const preprocessedAudio = await this.preprocessAudio(audioBlob, options);
       
-      // Stage 2: Intelligent chunking - Стадия 2: Умная разбивка
+      // Stage 2: Intelligent chunking
       onProgress?.({
         stage: 'chunking',
         progress: 20
@@ -136,7 +136,7 @@ class WhisperAdvancedProcessor {
 
       const chunks = await this.intelligentChunking(preprocessedAudio, options);
       
-      // Stage 3: Parallel transcription - Стадия 3: Параллельная транскрипция
+      // Stage 3: Parallel transcription
       onProgress?.({
         stage: 'transcription',
         progress: 30,
@@ -157,7 +157,7 @@ class WhisperAdvancedProcessor {
         }
       );
 
-      // Stage 4: Post-processing and assembly - Стадия 4: Постобработка и сборка
+      // Stage 4: Post-processing and assembly
       onProgress?.({
         stage: 'postprocessing',
         progress: 95
@@ -195,7 +195,6 @@ class WhisperAdvancedProcessor {
 
   /**
    * Real-time voice processing for live conversations
-   * Обработка голоса в реальном времени для живых разговоров
    */
   async processRealTime(
     audioStream: MediaStream,
@@ -214,7 +213,7 @@ class WhisperAdvancedProcessor {
         audioChunks.push(event.data);
         
         // Process intermediate results for real-time feedback
-        // Обработка промежуточных результатов для обратной связи в реальном времени
+        // Process interim results for real-time feedback
         if (audioChunks.length >= 3) { // Process every 3 chunks
           const combinedBlob = new Blob(audioChunks.slice(-3), { type: 'audio/webm' });
           
@@ -246,7 +245,7 @@ class WhisperAdvancedProcessor {
     };
 
     // Start recording with optimal chunk size
-    // Начинаем запись с оптимальным размером чанка
+    // Start recording with optimal chunk size
     mediaRecorder.start(1000); // 1 second chunks
     isRecording = true;
 
@@ -262,7 +261,6 @@ class WhisperAdvancedProcessor {
 
   /**
    * Advanced audio preprocessing with noise reduction
-   * Продвинутая предобработка аудио с шумоподавлением
    */
   private async preprocessAudio(
     audioBlob: Blob,
@@ -282,7 +280,6 @@ class WhisperAdvancedProcessor {
     }
 
     // Normalize audio levels
-    // Нормализация уровней аудио
     processedBuffer = this.normalizeAudio(processedBuffer);
 
     return processedBuffer;
@@ -290,7 +287,6 @@ class WhisperAdvancedProcessor {
 
   /**
    * Intelligent audio chunking based on speech patterns
-   * Умная разбивка аудио на основе речевых паттернов
    */
   private async intelligentChunking(
     audioBuffer: AudioBuffer,

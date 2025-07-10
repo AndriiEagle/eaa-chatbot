@@ -5,10 +5,10 @@ import { ChevronDown, ChevronUp } from 'lucide-react';
 
 const INITIAL_VISIBLE_SOURCES = 3;
 /**
- * Компонент для отображения списка источников с их релевантностью и дополнительной информацией
+ * Component for displaying list of sources with their relevance and additional information
  */
 const SourcesList: React.FC<SourcesListProps> = ({ sources, containerStyles }) => {
-  // Состояние для хранения ID источника, над которым наведен курсор
+  // State for storing ID of source being hovered over
   const [hoveredSourceId, setHoveredSourceId] = useState<string | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -18,8 +18,8 @@ const SourcesList: React.FC<SourcesListProps> = ({ sources, containerStyles }) =
   
   const visibleSources = isExpanded ? sources : sources.slice(0, INITIAL_VISIBLE_SOURCES);
 
-  // Логируем для отладки
-  console.log(`[SourcesList] Отображаю ${sources.length} источников:`, sources);
+  // Log for debugging
+  console.log(`[SourcesList] Displaying ${sources.length} sources:`, sources);
 
   return (
     <div 
@@ -89,7 +89,7 @@ const SourcesList: React.FC<SourcesListProps> = ({ sources, containerStyles }) =
               </div>
             </div>
             
-            {/* Отображаем превью источника при наведении */}
+            {/* Display source preview on hover */}
             {hoveredSourceId === source.id && source.text_preview && (
               <div style={{
                 backgroundColor: '#2d3748',
@@ -136,7 +136,7 @@ const SourcesList: React.FC<SourcesListProps> = ({ sources, containerStyles }) =
             fontSize: '0.75rem'
           }}
         >
-          {isExpanded ? 'Свернуть' : `Показать ещё ${sources.length - INITIAL_VISIBLE_SOURCES}`}
+          {isExpanded ? 'Collapse' : `Show ${sources.length - INITIAL_VISIBLE_SOURCES} more`}
           {isExpanded 
             ? <ChevronUp size={14} style={{ marginLeft: '0.25rem' }} /> 
             : <ChevronDown size={14} style={{ marginLeft: '0.25rem' }} />

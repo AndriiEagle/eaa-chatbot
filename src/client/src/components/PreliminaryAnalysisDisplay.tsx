@@ -2,37 +2,37 @@ import React from 'react';
 import ReactMarkdown, { Options } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { PreliminaryAnalysis } from '../types/index';
-import SourceHighlighter from './SourceHighlighter'; // Предполагаем, что он нужен для консистентности
+import SourceHighlighter from './SourceHighlighter'; // Assuming it's needed for consistency
 
 interface PreliminaryAnalysisDisplayProps {
   analysisData: PreliminaryAnalysis;
-  // Можно добавить пропс для передачи функции onSelectSuggestion, если нужна интерактивность
+  // Can add prop for passing onSelectSuggestion function if interactivity is needed
   // onSelectSuggestion: (suggestion: string) => void;
 }
 
 const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({ analysisData }) => {
   const formatAnalysisToString = (pa: PreliminaryAnalysis): string => {
-    let formattedText = `##### 🔍 Предварительный анализ\n`; // Используем Markdown для заголовка
+    let formattedText = `##### 🔍 Preliminary Analysis\n`; // Using Markdown for title
     if (pa.completeness !== undefined) {
-      formattedText += `*(на основе ${Math.round(pa.completeness * 100)}% имеющихся данных)*\n\n`;
+      formattedText += `*(based on ${Math.round(pa.completeness * 100)}% of available data)*\n\n`;
     }
 
-    if (pa.businessType) formattedText += `- **Тип бизнеса**: ${pa.businessType}\n`;
-    if (pa.businessSize) formattedText += `- **Размер компании**: ${pa.businessSize}\n`;
+    if (pa.businessType) formattedText += `- **Business Type**: ${pa.businessType}\n`;
+    if (pa.businessSize) formattedText += `- **Company Size**: ${pa.businessSize}\n`;
     if (pa.summary && pa.summary.trim() !== '') formattedText += `\n${pa.summary.trim()}\n`;
 
     if (pa.humanReadableMissingData && pa.humanReadableMissingData.length > 0) {
-      formattedText += `\n**Для более точного ответа, пожалуйста, уточните**:\n`;
+      formattedText += `\n**For a more accurate answer, please clarify**:\n`;
       pa.humanReadableMissingData.forEach(item => {
         formattedText += `- ${item}\n`;
       });
     }
 
-    // Оставим специфические вопросы для основного блока suggestions, если они там используются
-    // Либо можно добавить их сюда, если они должны быть частью этого блока
+    // Leave specific questions for main suggestions block if they're used there
+    // Or can add them here if they should be part of this block
     /*
     if (pa.specificQuestions && pa.specificQuestions.length > 0) {
-      formattedText += `\n**Уточняющие вопросы**:\n`;
+      formattedText += `\n**Clarifying Questions**:\n`;
       pa.specificQuestions.forEach((question, index) => {
         formattedText += `${index + 1}. ${question}\n`;
       });
@@ -46,7 +46,7 @@ const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({
 
   const styles = {
     container: {
-      backgroundColor: '#2E2E2E', // Немного другой фон для выделения
+      backgroundColor: '#2E2E2E', // Slightly different background for highlighting
       padding: '12px',
       borderRadius: '8px',
       marginBottom: '10px',
@@ -70,7 +70,7 @@ const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({
     },
   };
 
-  // Определение компонентов для ReactMarkdown вынесем для читаемости
+  // Define components for ReactMarkdown for readability
   const markdownComponents: Options['components'] = {
     p: ({ children }) => <p style={{ margin: '0 0 8px 0' }}><SourceHighlighter>{children}</SourceHighlighter></p>,
     li: ({ children }) => <li style={{ marginLeft: '20px' }}><SourceHighlighter>{children}</SourceHighlighter></li>,

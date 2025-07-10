@@ -262,7 +262,6 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
   // State для интерфейса
   const [showSettings, setShowSettings] = useState(false);
   const [showTranscript, setShowTranscript] = useState(true);
-  const [isRecording, setIsRecording] = useState(false);
 
   // State для аудиовизуализации
   const [audioVisualization, setAudioVisualization] = useState<AudioVisualization>({
