@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactMarkdown, { Options } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import type { Components } from 'react-markdown';
 import { PreliminaryAnalysis } from '../types/index';
 import SourceHighlighter from './SourceHighlighter'; // Assuming it's needed for consistency
 
@@ -71,11 +72,11 @@ const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({
   };
 
   // Define components for ReactMarkdown for readability
-  const markdownComponents: Options['components'] = {
-    p: ({ children }) => <p style={{ margin: '0 0 8px 0' }}><SourceHighlighter>{children}</SourceHighlighter></p>,
-    li: ({ children }) => <li style={{ marginLeft: '20px' }}><SourceHighlighter>{children}</SourceHighlighter></li>,
-    h5: ({ children }) => <h5 style={{ marginTop: '0', marginBottom: '8px' }}><SourceHighlighter>{children}</SourceHighlighter></h5>,
-    strong: ({ children }) => <strong><SourceHighlighter>{children}</SourceHighlighter></strong>,
+  const markdownComponents: Components = {
+    p: ({ children }: { children?: React.ReactNode }) => <p style={{ margin: '0 0 8px 0' }}><SourceHighlighter>{children}</SourceHighlighter></p>,
+    li: ({ children }: { children?: React.ReactNode }) => <li style={{ marginLeft: '20px' }}><SourceHighlighter>{children}</SourceHighlighter></li>,
+    h5: ({ children }: { children?: React.ReactNode }) => <h5 style={{ marginTop: '0', marginBottom: '8px' }}><SourceHighlighter>{children}</SourceHighlighter></h5>,
+    strong: ({ children }: { children?: React.ReactNode }) => <strong><SourceHighlighter>{children}</SourceHighlighter></strong>,
   };
 
   return (

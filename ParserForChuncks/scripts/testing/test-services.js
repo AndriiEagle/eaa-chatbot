@@ -1,5 +1,5 @@
-import { createEmbedding } from './dist/services/openaiService.js';
-import { findRelevantChunks } from './dist/services/supabaseService.js';
+import { createEmbedding } from '../../src/services/openaiService.ts';
+import { findRelevantChunks } from '../../src/services/supabaseService.ts';
 
 async function testServices() {
     console.log('🧪 ТЕСТИРОВАНИЕ КРИТИЧЕСКИХ СЕРВИСОВ...\n');
