@@ -484,16 +484,16 @@ const MessageBubble: React.FC<MessageBubbleProps> = React.memo(({
                       style={{ textDecoration: 'underline', color: '#93c5fd' }}
                     />
                   ),
-                  p: ({ children }) => <p><SourceHighlighter>{children}</SourceHighlighter></p>,
-                  li: ({ children }) => <li><SourceHighlighter>{children}</SourceHighlighter></li>,
-                  h1: ({ children }) => <h1><SourceHighlighter>{children}</SourceHighlighter></h1>,
-                  h2: ({ children }) => <h2><SourceHighlighter>{children}</SourceHighlighter></h2>,
-                  h3: ({ children }) => <h3><SourceHighlighter>{children}</SourceHighlighter></h3>,
-                  h4: ({ children }) => <h4><SourceHighlighter>{children}</SourceHighlighter></h4>,
-                  h5: ({ children }) => <h5><SourceHighlighter>{children}</SourceHighlighter></h5>,
-                  h6: ({ children }) => <h6><SourceHighlighter>{children}</SourceHighlighter></h6>,
-                  blockquote: ({ children }) => <blockquote><SourceHighlighter>{children}</SourceHighlighter></blockquote>,
-                  strong: ({ children }) => <strong><SourceHighlighter>{children}</SourceHighlighter></strong>,
+                  p: ({ children }: { children?: React.ReactNode }) => <p><SourceHighlighter>{children}</SourceHighlighter></p>,
+                  li: ({ children }: { children?: React.ReactNode }) => <li><SourceHighlighter>{children}</SourceHighlighter></li>,
+                  h1: ({ children }: { children?: React.ReactNode }) => <h1><SourceHighlighter>{children}</SourceHighlighter></h1>,
+                  h2: ({ children }: { children?: React.ReactNode }) => <h2><SourceHighlighter>{children}</SourceHighlighter></h2>,
+                  h3: ({ children }: { children?: React.ReactNode }) => <h3><SourceHighlighter>{children}</SourceHighlighter></h3>,
+                  h4: ({ children }: { children?: React.ReactNode }) => <h4><SourceHighlighter>{children}</SourceHighlighter></h4>,
+                  h5: ({ children }: { children?: React.ReactNode }) => <h5><SourceHighlighter>{children}</SourceHighlighter></h5>,
+                  h6: ({ children }: { children?: React.ReactNode }) => <h6><SourceHighlighter>{children}</SourceHighlighter></h6>,
+                  blockquote: ({ children }: { children?: React.ReactNode }) => <blockquote><SourceHighlighter>{children}</SourceHighlighter></blockquote>,
+                  strong: ({ children }: { children?: React.ReactNode }) => <strong><SourceHighlighter>{children}</SourceHighlighter></strong>,
                 }}
               >
                 {item.answer}

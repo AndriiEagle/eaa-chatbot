@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactMarkdown, { Options } from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Components } from 'react-markdown';
 import { PreliminaryAnalysis } from '../types/index';
