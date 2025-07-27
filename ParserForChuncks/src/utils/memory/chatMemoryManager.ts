@@ -53,6 +53,9 @@ export class ChatMemoryManager {
     this.messageManager = new MessageManager(this.supabase, this.openai);
     this.factManager = new FactManager(this.supabase, this.openai);
 
+    // 🎯 CRITICAL: Set FactManager in MessageManager for automatic fact extraction
+    this.messageManager.setFactManager(this.factManager);
+
     // Создаем SummaryManager и передаем ему callback-функции
     this.summaryManager = new SummaryManager(
       this.supabase,
@@ -63,6 +66,7 @@ export class ChatMemoryManager {
 
     this.initialized = true;
     console.log('✅ [MEMORY] ChatMemoryManager successfully initialized');
+    console.log('🎯 [MEMORY] Automatic fact extraction enabled for user messages');
   }
 
   /**
