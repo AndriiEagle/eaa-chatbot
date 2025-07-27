@@ -49,7 +49,11 @@ export class FrustrationDetectionAgent {
     minimumTriggers: 1            // Lowered from 2 - AI analysis is primary
   };
 
-  constructor(private customThresholds?: Partial<SafetyThresholds>) {}
+  private customThresholds?: Partial<SafetyThresholds>;
+
+  constructor(customThresholds?: Partial<SafetyThresholds>) {
+    this.customThresholds = customThresholds;
+  }
 
   /**
    * 🧠 MAIN FRUSTRATION ANALYSIS METHOD
