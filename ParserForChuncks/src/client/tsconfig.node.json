@@ -5,13 +5,9 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "typeRoots": ["./node_modules/@types"],
-
     /* Bundler mode */
-    "moduleResolution": "node",
-    "allowImportingTsExtensions": false,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
