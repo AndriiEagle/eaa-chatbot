@@ -41,6 +41,7 @@
     "start": "cd ParserForChuncks && npm run start",
     "dev": "cd ParserForChuncks && npm run dev",
     "test": "cd ParserForChuncks && npm run test",
+    "test:integration": "cd ParserForChuncks && npm run test:integration",
     "build-and-run": "cd ParserForChuncks && npm run build-and-run",
     "setup": "npm run install && cp env.example ParserForChuncks/.env && echo 'Please edit ParserForChuncks/.env with your API keys'",
     "clean": "cd ParserForChuncks && rm -rf dist node_modules && npm install --legacy-peer-deps",
