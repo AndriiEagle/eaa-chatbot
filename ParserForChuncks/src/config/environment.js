@@ -1,6 +1,14 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
+/**
+ * @typedef {Object} EnvVariables
+ * @property {string} OPENAI_API_KEY
+ * @property {string} SUPABASE_URL
+ * @property {string} SUPABASE_SERVICE_KEY
+ * @property {string | undefined} [PORT]
+ */
+
 // Schema definition for environment variables
 const envSchema = z.object({
   OPENAI_API_KEY: z.string().min(1, 'OpenAI API key is required'),
@@ -12,7 +20,12 @@ const envSchema = z.object({
 // Function to provide clear error messages when environment variables are missing
 function validateEnvironmentVariables() {
   // Skip validation in test environment but provide dummy keys
-  if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
+  if (
+    process.env.NODE_ENV === 'test' ||
+    process.env.VITEST ||
+    process.env.CI === 'true' ||
+    process.env.SKIP_ENV_VALIDATION === 'true'
+  ) {
     return {
       OPENAI_API_KEY: process.env.OPENAI_API_KEY || 'test-openai-key',
       SUPABASE_URL: process.env.SUPABASE_URL || 'http://test.supabase.co',
@@ -60,7 +73,8 @@ function validateEnvironmentVariables() {
 }
 
 // Validate environment variables
-export const env = validateEnvironmentVariables();
+/** @type {EnvVariables} */
+export const env = /** @type {EnvVariables} */ (validateEnvironmentVariables());
 
 // Configuration settings
 export const PORT = Number(env.PORT ?? 3000);

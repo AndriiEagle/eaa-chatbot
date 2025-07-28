@@ -12,7 +12,12 @@ const envSchema = z.object({
 let env;
 
 // Skip validation in test environment for consistency
-if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
+if (
+  process.env.NODE_ENV === 'test' ||
+  process.env.VITEST ||
+  process.env.CI === 'true' ||
+  process.env.SKIP_ENV_VALIDATION === 'true'
+) {
   console.log('🧪 Skipping environment variable validation in test mode.');
   env = {
     OPENAI_API_KEY: 'test',

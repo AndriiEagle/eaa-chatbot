@@ -1,0 +1,4 @@
+{
+  "extends": "./ParserForChuncks/tsconfig.json",
+  "include": ["ParserForChuncks/src/**/*"]
+} 
