@@ -16,12 +16,20 @@
     "allowJs": true,
     "checkJs": true
   },
-  "include": ["src", "types"],
+  "include": [
+    "src/server.ts",
+    "src/config/**/*",
+    "src/services/**/*",
+    "src/controllers/**/*",
+    "src/types/**/*",
+    "src/utils/**/*",
+    "types/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",
+    "src/client",
     "src/client/**/*",
-    "ParserForChuncks/**/*",
-    "src/utils/memory/**/*"
+    "ParserForChuncks/**/*"
   ]
 } 
