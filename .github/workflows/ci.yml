@@ -31,11 +31,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ParserForChuncks/package-lock.json
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: npm ci
+        run: npm install --legacy-peer-deps
         
       - name: Run security audit
         working-directory: ParserForChuncks
@@ -61,17 +60,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ParserForChuncks/package-lock.json
           
       - name: Install dependencies
         working-directory: ParserForChuncks
         run: |
-          npm ci
-          cd src/client && npm ci
+          npm install --legacy-peer-deps
+          cd src/client && npm install
         
       - name: Type checking
         working-directory: ParserForChuncks
-        run: npm run type-check
+        run: npm run typecheck
         
       - name: Lint code
         working-directory: ParserForChuncks
@@ -98,11 +96,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ParserForChuncks/package-lock.json
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: npm ci
+        run: npm install --legacy-peer-deps
         
       - name: Create test environment
         working-directory: ParserForChuncks
@@ -143,13 +140,12 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ParserForChuncks/package-lock.json
           
       - name: Install dependencies
         working-directory: ParserForChuncks
         run: |
-          npm ci
-          cd src/client && npm ci
+          npm install --legacy-peer-deps
+          cd src/client && npm install
         
       - name: Build application
         working-directory: ParserForChuncks
@@ -186,11 +182,10 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
-          cache-dependency-path: ParserForChuncks/package-lock.json
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: npm ci
+        run: npm install --legacy-peer-deps
         
       - name: Download build artifacts
         uses: actions/download-artifact@v4
@@ -296,7 +291,7 @@ jobs:
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: npm ci
+        run: npm install --legacy-peer-deps
         
       - name: Publish to NPM
         working-directory: ParserForChuncks
