@@ -9,56 +9,51 @@ const SessionsList: React.FC<SessionsListProps> = ({
   activeSessionId,
   onSelectSession,
   onDeleteSession,
-  onCreateNewSession
+  onCreateNewSession,
 }) => {
   // Date formatting
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'Recently';
-    
+
     const date = new Date(dateString);
     const now = new Date();
     const diffMs = now.getTime() - date.getTime();
     const diffMinutes = Math.floor(diffMs / (1000 * 60));
-    
+
     if (diffMinutes < 1) return 'Just now';
     if (diffMinutes < 60) return `${diffMinutes} min. ago`;
-    
+
     const diffHours = Math.floor(diffMinutes / 60);
     if (diffHours < 24) return `${diffHours} h. ago`;
-    
+
     return date.toLocaleDateString('ru-RU', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
-  
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
         <h2 style={styles.title}>Session History</h2>
-        <button
-          style={styles.newButton}
-          onClick={onCreateNewSession}
-        >
+        <button style={styles.newButton} onClick={onCreateNewSession}>
           + New session
         </button>
       </div>
-      
+
       <div style={styles.sessionsList}>
         {sessions.length === 0 ? (
-          <div style={styles.emptyState}>
-            No saved sessions
-          </div>
+          <div style={styles.emptyState}>No saved sessions</div>
         ) : (
           sessions.map(session => (
             <div
               key={session.id}
               style={{
                 ...styles.sessionItem,
-                ...(session.id === activeSessionId ? styles.activeSession : {})
+                ...(session.id === activeSessionId ? styles.activeSession : {}),
               }}
               onClick={() => onSelectSession(session.id)}
             >
@@ -69,7 +64,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
                   </span>
                   <button
                     style={styles.deleteButton}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       onDeleteSession(session.id);
                     }}
@@ -78,7 +73,7 @@ const SessionsList: React.FC<SessionsListProps> = ({
                     ✕
                   </button>
                 </div>
-                
+
                 <div style={styles.sessionSummary}>
                   {session.summary?.summary ? (
                     session.summary.summary
@@ -86,16 +81,19 @@ const SessionsList: React.FC<SessionsListProps> = ({
                     <span style={styles.noSummary}>Summary not created</span>
                   )}
                 </div>
-                
-                {session.summary?.key_topics && session.summary.key_topics.length > 0 && (
-                  <div style={styles.topicsList}>
-                    {session.summary.key_topics.slice(0, 3).map((topic, index) => (
-                      <span key={index} style={styles.topicTag}>
-                        {topic}
-                      </span>
-                    ))}
-                  </div>
-                )}
+
+                {session.summary?.key_topics &&
+                  session.summary.key_topics.length > 0 && (
+                    <div style={styles.topicsList}>
+                      {session.summary.key_topics
+                        .slice(0, 3)
+                        .map((topic, index) => (
+                          <span key={index} style={styles.topicTag}>
+                            {topic}
+                          </span>
+                        ))}
+                    </div>
+                  )}
               </div>
             </div>
           ))
@@ -121,7 +119,7 @@ const styles = {
     flexDirection: 'column',
     overflow: 'hidden',
   } as CSSProperties,
-  
+
   header: {
     padding: '16px',
     borderBottom: '1px solid #4b5563',
@@ -129,14 +127,14 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
   } as CSSProperties,
-  
+
   title: {
     margin: 0,
     fontSize: '16px',
     fontWeight: 'bold',
     color: '#fff',
   } as CSSProperties,
-  
+
   newButton: {
     background: '#3b82f6',
     color: '#fff',
@@ -147,20 +145,20 @@ const styles = {
     cursor: 'pointer',
     transition: 'background-color 0.2s',
   } as CSSProperties,
-  
+
   sessionsList: {
     overflowY: 'auto',
     flex: 1,
     padding: '8px',
   } as CSSProperties,
-  
+
   emptyState: {
     padding: '16px',
     textAlign: 'center',
     color: '#9ca3af',
     fontStyle: 'italic',
   } as CSSProperties,
-  
+
   sessionItem: {
     background: '#23272A',
     borderRadius: '6px',
@@ -169,28 +167,28 @@ const styles = {
     transition: 'all 0.2s',
     borderLeft: '3px solid transparent',
   } as CSSProperties,
-  
+
   activeSession: {
     borderLeftColor: '#3b82f6',
     background: '#2d3748',
   } as CSSProperties,
-  
+
   sessionContent: {
     padding: '12px',
   } as CSSProperties,
-  
+
   sessionHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '8px',
   } as CSSProperties,
-  
+
   sessionDate: {
     fontSize: '12px',
     color: '#9ca3af',
   } as CSSProperties,
-  
+
   deleteButton: {
     background: 'none',
     border: 'none',
@@ -201,7 +199,7 @@ const styles = {
     borderRadius: '4px',
     transition: 'all 0.2s',
   } as CSSProperties,
-  
+
   sessionSummary: {
     fontSize: '13px',
     lineHeight: '1.4',
@@ -213,18 +211,18 @@ const styles = {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   } as CSSProperties,
-  
+
   noSummary: {
     fontStyle: 'italic',
     color: '#9ca3af',
   } as CSSProperties,
-  
+
   topicsList: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '4px',
   } as CSSProperties,
-  
+
   topicTag: {
     background: '#4b5563',
     color: '#e5e7eb',
@@ -235,4 +233,4 @@ const styles = {
   } as CSSProperties,
 };
 
-export default SessionsList; 
+export default SessionsList;

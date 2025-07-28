@@ -16,7 +16,9 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Ошибка: Не найдены переменные окружения SUPABASE_URL или SUPABASE_SERVICE_KEY');
+  console.error(
+    '❌ Ошибка: Не найдены переменные окружения SUPABASE_URL или SUPABASE_SERVICE_KEY'
+  );
   process.exit(1);
 }
 
@@ -25,19 +27,26 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 async function executeSQL() {
   try {
     // Читаем файл SQL
-    const sqlFilePath = path.resolve(__dirname, '../../sql/escalation_schema_update.sql');
+    const sqlFilePath = path.resolve(
+      __dirname,
+      '../../sql/escalation_schema_update.sql'
+    );
     const sqlContent = fs.readFileSync(sqlFilePath, 'utf8');
-    
+
     console.log('Выполняем SQL запрос для обновления схемы...');
-    
+
     // Выполняем SQL запрос через RPC
     const { error } = await supabase.rpc('exec_sql', { sql: sqlContent });
-    
+
     if (error) {
       console.error('❌ Ошибка при выполнении SQL:', error);
-      console.log('\n===== ПОПРОБУЙТЕ ВЫПОЛНИТЬ СЛЕДУЮЩИЙ SQL ЗАПРОС В РЕДАКТОРЕ SUPABASE ВРУЧНУЮ =====\n');
+      console.log(
+        '\n===== ПОПРОБУЙТЕ ВЫПОЛНИТЬ СЛЕДУЮЩИЙ SQL ЗАПРОС В РЕДАКТОРЕ SUPABASE ВРУЧНУЮ =====\n'
+      );
       console.log(sqlContent);
-      console.log('\n==================================================================================\n');
+      console.log(
+        '\n==================================================================================\n'
+      );
     } else {
       console.log('✅ SQL запрос выполнен успешно! Схема обновлена.');
     }
@@ -58,4 +67,4 @@ executeSQL()
   .catch(err => {
     console.error('Ошибка при выполнении операции:', err);
     process.exit(1);
-  }); 
+  });

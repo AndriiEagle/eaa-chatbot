@@ -71,15 +71,15 @@ export interface PreprocessResult {
   existingDataSummary?: string;
   hasSufficientData?: boolean;
   requiredData?: string[];
-  splitQuestions: string[];  // Список вопросов после разбиения сложного запроса
+  splitQuestions: string[]; // Список вопросов после разбиения сложного запроса
 }
 
 /**
  * Информация о пользователе, извлеченная из сообщений
  */
 export interface UserFact {
-  type: string;    // Тип факта (business_type, business_size, и т.д.)
-  value: string;   // Значение факта
+  type: string; // Тип факта (business_type, business_size, и т.д.)
+  value: string; // Значение факта
   confidence: number; // Уровень уверенности в факте (0-1)
   source?: string; // Источник факта (сообщение пользователя)
   timestamp?: number; // Временная метка, когда факт был извлечен
@@ -89,14 +89,14 @@ export interface UserFact {
  * Результат анализа данных о пользователе
  */
 export interface UserDataAnalysisResult {
-  completeness: number;          // Процент полноты данных от 0 до 1
-  existingData: string[];        // Имеющиеся типы данных
-  missingData: string[];         // Отсутствующие типы данных
-  businessType?: string;         // Тип бизнеса
-  businessSize?: string;         // Размер бизнеса
-  summary?: string;              // Краткая сводка данных в текстовом формате
-  specificQuestions?: string[];  // Специфические вопросы для уточнения
-  aiInstructions?: string;       // Инструкции для ИИ по дальнейшему сбору информации
+  completeness: number; // Процент полноты данных от 0 до 1
+  existingData: string[]; // Имеющиеся типы данных
+  missingData: string[]; // Отсутствующие типы данных
+  businessType?: string; // Тип бизнеса
+  businessSize?: string; // Размер бизнеса
+  summary?: string; // Краткая сводка данных в текстовом формате
+  specificQuestions?: string[]; // Специфические вопросы для уточнения
+  aiInstructions?: string; // Инструкции для ИИ по дальнейшему сбору информации
   humanReadableMissingData?: string[]; // Отсутствующие данные в человекочитаемом формате
 }
 
@@ -108,4 +108,4 @@ export interface AskRequest {
   max_chunks?: number;
   user_id?: string;
   session_id?: string;
-} 
+}

@@ -68,7 +68,7 @@ interface AISuggestionsResult {
 
 /**
  * 🤖 AI SUGGESTIONS SERVICE
- * 
+ *
  * Handles all AI-powered suggestion generation logic.
  * Moved from controller to maintain separation of concerns.
  */
@@ -79,23 +79,25 @@ export class AISuggestionsService {
     this.aiAnalyzer = new AIContextAnalyzer(openai);
   }
 
-  async generateSuggestions(request: AISuggestionsRequest): Promise<AISuggestionsResult> {
-    logger.info('Generating AI suggestions', { 
-      userId: request.userId, 
-      sessionId: request.sessionId 
+  async generateSuggestions(
+    request: AISuggestionsRequest
+  ): Promise<AISuggestionsResult> {
+    logger.info('Generating AI suggestions', {
+      userId: request.userId,
+      sessionId: request.sessionId,
     });
 
     try {
       // 📊 Get user data
       const [userFacts, sessionMessages] = await Promise.all([
         chatMemory.getUserFacts(request.userId),
-        chatMemory.getSessionMessages(request.sessionId)
+        chatMemory.getSessionMessages(request.sessionId),
       ]);
 
       // 🧠 AI context analysis
       const context = await this.aiAnalyzer.analyzeContext(
-        userFacts, 
-        sessionMessages, 
+        userFacts,
+        sessionMessages,
         request.currentQuestion || ''
       );
 
@@ -106,7 +108,12 @@ export class AISuggestionsService {
       const header = await this.aiAnalyzer.generateHeader(context);
 
       // 💾 Save analytics
-      await this.saveAnalytics(request.userId, request.sessionId, context, suggestions.length);
+      await this.saveAnalytics(
+        request.userId,
+        request.sessionId,
+        context,
+        suggestions.length
+      );
 
       return {
         suggestions,
@@ -120,25 +127,24 @@ export class AISuggestionsService {
           suggestionsBreakdown: suggestions.map(s => ({
             category: s.category,
             priority: s.priority,
-            businessValue: s.businessValue
-          }))
-        }
+            businessValue: s.businessValue,
+          })),
+        },
       };
-
     } catch (error) {
-      logger.error('Failed to generate AI suggestions', { 
+      logger.error('Failed to generate AI suggestions', {
         error: error instanceof Error ? error.message : 'Unknown error',
         userId: request.userId,
-        sessionId: request.sessionId
+        sessionId: request.sessionId,
       });
       throw error;
     }
   }
 
   private async saveAnalytics(
-    userId: string, 
-    sessionId: string, 
-    context: FullContext, 
+    userId: string,
+    sessionId: string,
+    context: FullContext,
     suggestionsCount: number
   ): Promise<void> {
     try {
@@ -150,7 +156,7 @@ export class AISuggestionsService {
         emotional_frustration: context.emotion.frustrationLevel,
         conversation_stage: context.conversation.stage,
         suggestions_count: suggestionsCount,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
       });
     } catch (error) {
       logger.warn('Failed to save analytics', { error });
@@ -160,7 +166,7 @@ export class AISuggestionsService {
 
 /**
  * 🤖 AI CONTEXT ANALYZER
- * 
+ *
  * Handles all AI-powered context analysis.
  */
 class AIContextAnalyzer {
@@ -171,8 +177,8 @@ class AIContextAnalyzer {
   }
 
   async analyzeContext(
-    userFacts: unknown[], 
-    sessionMessages: unknown[], 
+    userFacts: unknown[],
+    sessionMessages: unknown[],
     currentQuestion: string
   ): Promise<FullContext> {
     const contextPrompt = `
@@ -213,12 +219,16 @@ Return exactly this JSON structure:
       const completion = await this.openai.chat.completions.create({
         model: CHAT_MODEL,
         messages: [
-          { role: 'system', content: 'You are an expert EAA consultant analyzer. Return only valid JSON.' },
-          { role: 'user', content: contextPrompt }
+          {
+            role: 'system',
+            content:
+              'You are an expert EAA consultant analyzer. Return only valid JSON.',
+          },
+          { role: 'user', content: contextPrompt },
         ],
         temperature: 0.1,
         max_tokens: 800,
-        response_format: { type: 'json_object' }
+        response_format: { type: 'json_object' },
       });
 
       return JSON.parse(completion.choices[0].message.content || '{}');
@@ -226,10 +236,29 @@ Return exactly this JSON structure:
       logger.error('AI Context Analysis failed', { error });
       // Safe fallback
       return {
-        persona: { type: 'newcomer', confidence: 0.5, experienceLevel: 'beginner', communicationStyle: 'cautious' },
-        business: { maturityLevel: 'startup', urgencyLevel: 'moderate', complianceReadiness: 0.3, budgetSensitivity: 'high' },
-        emotion: { frustrationLevel: 0.2, confidence: 0.7, preferredApproach: 'gentle' },
-        conversation: { stage: 'discovery', completeness: 0.2, topicsFocused: [], nextLogicalSteps: [] }
+        persona: {
+          type: 'newcomer',
+          confidence: 0.5,
+          experienceLevel: 'beginner',
+          communicationStyle: 'cautious',
+        },
+        business: {
+          maturityLevel: 'startup',
+          urgencyLevel: 'moderate',
+          complianceReadiness: 0.3,
+          budgetSensitivity: 'high',
+        },
+        emotion: {
+          frustrationLevel: 0.2,
+          confidence: 0.7,
+          preferredApproach: 'gentle',
+        },
+        conversation: {
+          stage: 'discovery',
+          completeness: 0.2,
+          topicsFocused: [],
+          nextLogicalSteps: [],
+        },
       };
     }
   }
@@ -261,12 +290,16 @@ Requirements:
       const completion = await this.openai.chat.completions.create({
         model: CHAT_MODEL,
         messages: [
-          { role: 'system', content: 'You are an EAA expert generating perfect suggestions in ENGLISH only.' },
-          { role: 'user', content: suggestionsPrompt }
+          {
+            role: 'system',
+            content:
+              'You are an EAA expert generating perfect suggestions in ENGLISH only.',
+          },
+          { role: 'user', content: suggestionsPrompt },
         ],
         temperature: 0.3,
         max_tokens: 600,
-        response_format: { type: 'json_object' }
+        response_format: { type: 'json_object' },
       });
 
       const result = JSON.parse(completion.choices[0].message.content || '[]');
@@ -299,11 +332,14 @@ Return just the header text with emoji.`;
       const completion = await this.openai.chat.completions.create({
         model: CHAT_MODEL,
         messages: [
-          { role: 'system', content: 'Generate perfect suggestion headers in English.' },
-          { role: 'user', content: headerPrompt }
+          {
+            role: 'system',
+            content: 'Generate perfect suggestion headers in English.',
+          },
+          { role: 'user', content: headerPrompt },
         ],
         temperature: 0.4,
-        max_tokens: 100
+        max_tokens: 100,
       });
 
       return completion.choices[0].message.content?.trim() || 'Try asking:';
@@ -312,4 +348,4 @@ Return just the header text with emoji.`;
       return 'Try asking:';
     }
   }
-} 
+}

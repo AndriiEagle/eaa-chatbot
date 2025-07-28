@@ -17,35 +17,39 @@ export interface SearchResult {
 
 /**
  * 🎯 EMBEDDING SERVICE
- * 
+ *
  * Handles all embedding and similarity search operations.
  * Single responsibility: Vector operations and chunk retrieval.
  */
 export class EmbeddingService {
-  
   async createEmbedding(text: string): Promise<number[]> {
     logger.info('Creating embedding', { textLength: text.length });
     return await createEmbedding(text);
   }
 
   async searchSimilarChunks(
-    embedding: number[], 
-    datasetId: string, 
-    similarityThreshold: number, 
+    embedding: number[],
+    datasetId: string,
+    similarityThreshold: number,
     maxChunks: number
   ): Promise<SearchResult> {
     const embeddingTimer = createTimer();
     const searchTimer = createTimer();
-    
-    logger.info('Searching similar chunks', { 
-      datasetId, 
-      similarityThreshold, 
-      maxChunks 
+
+    logger.info('Searching similar chunks', {
+      datasetId,
+      similarityThreshold,
+      maxChunks,
     });
 
     try {
       searchTimer.reset();
-      const chunks = await findRelevantChunks(embedding, datasetId, similarityThreshold, maxChunks);
+      const chunks = await findRelevantChunks(
+        embedding,
+        datasetId,
+        similarityThreshold,
+        maxChunks
+      );
       searchTimer.stop();
 
       const sources = formatSourcesMetadata(chunks);
@@ -57,12 +61,12 @@ export class EmbeddingService {
           embedding_ms: embeddingTimer.duration,
           search_ms: searchTimer.duration,
           generate_ms: 0,
-          total_ms: embeddingTimer.duration + searchTimer.duration
-        }
+          total_ms: embeddingTimer.duration + searchTimer.duration,
+        },
       };
     } catch (error) {
       logger.error('Error in similarity search', { error });
       throw error;
     }
   }
-} 
+}

@@ -14,20 +14,35 @@ interface LoadingStage {
   progress: number;
 }
 
-const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loading, messages }) => {
+const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({
+  loading,
+  messages,
+}) => {
   const [currentStageIndex, setCurrentStageIndex] = useState(0);
   const [stages, setStages] = useState<LoadingStage[]>([
     { id: 'query', name: 'Processing query', completed: false, progress: 0 },
     { id: 'request', name: 'Sending request', completed: false, progress: 0 },
-    { id: 'search', name: 'Searching documents', completed: false, progress: 0 },
-    { id: 'generation', name: 'Generating response', completed: false, progress: 0 }
+    {
+      id: 'search',
+      name: 'Searching documents',
+      completed: false,
+      progress: 0,
+    },
+    {
+      id: 'generation',
+      name: 'Generating response',
+      completed: false,
+      progress: 0,
+    },
   ]);
 
   useEffect(() => {
     if (!loading) {
       // Reset all stages when loading stops
       setCurrentStageIndex(0);
-      setStages(prev => prev.map(stage => ({ ...stage, completed: false, progress: 0 })));
+      setStages(prev =>
+        prev.map(stage => ({ ...stage, completed: false, progress: 0 }))
+      );
       return;
     }
 
@@ -36,11 +51,11 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loading, messages }
       setStages(prev => {
         const newStages = [...prev];
         const currentStage = newStages[currentStageIndex];
-        
+
         if (currentStage && !currentStage.completed) {
           // Increase progress for current stage
           currentStage.progress = Math.min(100, currentStage.progress + 15);
-          
+
           // If stage reaches 100%, mark as completed and move to next stage
           if (currentStage.progress >= 100) {
             currentStage.completed = true;
@@ -50,7 +65,7 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loading, messages }
             }
           }
         }
-        
+
         return newStages;
       });
     }, 300); // Update every 300ms
@@ -70,7 +85,9 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loading, messages }
             searchStage.completed = true;
             searchStage.progress = 100;
             // Move to generation stage
-            const generationIndex = newStages.findIndex(s => s.id === 'generation');
+            const generationIndex = newStages.findIndex(
+              s => s.id === 'generation'
+            );
             if (generationIndex !== -1) {
               setCurrentStageIndex(generationIndex);
             }
@@ -93,7 +110,10 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loading, messages }
         <div className={styles['spinner-inner']}></div>
       </div>
       <div className={styles['elite-text-container']}>
-        <div className={styles['elite-text']} data-text={currentStage?.name || 'Processing'}>
+        <div
+          className={styles['elite-text']}
+          data-text={currentStage?.name || 'Processing'}
+        >
           {currentStage?.name || 'Processing'}
         </div>
       </div>
@@ -101,6 +121,4 @@ const LoadingIndicator: React.FC<LoadingIndicatorProps> = ({ loading, messages }
   );
 };
 
-
-
-export default LoadingIndicator; 
+export default LoadingIndicator;

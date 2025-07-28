@@ -7,7 +7,12 @@ interface ToggleSwitchProps {
   helpText?: string;
 }
 
-const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, enabled, setEnabled, helpText }) => {
+const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
+  label,
+  enabled,
+  setEnabled,
+  helpText,
+}) => {
   const styles = {
     container: {
       display: 'flex',
@@ -55,9 +60,9 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, enabled, setEnabled,
       transform: enabled ? 'translateX(16px)' : 'translateX(0)',
     } as CSSProperties,
     helpText: {
-        fontSize: '0.75rem',
-        color: '#9ca3af',
-        marginTop: '0.25rem',
+      fontSize: '0.75rem',
+      color: '#9ca3af',
+      marginTop: '0.25rem',
     } as CSSProperties,
   };
 
@@ -65,17 +70,17 @@ const ToggleSwitch: React.FC<ToggleSwitchProps> = ({ label, enabled, setEnabled,
 
   return (
     <div>
-        <div style={styles.container} onClick={toggle}>
-            <span style={styles.label}>{label}</span>
-            <div style={styles.switch}>
-                <div style={styles.slider}>
-                    <div style={styles.sliderBefore}></div>
-                </div>
-            </div>
+      <div style={styles.container} onClick={toggle}>
+        <span style={styles.label}>{label}</span>
+        <div style={styles.switch}>
+          <div style={styles.slider}>
+            <div style={styles.sliderBefore}></div>
+          </div>
         </div>
-        {helpText && <div style={styles.helpText}>{helpText}</div>}
+      </div>
+      {helpText && <div style={styles.helpText}>{helpText}</div>}
     </div>
   );
 };
 
-export default ToggleSwitch; 
+export default ToggleSwitch;

@@ -6,27 +6,34 @@
 
 import { SupabaseClient } from '@supabase/supabase-js';
 import { OpenAI } from 'openai';
-import { chatMemory, ChatMessage, ChatSession, RelevantMessage, UserFact } from './memory/index.js';
-
-// Для совместимости экспортируем старые типы
-export type {
+import {
+  chatMemory,
   ChatMessage,
   ChatSession,
   RelevantMessage,
-  UserFact
-};
+  UserFact,
+} from './memory/index.js';
+
+// Для совместимости экспортируем старые типы
+export type { ChatMessage, ChatSession, RelevantMessage, UserFact };
 
 /**
  * @deprecated Используйте chatMemory.initialize() из './memory/index.js'
  */
-export function initChatMemoryManager(supabase: SupabaseClient, openai: OpenAI): void {
+export function initChatMemoryManager(
+  supabase: SupabaseClient,
+  openai: OpenAI
+): void {
   chatMemory.initialize(supabase, openai);
 }
 
 /**
  * @deprecated Используйте chatMemory.createSession() из './memory/index.js'
  */
-export async function createSession(userId: string, metadata: any = {}): Promise<string> {
+export async function createSession(
+  userId: string,
+  metadata: any = {}
+): Promise<string> {
   return chatMemory.createSession(userId, metadata);
 }
 
@@ -84,13 +91,20 @@ export async function saveConversationPair(
   assistantResponse: string,
   metadata: any = {}
 ): Promise<string[]> {
-  return chatMemory.saveConversationPair(sessionId, userQuestion, assistantResponse, metadata);
+  return chatMemory.saveConversationPair(
+    sessionId,
+    userQuestion,
+    assistantResponse,
+    metadata
+  );
 }
 
 /**
  * @deprecated Используйте chatMemory.getSessionMessages() из './memory/index.js'
  */
-export async function getSessionMessages(sessionId: string): Promise<ChatMessage[]> {
+export async function getSessionMessages(
+  sessionId: string
+): Promise<ChatMessage[]> {
   return chatMemory.getSessionMessages(sessionId);
 }
 
@@ -115,7 +129,13 @@ export async function saveUserFact(
   confidence: number = 1,
   sourceMessageId: string = ''
 ): Promise<string> {
-  return chatMemory.saveUserFact(userId, factType, factValue, confidence, sourceMessageId);
+  return chatMemory.saveUserFact(
+    userId,
+    factType,
+    factValue,
+    confidence,
+    sourceMessageId
+  );
 }
 
 /**
@@ -136,12 +156,12 @@ export async function updateSessionSummary(sessionId: string): Promise<void> {
  * @deprecated Используйте chatMemory.createContextForRequest() из './memory/index.js'
  */
 export async function createContextForRequest(
-  userId: string, 
-  sessionId: string, 
+  userId: string,
+  sessionId: string,
   query: string
 ): Promise<string> {
   return chatMemory.createContextForRequest(userId, sessionId, query);
 }
 
 // Экспортируем экземпляр singleton для обратной совместимости
-export const ChatMemoryManager = chatMemory; 
+export const ChatMemoryManager = chatMemory;

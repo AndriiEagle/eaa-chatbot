@@ -9,7 +9,7 @@ export const loaderPhrases = [
   '💉 Mixing toxin of wit.',
   '💀 Processing data as if you said something worthwhile.',
   '🦴 Just kidding, I already know everything, just building drama.',
-  '⚰️ Bot is thinking... Meanwhile, think about why you exist.'
+  '⚰️ Bot is thinking... Meanwhile, think about why you exist.',
 ];
 
 // Copy notification phrases
@@ -21,14 +21,14 @@ export const copyPhrases = [
   '📤 Your ego already put this in resume.',
   '🦍 Clicked? Good job, chimp with motor skills!',
   '📦 Carried to cave, master.',
-  '💾 Saved on hell\'s floppy disk.',
+  "💾 Saved on hell's floppy disk.",
   '📎 Well, another byte in favor of idiocracy.',
-  '🧨 Copy done. Still no brains though.'
+  '🧨 Copy done. Still no brains though.',
 ];
 
 // Default settings
 export const defaultSettings = {
   datasetId: localStorage.getItem('dataset_id') || '',
   threshold: parseFloat(localStorage.getItem('similarity_threshold') || '0.7'),
-  maxChunks: parseInt(localStorage.getItem('max_chunks') || '5')
-}; 
+  maxChunks: parseInt(localStorage.getItem('max_chunks') || '5'),
+};

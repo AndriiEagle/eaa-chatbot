@@ -4,15 +4,18 @@ import { logger } from '../utils/logger.js';
 
 /**
  * 🎯 MEMORY SERVICE
- * 
+ *
  * Handles all memory and context operations.
  * Single responsibility: User context and conversation memory.
  */
 export class MemoryService {
-  
-  async getContextForRequest(userId: string, sessionId: string, question: string): Promise<string> {
+  async getContextForRequest(
+    userId: string,
+    sessionId: string,
+    question: string
+  ): Promise<string> {
     logger.info('Getting context for request', { userId, sessionId });
-    
+
     try {
       return await getContext(userId, sessionId);
     } catch (error) {
@@ -21,9 +24,13 @@ export class MemoryService {
     }
   }
 
-  async saveConversation(sessionId: string, question: string, answer: string): Promise<void> {
+  async saveConversation(
+    sessionId: string,
+    question: string,
+    answer: string
+  ): Promise<void> {
     logger.info('Saving conversation', { sessionId });
-    
+
     try {
       await chatMemory.saveConversationPair(sessionId, question, answer);
     } catch (error) {
@@ -33,7 +40,7 @@ export class MemoryService {
 
   async getUserFacts(userId: string): Promise<unknown[]> {
     logger.info('Getting user facts', { userId });
-    
+
     try {
       return await chatMemory.getUserFacts(userId);
     } catch (error) {
@@ -44,7 +51,7 @@ export class MemoryService {
 
   async getSessionMessages(sessionId: string): Promise<unknown[]> {
     logger.info('Getting session messages', { sessionId });
-    
+
     try {
       return await chatMemory.getSessionMessages(sessionId);
     } catch (error) {
@@ -52,4 +59,4 @@ export class MemoryService {
       return [];
     }
   }
-} 
+}

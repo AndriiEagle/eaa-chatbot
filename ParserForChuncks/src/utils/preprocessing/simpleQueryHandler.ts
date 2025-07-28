@@ -13,7 +13,9 @@ interface SimpleQueryResult {
  * @param query - Входящий запрос от пользователя.
  * @returns Объект с флагом, является ли запрос простым, и текстом ответа.
  */
-export async function handleSimpleQuery(query: string): Promise<SimpleQueryResult> {
+export async function handleSimpleQuery(
+  query: string
+): Promise<SimpleQueryResult> {
   // Запросы длиннее 50 символов вряд ли являются простыми приветствиями
   if (query.trim().length > 50) {
     return { is_simple_query: false, response_text: null };
@@ -40,23 +42,26 @@ export async function handleSimpleQuery(query: string): Promise<SimpleQueryResul
     const result = response.choices[0]?.message?.content;
 
     if (!result) {
-      console.error('❌ [SimpleQueryAgent] Failed to get response from OpenAI.');
+      console.error(
+        '❌ [SimpleQueryAgent] Failed to get response from OpenAI.'
+      );
       return { is_simple_query: false, response_text: null };
     }
 
     const parsedResult: SimpleQueryResult = JSON.parse(result);
-    
+
     // Дополнительная проверка, чтобы убедиться, что у нас есть правильный флаг и текст
     if (typeof parsedResult.is_simple_query !== 'boolean') {
-      console.error('❌ [SimpleQueryAgent] OpenAI response has invalid format (is_simple_query).');
+      console.error(
+        '❌ [SimpleQueryAgent] OpenAI response has invalid format (is_simple_query).'
+      );
       return { is_simple_query: false, response_text: null };
     }
 
     return parsedResult;
-
   } catch (error) {
     console.error('❌ [SimpleQueryAgent] Error calling OpenAI:', error);
     // В случае ошибки считаем, что это не простой запрос, чтобы обработка продолжилась
     return { is_simple_query: false, response_text: null };
   }
-} 
+}

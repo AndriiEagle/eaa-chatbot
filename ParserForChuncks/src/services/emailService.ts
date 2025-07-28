@@ -18,8 +18,8 @@ const createEmailTransporter = () => {
     secure: false,
     auth: {
       user: process.env.SMTP_USER || 'your-email@gmail.com',
-      pass: process.env.SMTP_PASS || 'your-app-password'
-    }
+      pass: process.env.SMTP_PASS || 'your-app-password',
+    },
   });
 };
 
@@ -27,11 +27,14 @@ const createEmailTransporter = () => {
  * Sends escalation email notification directly via SMTP
  * @param details - Escalation details
  */
-export const sendEscalationEmail = async (details: EscalationDetails): Promise<void> => {
+export const sendEscalationEmail = async (
+  details: EscalationDetails
+): Promise<void> => {
   const { sessionId, messageCount, escalationTime } = details;
 
   // Recipient email address
-  const toEmail = process.env.ESCALATION_EMAIL_RECIPIENT || 'andriipokrovskyi@gmail.com';
+  const toEmail =
+    process.env.ESCALATION_EMAIL_RECIPIENT || 'andriipokrovskyi@gmail.com';
   const subject = `🚨 User Frustration Alert - Specialist Intervention Required: ${sessionId}`;
 
   const htmlBody = `
@@ -93,8 +96,10 @@ export const sendEscalationEmail = async (details: EscalationDetails): Promise<v
   try {
     // Try Supabase Edge Functions first
     try {
-      console.log('📤 [EmailService] Attempting to send via Supabase Edge Functions...');
-      
+      console.log(
+        '📤 [EmailService] Attempting to send via Supabase Edge Functions...'
+      );
+
       const { data, error } = await supabase.functions.invoke('send-email', {
         body: {
           to: toEmail,
@@ -107,15 +112,18 @@ export const sendEscalationEmail = async (details: EscalationDetails): Promise<v
         throw new Error(`Supabase Function error: ${error.message}`);
       }
 
-      console.log(`✅ [EmailService] Email sent successfully via Supabase: ${sessionId}`);
+      console.log(
+        `✅ [EmailService] Email sent successfully via Supabase: ${sessionId}`
+      );
       return;
-
     } catch (supabaseError) {
-      console.log('⚠️ [EmailService] Supabase Edge Functions unavailable, falling back to SMTP...');
-      
+      console.log(
+        '⚠️ [EmailService] Supabase Edge Functions unavailable, falling back to SMTP...'
+      );
+
       // Fallback to direct SMTP delivery
       const transporter = createEmailTransporter();
-      
+
       const mailOptions = {
         from: `EAA ChatBot Support <${process.env.SMTP_USER || 'your-email@gmail.com'}>`,
         to: toEmail,
@@ -124,24 +132,29 @@ export const sendEscalationEmail = async (details: EscalationDetails): Promise<v
       };
 
       const info = await transporter.sendMail(mailOptions);
-      console.log(`✅ [EmailService] Email sent successfully via SMTP: ${info.messageId}`);
+      console.log(
+        `✅ [EmailService] Email sent successfully via SMTP: ${info.messageId}`
+      );
     }
-
   } catch (error) {
-    console.error(`❌ [EmailService] Failed to send email for session ${sessionId}:`, error);
-    
+    console.error(
+      `❌ [EmailService] Failed to send email for session ${sessionId}:`,
+      error
+    );
+
     // Save error to database for tracking
     try {
-      await supabase
-        .from('email_errors')
-        .insert({
-          session_id: sessionId,
-          error_message: error instanceof Error ? error.message : String(error),
-          error_type: 'email_send_failure',
-          created_at: new Date().toISOString()
-        });
+      await supabase.from('email_errors').insert({
+        session_id: sessionId,
+        error_message: error instanceof Error ? error.message : String(error),
+        error_type: 'email_send_failure',
+        created_at: new Date().toISOString(),
+      });
     } catch (dbError) {
-      console.error('❌ [EmailService] Failed to save error to database:', dbError);
+      console.error(
+        '❌ [EmailService] Failed to save error to database:',
+        dbError
+      );
     }
   }
 };

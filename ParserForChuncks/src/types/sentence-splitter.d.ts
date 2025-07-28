@@ -1,1 +1,1 @@
-declare module 'sentence-splitter'; 
+declare module 'sentence-splitter';

@@ -1,7 +1,7 @@
 // Тип сообщения (пользователь или система)
 export enum MessageType {
   USER = 'user',
-  BOT = 'bot'
+  BOT = 'bot',
 }
 
 // Источник информации
@@ -100,4 +100,4 @@ export interface SessionsListProps {
   onSelectSession: (sessionId: string) => void;
   onDeleteSession: (sessionId: string) => void;
   onCreateNewSession: () => void;
-} 
+}

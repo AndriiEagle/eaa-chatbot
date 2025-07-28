@@ -9,15 +9,18 @@ const __dirname = path.dirname(__filename);
 async function applySqlFix() {
   try {
     console.log('🚀 Applying database schema update...');
-    
+
     // Path to SQL file relative to the current script
-    const sqlFilePath = path.join(__dirname, '../../sql/escalation_schema_update.sql');
-    
+    const sqlFilePath = path.join(
+      __dirname,
+      '../../sql/escalation_schema_update.sql'
+    );
+
     console.log(`Reading SQL file from: ${sqlFilePath}`);
     const sql = fs.readFileSync(sqlFilePath, 'utf8');
 
     if (!sql) {
-        throw new Error('SQL file is empty or not found.');
+      throw new Error('SQL file is empty or not found.');
     }
 
     console.log('Executing SQL...');
@@ -34,4 +37,4 @@ async function applySqlFix() {
   }
 }
 
-applySqlFix(); 
+applySqlFix();

@@ -11,16 +11,21 @@ interface PreliminaryAnalysisDisplayProps {
   // onSelectSuggestion: (suggestion: string) => void;
 }
 
-const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({ analysisData }) => {
+const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({
+  analysisData,
+}) => {
   const formatAnalysisToString = (pa: PreliminaryAnalysis): string => {
     let formattedText = `##### 🔍 Preliminary Analysis\n`; // Using Markdown for title
     if (pa.completeness !== undefined) {
       formattedText += `*(based on ${Math.round(pa.completeness * 100)}% of available data)*\n\n`;
     }
 
-    if (pa.businessType) formattedText += `- **Business Type**: ${pa.businessType}\n`;
-    if (pa.businessSize) formattedText += `- **Company Size**: ${pa.businessSize}\n`;
-    if (pa.summary && pa.summary.trim() !== '') formattedText += `\n${pa.summary.trim()}\n`;
+    if (pa.businessType)
+      formattedText += `- **Business Type**: ${pa.businessType}\n`;
+    if (pa.businessSize)
+      formattedText += `- **Company Size**: ${pa.businessSize}\n`;
+    if (pa.summary && pa.summary.trim() !== '')
+      formattedText += `\n${pa.summary.trim()}\n`;
 
     if (pa.humanReadableMissingData && pa.humanReadableMissingData.length > 0) {
       formattedText += `\n**For a more accurate answer, please clarify**:\n`;
@@ -43,7 +48,10 @@ const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({
   };
 
   const analysisString = formatAnalysisToString(analysisData);
-  const percent = analysisData?.completeness !== undefined ? Math.round(analysisData.completeness * 100) : null;
+  const percent =
+    analysisData?.completeness !== undefined
+      ? Math.round(analysisData.completeness * 100)
+      : null;
 
   const styles = {
     container: {
@@ -73,10 +81,26 @@ const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({
 
   // Define components for ReactMarkdown for readability
   const markdownComponents: Components = {
-    p: ({ children }: { children?: React.ReactNode }) => <p style={{ margin: '0 0 8px 0' }}><SourceHighlighter>{children}</SourceHighlighter></p>,
-    li: ({ children }: { children?: React.ReactNode }) => <li style={{ marginLeft: '20px' }}><SourceHighlighter>{children}</SourceHighlighter></li>,
-    h5: ({ children }: { children?: React.ReactNode }) => <h5 style={{ marginTop: '0', marginBottom: '8px' }}><SourceHighlighter>{children}</SourceHighlighter></h5>,
-    strong: ({ children }: { children?: React.ReactNode }) => <strong><SourceHighlighter>{children}</SourceHighlighter></strong>,
+    p: ({ children }: { children?: React.ReactNode }) => (
+      <p style={{ margin: '0 0 8px 0' }}>
+        <SourceHighlighter>{children}</SourceHighlighter>
+      </p>
+    ),
+    li: ({ children }: { children?: React.ReactNode }) => (
+      <li style={{ marginLeft: '20px' }}>
+        <SourceHighlighter>{children}</SourceHighlighter>
+      </li>
+    ),
+    h5: ({ children }: { children?: React.ReactNode }) => (
+      <h5 style={{ marginTop: '0', marginBottom: '8px' }}>
+        <SourceHighlighter>{children}</SourceHighlighter>
+      </h5>
+    ),
+    strong: ({ children }: { children?: React.ReactNode }) => (
+      <strong>
+        <SourceHighlighter>{children}</SourceHighlighter>
+      </strong>
+    ),
   };
 
   return (
@@ -96,4 +120,4 @@ const PreliminaryAnalysisDisplay: React.FC<PreliminaryAnalysisDisplayProps> = ({
   );
 };
 
-export default PreliminaryAnalysisDisplay; 
+export default PreliminaryAnalysisDisplay;

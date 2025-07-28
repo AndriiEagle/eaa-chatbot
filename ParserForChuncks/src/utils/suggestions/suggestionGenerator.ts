@@ -2,7 +2,7 @@
  * NEW AI AGENT FOR GENERATING SUGGESTIONS
  * Replaces static algorithm with intelligent system,
  * which analyzes entire conversation and user memory
- * 
+ *
  * Features:
  * - Analyzes conversation history and user facts
  * - Generates contextual suggestions based on user profile
@@ -35,62 +35,71 @@ export async function generatePersonalizedSuggestions(
   userId: string = 'anonymous',
   sessionId: string = 'default'
 ): Promise<SuggestionResult> {
-  
-  console.log(`🤖 [AI_SUGGESTIONS] Calling AI agent for generating suggestions`);
-  console.log(`👤 User: ${userId} | 💬 Session: ${sessionId} | 🆕 First: ${isFirstInteraction}`);
+  console.log(
+    `🤖 [AI_SUGGESTIONS] Calling AI agent for generating suggestions`
+  );
+  console.log(
+    `👤 User: ${userId} | 💬 Session: ${sessionId} | 🆕 First: ${isFirstInteraction}`
+  );
 
   try {
     // Call AI agent via internal API
-    const response = await fetch('http://localhost:3000/api/v1/agent/ai-suggestions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        userId,
-        sessionId,
-        currentQuestion,
-        isFirstInteraction
-      }),
-    });
+    const response = await fetch(
+      'http://localhost:3000/api/v1/agent/ai-suggestions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId,
+          sessionId,
+          currentQuestion,
+          isFirstInteraction,
+        }),
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
     }
 
     const aiResult = await response.json();
-    
-    console.log(`✅ [AI_SUGGESTIONS] AI agent generated ${aiResult.clarificationQuestions?.length || 0} suggestions`);
+
+    console.log(
+      `✅ [AI_SUGGESTIONS] AI agent generated ${aiResult.clarificationQuestions?.length || 0} suggestions`
+    );
     console.log(`🧠 [AI_SUGGESTIONS] AI logic: ${aiResult.reasoning}`);
 
     return {
       clarificationQuestions: aiResult.clarificationQuestions || [],
       infoTemplates: aiResult.infoTemplates || [],
-      header: aiResult.suggestions_header || 'Choose a suggestion or ask a clarifying question:'
+      header:
+        aiResult.suggestions_header ||
+        'Choose a suggestion or ask a clarifying question:',
     };
-
   } catch (error) {
     console.error('❌ [AI_SUGGESTIONS] Error calling AI agent:', error);
-    
+
     // Fallback - minimal suggestions on error (English version)
     console.log('🔄 [AI_SUGGESTIONS] Using fallback suggestions (English)');
-    
-    const fallbackSuggestions = isFirstInteraction 
+
+    const fallbackSuggestions = isFirstInteraction
       ? [
           'Am I obligated to comply with EAA for my digital product?',
           'What penalties might I face for not complying with EAA?',
-          'Where do I start preparing for EAA compliance?'
+          'Where do I start preparing for EAA compliance?',
         ]
       : [
           'How do I conduct an accessibility audit of my website?',
           'What tools can help me check WCAG compliance?',
-          'How much time do I need to implement EAA requirements?'
+          'How much time do I need to implement EAA requirements?',
         ];
 
     return {
       clarificationQuestions: fallbackSuggestions,
       infoTemplates: [],
-      header: 'Choose a suggestion or ask a clarifying question:'
+      header: 'Choose a suggestion or ask a clarifying question:',
     };
   }
 }
@@ -100,36 +109,37 @@ export async function generatePersonalizedSuggestions(
  * Returns basic suggestions if AI agent is not available
  */
 export function generatePersonalizedSuggestionsSync(
-  userFacts: any[], 
+  userFacts: any[],
   clarificationQuestions: string[] = [],
   isFirstInteraction: boolean = false,
   currentQuestion: string = '',
   userId: string = 'anonymous',
   sessionId: string = 'default'
 ): SuggestionResult {
-  
-  console.log('⚠️ [SYNC_SUGGESTIONS] Using synchronous version - AI not available');
-  
-  const fallbackSuggestions = isFirstInteraction 
+  console.log(
+    '⚠️ [SYNC_SUGGESTIONS] Using synchronous version - AI not available'
+  );
+
+  const fallbackSuggestions = isFirstInteraction
     ? [
         'Am I obligated to comply with EAA for my digital product?',
         'What penalties might I face for not complying with EAA?',
-        'Where do I start preparing for EAA compliance?'
+        'Where do I start preparing for EAA compliance?',
       ]
     : [
         'How do I conduct an accessibility audit of my website?',
         'What tools can help me check WCAG compliance?',
-        'How much time do I need to implement EAA requirements?'
+        'How much time do I need to implement EAA requirements?',
       ];
 
   // Filter duplicates with current question
-  const filteredSuggestions = fallbackSuggestions.filter(suggestion => 
-    suggestion.toLowerCase() !== currentQuestion.toLowerCase()
+  const filteredSuggestions = fallbackSuggestions.filter(
+    suggestion => suggestion.toLowerCase() !== currentQuestion.toLowerCase()
   );
 
   return {
     clarificationQuestions: filteredSuggestions.slice(0, 3),
     infoTemplates: [],
-    header: 'Choose a suggestion or ask a clarifying question:'
+    header: 'Choose a suggestion or ask a clarifying question:',
   };
-} 
+}

@@ -5,4 +5,4 @@ export const API_URL = 'http://localhost:3000/api/v1/ask';
 export const DEBUG_LOGS = false; // Включить true для полного дебага, false — только ключевые события
 
 // Задержка (в миллисекундах) для автоматического скрытия уведомлений
-export const NOTIFICATION_TIMEOUT = 3000; 
+export const NOTIFICATION_TIMEOUT = 3000;
