@@ -63,9 +63,7 @@ jobs:
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: |
-          npm install --legacy-peer-deps
-          cd src/client && npm install
+        run: npm install --legacy-peer-deps
         
       - name: Type checking
         working-directory: ParserForChuncks
@@ -143,9 +141,7 @@ jobs:
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: |
-          npm install --legacy-peer-deps
-          cd src/client && npm install
+        run: npm install --legacy-peer-deps
         
       - name: Build application
         working-directory: ParserForChuncks
