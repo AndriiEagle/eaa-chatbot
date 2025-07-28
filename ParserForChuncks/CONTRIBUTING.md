@@ -2,373 +2,276 @@
 
 Thank you for considering contributing to the EAA ChatBot project! This document provides guidelines and information for contributors.
 
-## 🌟 How to Contribute
+## 📋 Содержание
 
-### Reporting Issues
+- [Как внести вклад](#как-внести-вклад)
+- [Сообщение о багах](#сообщение-о-багах)
+- [Предложение функций](#предложение-функций)
+- [Процесс разработки](#процесс-разработки)
+- [Стандарты кода](#стандарты-кода)
+- [Тестирование](#тестирование)
+- [Документация](#документация)
 
-Before creating an issue, please:
+## 🚀 Как внести вклад
 
-1. **Search existing issues** to avoid duplicates
-2. **Use the issue templates** when available
-3. **Provide detailed information** including:
-   - Steps to reproduce the problem
-   - Expected vs actual behavior
-   - Environment details (OS, Node.js version, etc.)
-   - Screenshots or logs if applicable
-
-### Suggesting Features
-
-We welcome feature suggestions! Please:
-
-1. **Check existing feature requests** first
-2. **Create a detailed proposal** including:
-   - Use case and problem it solves
-   - Proposed solution
-   - Alternative approaches considered
-   - Potential impact on existing functionality
-
-## 🚀 Development Setup
-
-### Prerequisites
-
-- Node.js 18.0.0+
-- npm 8.0.0+
-- Git
-- Supabase account
-- OpenAI API key
-
-### Getting Started
-
-1. **Fork the repository**
+### 1. Fork репозитория
 ```bash
 git clone https://github.com/your-username/eaa-chatbot.git
-cd eaa-chatbot/ParserForChuncks
+cd eaa-chatbot
 ```
 
-2. **Install dependencies**
-```bash
-npm install
-```
-
-3. **Set up environment variables**
-```bash
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-4. **Run tests to ensure everything works**
-```bash
-npm test
-```
-
-5. **Start development server**
-```bash
-npm run dev
-```
-
-## 📝 Development Guidelines
-
-### Code Style
-
-We use ESLint and Prettier for code formatting:
-
-```bash
-# Check linting
-npm run lint
-
-# Fix linting issues
-npm run lint:fix
-
-# Format code
-npm run format
-
-# Check formatting
-npm run format:check
-```
-
-### TypeScript Guidelines
-
-- **Use strict typing** - avoid `any` when possible
-- **Define interfaces** for complex objects
-- **Use proper error handling** with try-catch blocks
-- **Document complex functions** with JSDoc comments
-
-```typescript
-/**
- * Processes user query and generates AI response
- * @param query - User's question
- * @param userId - Unique user identifier
- * @param sessionId - Chat session identifier
- * @returns Promise with AI response and metadata
- */
-async function processQuery(
-  query: string,
-  userId: string,
-  sessionId: string
-): Promise<QueryResponse> {
-  // Implementation
-}
-```
-
-### Testing Requirements
-
-- **Write tests** for new functionality
-- **Maintain 100% test coverage** for critical paths
-- **Use descriptive test names**
-- **Test both success and error scenarios**
-
-```typescript
-describe('SuggestionService', () => {
-  it('should generate context-appropriate suggestions for business users', async () => {
-    // Test implementation
-  });
-
-  it('should handle API failures gracefully', async () => {
-    // Test implementation
-  });
-});
-```
-
-### Commit Message Convention
-
-We follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-<type>[optional scope]: <description>
-
-[optional body]
-
-[optional footer(s)]
-```
-
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc.)
-- `refactor`: Code refactoring
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
-
-**Examples:**
-```
-feat(ai): add frustration detection agent
-fix(api): resolve memory leak in session management
-docs(readme): update installation instructions
-test(suggestions): add comprehensive test suite
-```
-
-## 🏗️ Architecture Guidelines
-
-### File Structure
-
-```
-src/
-├── controllers/          # HTTP request handlers
-├── services/            # Business logic
-├── utils/               # Utility functions
-├── types/               # TypeScript type definitions
-├── schemas/             # Validation schemas
-├── repositories/        # Data access layer
-├── hooks/               # Custom hooks
-└── client/              # React frontend
-    ├── src/
-    │   ├── components/  # React components
-    │   ├── types/       # Frontend types
-    │   ├── utils/       # Frontend utilities
-    │   └── constants/   # Configuration constants
-    └── public/          # Static assets
-```
-
-### Design Principles
-
-1. **Separation of Concerns** - Keep business logic separate from HTTP handling
-2. **Single Responsibility** - Each function/class should have one clear purpose
-3. **Dependency Injection** - Use dependency injection for testability
-4. **Error Handling** - Implement comprehensive error handling
-5. **Logging** - Add appropriate logging for debugging and monitoring
-
-### AI Agent Development
-
-When creating new AI agents:
-
-1. **Follow the existing pattern** in `src/services/suggestionService/analyzers/`
-2. **Use proper error handling** for OpenAI API calls
-3. **Implement fallback mechanisms** for API failures
-4. **Add comprehensive tests** with mocked responses
-5. **Document the agent's purpose** and expected inputs/outputs
-
-```typescript
-export class NewAIAnalyzer {
-  private openai: OpenAI;
-
-  constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
-  }
-
-  async analyze(input: AnalysisInput): Promise<AnalysisResult> {
-    try {
-      // Implementation with proper error handling
-    } catch (error) {
-      // Fallback mechanism
-    }
-  }
-}
-```
-
-## 🧪 Testing Guidelines
-
-### Test Categories
-
-1. **Unit Tests** - Test individual functions/classes
-2. **Integration Tests** - Test component interactions
-3. **AI Tests** - Test AI agent responses (with mocking)
-4. **API Tests** - Test HTTP endpoints
-
-### Writing Good Tests
-
-```typescript
-// ✅ Good test
-describe('FrustrationAnalyzer', () => {
-  beforeEach(() => {
-    // Setup test environment
-  });
-
-  it('should detect high frustration level from angry messages', async () => {
-    const analyzer = new FrustrationAnalyzer();
-    const result = await analyzer.analyze({
-      messages: ['This is terrible!', 'Nothing works!'],
-      userId: 'test-user'
-    });
-
-    expect(result.frustrationLevel).toBeGreaterThan(0.7);
-    expect(result.shouldEscalate).toBe(true);
-  });
-});
-
-// ❌ Bad test
-it('should work', async () => {
-  const result = await someFunction();
-  expect(result).toBeTruthy();
-});
-```
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run specific test file
-npm test -- suggestion.service.test.ts
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-## 🔄 Pull Request Process
-
-### Before Submitting
-
-1. **Create a feature branch** from `main`
+### 2. Создайте ветку для изменений
 ```bash
 git checkout -b feature/amazing-feature
+# или
+git checkout -b fix/issue-123
+# или  
+git checkout -b docs/update-readme
 ```
 
-2. **Make your changes** following the guidelines above
-
-3. **Write/update tests** for your changes
-
-4. **Run the full test suite**
+### 3. Настройте окружение разработки
 ```bash
-npm test
-npm run lint
-npm run type-check
+cd ParserForChuncks
+npm install
+cp env.example .env
+# Отредактируйте .env с вашими ключами
 ```
 
-5. **Update documentation** if needed
+### 4. Внесите изменения
+- Следуйте [стандартам кода](#стандарты-кода)
+- Добавьте тесты для новой функциональности
+- Обновите документацию если необходимо
 
-6. **Commit your changes** using conventional commits
+### 5. Протестируйте изменения
+```bash
+npm run build
+npm run test
+```
 
-### PR Requirements
+### 6. Создайте Pull Request
+- Заполните шаблон PR
+- Добавьте описание изменений
+- Свяжите с соответствующим issue
 
-- [ ] **Descriptive title** and detailed description
-- [ ] **All tests pass** (including new tests for new features)
-- [ ] **No linting errors**
-- [ ] **TypeScript compilation succeeds**
-- [ ] **Documentation updated** (if applicable)
-- [ ] **Breaking changes documented** (if applicable)
+## 🐛 Сообщение о багах
 
-### PR Template
+### Перед созданием issue проверьте:
+- [ ] Баг воспроизводится на последней версии
+- [ ] Нет дублирующих issues
+- [ ] Проверили документацию
+
+### Шаблон для баг-репорта:
+```markdown
+**Описание бага:**
+Краткое описание проблемы
+
+**Шаги для воспроизведения:**
+1. Перейти к '...'
+2. Нажать на '...'
+3. Увидеть ошибку
+
+**Ожидаемое поведение:**
+Что должно было произойти
+
+**Фактическое поведение:**
+Что произошло на самом деле
+
+**Окружение:**
+- OS: [e.g. Windows 10]
+- Node.js: [e.g. 18.17.0]
+- Browser: [e.g. Chrome 119]
+
+**Дополнительная информация:**
+Логи, скриншоты, и т.д.
+```
+
+## ✨ Предложение функций
+
+### Шаблон для feature request:
+```markdown
+**Описание функции:**
+Что вы хотите добавить?
+
+**Мотивация:**
+Зачем это нужно? Какую проблему решает?
+
+**Подробное описание:**
+Как это должно работать?
+
+**Альтернативы:**
+Какие есть альтернативные решения?
+
+**Дополнительная информация:**
+Mockups, примеры, ссылки и т.д.
+```
+
+## 🛠️ Процесс разработки
+
+### Структура веток:
+- `main` - стабильная продакшн версия
+- `dev` - основная ветка разработки  
+- `feature/*` - новые функции
+- `fix/*` - исправления багов
+- `docs/*` - изменения документации
+
+### Workflow:
+1. **Создайте issue** для обсуждения изменений
+2. **Создайте ветку** от `dev`
+3. **Разрабатывайте** с частыми коммитами
+4. **Тестируйте** все изменения
+5. **Создайте PR** в `dev` ветку
+6. **Пройдите code review**
+7. **Merge** после одобрения
+
+## 📝 Стандарты кода
+
+### TypeScript
+```typescript
+// ✅ Хорошо
+interface UserRequest {
+  question: string;
+  userId: string;
+  sessionId: string;
+}
+
+const processRequest = async (request: UserRequest): Promise<Response> => {
+  // implementation
+};
+
+// ❌ Плохо
+const processRequest = (request: any) => {
+  // implementation
+};
+```
+
+### Именование:
+- **Переменные/функции**: camelCase (`getUserData`)
+- **Классы/интерфейсы**: PascalCase (`UserManager`)
+- **Константы**: SCREAMING_SNAKE_CASE (`MAX_RETRY_COUNT`)
+- **Файлы**: kebab-case (`user-service.ts`)
+
+### Комментарии:
+```typescript
+/**
+ * Анализирует фрустрацию пользователя на основе сообщения
+ * @param message - Сообщение пользователя для анализа
+ * @param userId - ID пользователя для контекста
+ * @returns Результат анализа с уровнем фрустрации
+ */
+async function analyzeFrustration(message: string, userId: string): Promise<FrustrationAnalysis> {
+  // Используем ИИ для анализа тональности
+  const sentiment = await openai.analyzeMessage(message);
+  
+  return {
+    level: sentiment.frustration,
+    confidence: sentiment.confidence,
+    triggers: sentiment.triggers
+  };
+}
+```
+
+### ESLint правила:
+- Точка с запятой обязательна
+- Одинарные кавычки для строк
+- Максимум 100 символов в строке
+- Trailing comma везде где возможно
+
+## 🧪 Тестирование
+
+### Запуск тестов:
+```bash
+# Все тесты
+npm run test
+
+# Конкретный тест
+node test-frustration-system.js
+
+# Интеграционные тесты
+npm run test:integration
+```
+
+### Написание тестов:
+```typescript
+describe('FrustrationDetectionAgent', () => {
+  it('should detect high frustration', async () => {
+    const message = "Это просто ужас! Ничего не работает!";
+    const result = await agent.analyze(message, 'user123');
+    
+    expect(result.level).toBeGreaterThan(0.75);
+    expect(result.confidence).toBeGreaterThan(0.85);
+  });
+  
+  it('should not detect frustration in neutral message', async () => {
+    const message = "Как добавить кнопку на сайт?";
+    const result = await agent.analyze(message, 'user123');
+    
+    expect(result.level).toBeLessThan(0.3);
+  });
+});
+```
+
+### Минимальные требования:
+- ✅ Все новые функции покрыты тестами
+- ✅ Все тесты проходят
+- ✅ Покрытие кода > 80%
+
+## 📖 Документация
+
+### Обновление README:
+- Добавьте новые API эндпоинты
+- Обновите примеры использования
+- Добавьте новые переменные окружения
+
+### Комментарии в коде:
+- JSDoc для всех публичных функций
+- Комментарии для сложной бизнес-логики
+- TODO комментарии для будущих улучшений
+
+### Changelog:
+Обновите `CHANGELOG.md` в соответствии с [Keep a Changelog](https://keepachangelog.com/):
 
 ```markdown
-## Description
-Brief description of changes
+## [Unreleased]
 
-## Type of Change
-- [ ] Bug fix (non-breaking change that fixes an issue)
-- [ ] New feature (non-breaking change that adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Documentation update
+### ✨ Добавлено
+- Новая функция X для улучшения Y
 
-## Testing
-- [ ] Unit tests added/updated
-- [ ] Integration tests added/updated
-- [ ] All tests pass locally
-
-## Checklist
-- [ ] Code follows project style guidelines
-- [ ] Self-review completed
-- [ ] Code is commented where necessary
-- [ ] Documentation updated
-- [ ] No new warnings introduced
+### 🐛 Исправлено  
+- Исправлена проблема с Z в ситуации W
 ```
 
-## 🎯 Areas for Contribution
+## 🎯 Приоритетные области для вкладов
 
-We especially welcome contributions in these areas:
+### 🔥 Высокий приоритет:
+- Исправление багов безопасности
+- Улучшение производительности
+- Добавление тестов
+- Исправление accessibility проблем
 
-### High Priority
-- **Performance optimization** - Improve response times
-- **Test coverage** - Expand test suites
-- **Documentation** - API docs, tutorials, examples
-- **Accessibility** - Improve UI accessibility features
-- **Security** - Security audits and improvements
+### 📈 Средний приоритет:
+- Новые функции ИИ агентов
+- Улучшение UX/UI
+- Документация и примеры
+- Интеграции с внешними сервисами
 
-### Medium Priority
-- **Internationalization** - Multi-language support
-- **Mobile responsiveness** - Better mobile experience
-- **Analytics** - Enhanced monitoring and metrics
-- **Integration** - Third-party service integrations
+### 💡 Низкий приоритет:
+- Рефакторинг кода
+- Оптимизация сборки
+- Дополнительные языки
+- Экспериментальные функции
 
-### Low Priority
-- **UI/UX improvements** - Design enhancements
-- **Code refactoring** - Code quality improvements
-- **Performance monitoring** - Advanced monitoring tools
+## ❓ Вопросы?
 
-## 🆘 Getting Help
+- 💬 Создайте [Discussion](https://github.com/your-repo/discussions)
+- 📧 Напишите на support@eaa-chatbot.com
+- 📖 Изучите [Wiki](https://github.com/your-repo/wiki)
 
-- **Documentation**: Check the [README](README.md) and [API docs](docs/api/)
-- **Issues**: Search [existing issues](https://github.com/your-username/eaa-chatbot/issues)
-- **Discussions**: Use [GitHub Discussions](https://github.com/your-username/eaa-chatbot/discussions)
-- **Email**: Contact us at dev@eaa-chatbot.com
+## 📜 Лицензия
 
-## 🏆 Recognition
-
-Contributors will be:
-- **Listed in CONTRIBUTORS.md**
-- **Mentioned in release notes** for significant contributions
-- **Invited to join** the core contributor team (for regular contributors)
-
-## 📄 License
-
-By contributing to this project, you agree that your contributions will be licensed under the [MIT License](LICENSE).
+Внося вклад в этот проект, вы соглашаетесь с тем, что ваши изменения будут лицензированы под [MIT License](LICENSE).
 
 ---
 
-Thank you for helping make EAA ChatBot better for everyone! 🚀 
+<div align="center">
+  <b>Спасибо за вклад в создание более доступного интернета! 🌍</b>
+</div> 

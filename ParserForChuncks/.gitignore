@@ -1,5 +1,6 @@
 # Dependencies
 node_modules/
+*/node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
@@ -11,19 +12,25 @@ pnpm-debug.log*
 .env.development.local
 .env.test.local
 .env.production.local
+**/.env
+**/.env.*
+
+# API Keys and sensitive data
+*.key
+*.pem
+config/secrets.json
+secrets/
 
 # Build outputs
-dist/
 build/
+dist/
+*/dist/
+*/build/
 *.tsbuildinfo
-
-# Logs
-logs/
-*.log
-lerna-debug.log*
+tsconfig.tsbuildinfo
 
 # Runtime data
-pids/
+pids
 *.pid
 *.seed
 *.pid.lock
@@ -31,20 +38,36 @@ pids/
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov
-.nyc_output/
+
+# nyc test coverage
+.nyc_output
+
+# Grunt intermediate storage
+.grunt
+
+# Bower dependency directory
+bower_components
+
+# node-waf configuration
+.lock-wscript
+
+# Compiled binary addons
+build/Release
 
 # Dependency directories
-node_modules/
 jspm_packages/
-
-# TypeScript cache
-*.tsbuildinfo
 
 # Optional npm cache directory
 .npm
 
 # Optional eslint cache
 .eslintcache
+
+# Microbundle cache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
 # Optional REPL history
 .node_repl_history
@@ -56,10 +79,9 @@ jspm_packages/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
 .env.test
 
-# parcel-bundler cache (https://parceljs.org/)
+# parcel-bundler cache
 .cache
 .parcel-cache
 
@@ -89,10 +111,14 @@ public
 # TernJS port file
 .tern-port
 
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
+# React build
+build/
+*/build/
 
-# IDE
+# TypeScript
+*.d.ts.map
+
+# IDE and editor files
 .vscode/
 .idea/
 *.swp
@@ -107,38 +133,58 @@ public
 .Trashes
 ehthumbs.db
 Thumbs.db
+*.tmp
+
+# Logs
+logs
+*.log
 
 # Temporary files
-tmp/
 temp/
+tmp/
+*.temp
 
 # Database
 *.sqlite
-*.sqlite3
 *.db
 
-# PM2
-.pm2/
-
-# Docker
-docker-compose.override.yml
+# Supabase
+.supabase/
 
 # Local development
 .local/
 
+# Testing
+coverage/
+.nyc_output/
+junit.xml
+
+# Documentation build
+docs/build/
+
 # Backup files
 *.backup
 *.bak
+*~
 
-# Test files
-test-results/
-test-output/
+# Package manager lock files (если нужно игнорировать)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
 
-# API documentation
-docs/api/
-
-# Failed chunks (project specific)
+# Custom project ignores
 failed_chunks.json
+all_chunks_from_supabase.txt
+*.chunks
 
-# Supabase
-.supabase/ 
+# Email drafts and generated content
+drafts/
+generated_emails/
+*.draft
+
+# Ignore proposal/pitch markdown files
+ParserForChuncks/AGENTIC_AI_SOLUTIONS_DESIGNER_PITCH.md
+ParserForChuncks/BLUECALLOM_AGENTIC_AI_DESIGNER_PITCH.md
+ParserForChuncks/FREE_PRODUCT_PROPOSAL_FOR_BLUECALLOM.md
+ParserForChuncks/ULTIMATE_VALUE_PROPOSITION_BLUECALLOM.md 
+ParserForChuncks/COMPREHENSIVE_PROJECT_ANALYSIS.md

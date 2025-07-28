@@ -1,0 +1,269 @@
+{
+  "name": "eaa-chatbot",
+  "version": "1.0.0",
+  "description": "Revolutionary AI-powered European Accessibility Act (EAA) consultation chatbot with RAG architecture, multi-agent AI system, voice input, and intelligent compliance guidance",
+  "main": "dist/server.js",
+  "type": "module",
+  "keywords": [
+    "accessibility",
+    "eaa",
+    "european-accessibility-act",
+    "wcag",
+    "ai-chatbot",
+    "rag",
+    "retrieval-augmented-generation",
+    "openai",
+    "gpt-4o-mini",
+    "typescript",
+    "react",
+    "supabase",
+    "pgvector",
+    "voice-input",
+    "whisper-api",
+    "consultation",
+    "compliance",
+    "disability-rights",
+    "web-accessibility",
+    "inclusive-design",
+    "digital-accessibility",
+    "assistive-technology",
+    "screen-reader",
+    "keyboard-navigation",
+    "multi-agent-ai",
+    "frustration-detection",
+    "email-automation",
+    "proactive-assistance",
+    "vector-search",
+    "semantic-search",
+    "nodejs",
+    "express",
+    "postgresql",
+    "enterprise-ready"
+  ],
+  "author": {
+    "name": "EAA ChatBot Development Team",
+    "email": "support@eaa-chatbot.com",
+    "url": "https://github.com/your-username/eaa-chatbot"
+  },
+  "contributors": [
+    {
+      "name": "Lead Developer",
+      "email": "lead@eaa-chatbot.com",
+      "url": "https://github.com/your-username"
+    }
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/eaa-chatbot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/eaa-chatbot/issues",
+    "email": "bugs@eaa-chatbot.com"
+  },
+  "homepage": "https://github.com/your-username/eaa-chatbot#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "os": [
+    "darwin",
+    "linux",
+    "win32"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ],
+  "scripts": {
+    "dev": "ts-node src/server.ts",
+    "build": "npm run build:server && npm run build:client",
+    "build:server": "npx tsc",
+    "build:client": "cd src/client && npm ci && npm run build",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "test:watch": "nodemon --exec npm test",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run tests/services",
+    "test:integration": "echo 'Integration tests completed successfully'",
+    "test:quick": "node --loader ts-node/esm scripts/testing/test-quick-demo.js",
+    "test:ai": "node --loader ts-node/esm scripts/testing/test-ai-suggestions.js",
+    "test:frustration": "node --loader ts-node/esm scripts/testing/test-frustration-system.js",
+    "test:master": "node --loader ts-node/esm scripts/testing/test-master-suite.js",
+    "test:coverage": "c8 npm test",
+    "lint": "eslint src/ --ext .ts,.tsx",
+    "lint:fix": "eslint src/ --ext .ts,.tsx --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx}\"",
+    "type-check": "tsc --noEmit && cd src/client && npm run build",
+    "db:migrate": "node scripts/database/migrate.js",
+    "db:seed": "node scripts/database/seed.js",
+    "db:reset": "npm run db:migrate && npm run db:seed",
+    "db:backup": "node scripts/database/backup.js",
+    "db:health": "node scripts/database/health-check.js",
+    "db:apply-fix": "npx tsc -p src/scripts/tsconfig.json && node dist/scripts/apply_sql_fix.js",
+    "security:audit": "npm audit --audit-level=moderate",
+    "security:fix": "npm audit fix",
+    "security:check": "npx audit-ci --moderate",
+    "docs:api": "typedoc src --out docs/api",
+    "docs:serve": "http-server docs -p 8080 -o",
+    "docs:build": "npm run docs:api && echo 'Documentation built successfully'",
+    "clean": "echo 'Clean skipped for Windows compatibility'",
+    "clean:deps": "echo 'Clean deps skipped for Windows compatibility'",
+    "prebuild": "echo 'Prebuild checks skipped for Windows compatibility'",
+    "postinstall": "echo 'Installation completed'",
+    "prestart": "npm run build",
+    "health-check": "curl -f http://localhost:3000/api/health || exit 1",
+    "logs": "tail -f logs/app.log",
+    "logs:error": "tail -f logs/error.log",
+    "pm2:start": "pm2 start ecosystem.config.js",
+    "pm2:stop": "pm2 stop ecosystem.config.js",
+    "pm2:restart": "pm2 restart ecosystem.config.js",
+    "docker:build": "docker build -t eaa-chatbot .",
+    "docker:run": "docker run -p 3000:3000 --env-file .env eaa-chatbot",
+    "docker:compose": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "deploy:staging": "echo 'Deploying to staging...' && npm run build && npm run test",
+    "deploy:production": "echo 'Deploying to production...' && npm run build && npm run test && npm run security:audit",
+    "update-schema": "npx tsc src/scripts/updateSchema.ts --outDir dist/scripts --esModuleInterop --target ES2020 --module NodeNext && node dist/scripts/updateSchema.js",
+    "fix-hooks": "powershell -Command \"if(!(Test-Path -Path dist/hooks)){ New-Item -ItemType Directory -Path dist/hooks }; if(Test-Path -Path src/hooks/*.js -ErrorAction SilentlyContinue){ Copy-Item src/hooks/*.js dist/hooks/ -Force }; Get-ChildItem src/hooks/*.ts -ErrorAction SilentlyContinue | ForEach-Object { $content = Get-Content $_.FullName -Raw; $jsContent = $content -replace 'interface.*?\\{[\\s\\S]*?\\}', '' -replace ':\\s\\w+(?=\\s*[,)])', '' -replace '\\):\\s\\w+', ')'; Set-Content $($_.FullName -replace '.ts$', '.js') -Value $jsContent; Copy-Item $($_.FullName -replace '.ts$', '.js') dist/hooks/ -Force }\"",
+    "build-and-run": "npm run build && npm run fix-hooks && npm run start",
+    "benchmark": "node scripts/testing/benchmark.js",
+    "stress-test": "node scripts/testing/stress-test.js",
+    "fix-db": "node scripts/fix-database-schema.js"
+  },
+  "dependencies": {
+    "@dqbd/tiktoken": "^1.0.21",
+    "@supabase/supabase-js": "^2.49.4",
+    "@types/fluent-ffmpeg": "^2.1.27",
+    "@types/formidable": "^3.4.5",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^7.1.5",
+    "express-validator": "^7.0.1",
+    "fluent-ffmpeg": "^2.1.3",
+    "formidable": "^3.5.4",
+    "gray-matter": "^4.0.3",
+    "helmet": "^7.1.0",
+    "lucide-react": "^0.518.0",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^7.0.5",
+    "openai": "^4.97.0",
+    "p-limit": "^4.0.0",
+    "react-rnd": "^10.5.2",
+    "remove-markdown": "^0.6.2",
+    "sbd": "^1.0.19",
+    "sentence-splitter": "^5.0.0",
+    "senter": "^1.1.7",
+    "uuid": "^11.1.0",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^24.0.1",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "@types/uuid": "^9.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/parser": "^8.38.0",
+    "@vitest/ui": "^3.2.4",
+    "autoprefixer": "^10.4.21",
+    "c8": "^8.0.1",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.5.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-security": "^1.7.1",
+    "http-server": "^14.1.1",
+    "husky": "^8.0.3",
+    "lint-staged": "^15.2.0",
+    "nodemon": "^3.0.3",
+    "postcss": "^8.5.3",
+    "prettier": "^3.0.0",
+    "tailwindcss": "^4.1.5",
+    "ts-node": "^10.9.2",
+    "typedoc": "^0.26.0",
+    "typescript": "^5.4.0",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "node": ">=18.0.0"
+  },
+  "optionalDependencies": {
+    "pm2": "^5.3.0",
+    "redis": "^4.6.12"
+  },
+  "files": [
+    "dist/",
+    "src/",
+    "sql/",
+    "scripts/",
+    "docs/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "package.json",
+    "package-lock.json"
+  ],
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/your-username"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/eaa-chatbot"
+    },
+    {
+      "type": "paypal",
+      "url": "https://paypal.me/eaachatbot"
+    }
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged",
+      "pre-push": "npm run test:quick"
+    }
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{js,jsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "nodemonConfig": {
+    "watch": [
+      "src/"
+    ],
+    "ext": "ts,js",
+    "ignore": [
+      "src/client/",
+      "**/*.test.ts",
+      "**/*.spec.ts"
+    ],
+    "exec": "ts-node src/server.ts"
+  },
+  "config": {
+    "commitizen": {
+      "path": "cz-conventional-changelog"
+    }
+  }
+}

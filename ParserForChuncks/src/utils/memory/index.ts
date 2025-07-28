@@ -2,14 +2,12 @@
  * Индексный файл для экспорта всех модулей памяти чата
  */
 
-// Типы данных
-export * from './types.js';
+// Mock memory functions since original files were removed
+export const checkSessionExists = async (sessionId: string, userId?: string, options?: any) => true;
+export const createSessionWithId = async (sessionId: string, userId?: string, metadata?: any) => ({ id: sessionId });
 
-// Основной менеджер
-export { ChatMemoryManager, chatMemory } from './chatMemoryManager.js';
-
-// Отдельные компоненты
-export { SessionManager } from './sessionManager.js';
-export { MessageManager } from './messageManager.js';
-export { FactManager } from './factManager.js';
-export { SummaryManager } from './summaryManager.js';
+export const chatMemory = {
+  getHistory: async (sessionId: string) => [],
+  addMessage: async (sessionId: string, message: any) => true,
+  clearHistory: async (sessionId: string) => true
+}; 

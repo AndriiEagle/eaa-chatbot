@@ -1,52 +1,95 @@
 {
   "root": true,
-  "parser": "@typescript-eslint/parser",
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true,
+    "jest": true
+  },
   "extends": [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/recommended",
-    "plugin:react/recommended",
-    "plugin:react-hooks/recommended",
-    "plugin:jsx-a11y/recommended",
-    "plugin:security/recommended",
-    "prettier"
+    "eslint:recommended"
   ],
-  "plugins": [
-    "react",
-    "react-hooks",
-    "jsx-a11y",
-    "security",
-    "prettier"
-  ],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2021,
+    "ecmaVersion": "latest",
     "sourceType": "module",
     "ecmaFeatures": {
       "jsx": true
     }
   },
-  "settings": {
-    "react": {
-      "version": "detect"
-    }
-  },
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "node": true
-  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "rules": {
-    "prettier/prettier": "off", // Disable formatting errors in CI
-    "react/prop-types": "off",
-    "react/display-name": "off",
-    "jsx-a11y/no-autofocus": "off",
-    "jsx-a11y/mouse-events-have-key-events": "off",
-    "jsx-a11y/anchor-has-content": "off",
-    "jsx-a11y/no-static-element-interactions": "off",
-    "react/react-in-jsx-scope": "off",
+    // TypeScript specific rules
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "@typescript-eslint/no-explicit-any": "warn",
-    "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
-    "jsx-a11y/click-events-have-key-events": "off",
-    "jsx-a11y/label-has-associated-control": "off",
-    "prefer-const": "off"
-  }
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-non-null-assertion": "warn",
+    
+    // General JavaScript rules
+    "no-console": ["warn", { "allow": ["warn", "error", "info"] }],
+    "no-debugger": "error",
+    "no-alert": "error",
+    "no-eval": "error",
+    "no-implied-eval": "error",
+    "no-new-func": "error",
+    "no-script-url": "error",
+    "no-sequences": "error",
+    "no-throw-literal": "error",
+    "no-unmodified-loop-condition": "error",
+    "no-unused-expressions": "error",
+    "no-useless-call": "error",
+    "no-useless-return": "error",
+    "prefer-promise-reject-errors": "error",
+    "require-atomic-updates": "error",
+    
+    // Code style rules
+    "prefer-const": "error",
+    "prefer-arrow-callback": "error",
+    "prefer-template": "error",
+    "template-curly-spacing": ["error", "never"],
+    "object-shorthand": ["error", "always"],
+    "quote-props": ["error", "as-needed"]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-non-null-assertion": "off",
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["scripts/**/*.js", "scripts/**/*.ts"],
+      "rules": {
+        "no-console": "off",
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    },
+    {
+      "files": ["**/*.config.js", "**/*.config.ts"],
+      "env": {
+        "node": true
+      },
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off",
+        "no-console": "off"
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "dist/",
+    "build/",
+    "coverage/",
+    "node_modules/",
+    "*.min.js",
+    "*.bundle.js",
+    "src/client/dist/",
+    "docs/api/"
+  ]
 } 

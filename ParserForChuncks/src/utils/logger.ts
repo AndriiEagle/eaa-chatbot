@@ -86,7 +86,6 @@ class Logger {
     }
   }
 
-  // Business logic specific logging methods
   businessOperation(operation: string, context: Record<string, any>): void {
     this.info(`Business operation: ${operation}`, {
       category: 'business',
@@ -106,90 +105,7 @@ class Logger {
       ...context,
     });
   }
-
-  performanceMetric(
-    metric: string,
-    value: number,
-    unit: string,
-    context?: Record<string, any>
-  ): void {
-    this.info(`Performance: ${metric}`, {
-      category: 'performance',
-      metric,
-      value,
-      unit,
-      ...context,
-    });
-  }
-
-  securityEvent(event: string, context?: Record<string, any>): void {
-    this.warn(`Security event: ${event}`, {
-      category: 'security',
-      event,
-      ...context,
-    });
-  }
-
-  aiOperation(
-    operation: string,
-    model: string,
-    context?: Record<string, any>
-  ): void {
-    this.info(`AI operation: ${operation}`, {
-      category: 'ai',
-      operation,
-      model,
-      ...context,
-    });
-  }
-
-  databaseOperation(
-    operation: string,
-    table: string,
-    context?: Record<string, any>
-  ): void {
-    this.debug(`Database ${operation} on ${table}`, {
-      category: 'database',
-      operation,
-      table,
-      ...context,
-    });
-  }
 }
 
 // Export singleton instance
-export const logger = new Logger();
-
-// Export commonly used functions for backwards compatibility
-export const logInfo = (message: string, context?: Record<string, any>) =>
-  logger.info(message, context);
-export const logError = (message: string, context?: Record<string, any>) =>
-  logger.error(message, context);
-export const logDebug = (message: string, context?: Record<string, any>) =>
-  logger.debug(message, context);
-export const logWarn = (message: string, context?: Record<string, any>) =>
-  logger.warn(message, context);
-
-// Structured logging helpers for common patterns
-export const logApiCall = (
-  endpoint: string,
-  method: string,
-  duration?: number,
-  statusCode?: number
-) => {
-  logger.apiRequest(method, endpoint, { duration, statusCode });
-};
-
-export const logPerformance = (operation: string, startTime: number) => {
-  const duration = Date.now() - startTime;
-  logger.performanceMetric(operation, duration, 'ms');
-};
-
-export const logBusinessEvent = (
-  event: string,
-  userId?: string,
-  sessionId?: string,
-  data?: Record<string, any>
-) => {
-  logger.businessOperation(event, { userId, sessionId, ...data });
-};
+export const logger = new Logger(); 

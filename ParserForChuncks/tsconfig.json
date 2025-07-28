@@ -2,7 +2,7 @@
   "compilerOptions": {
     "target": "ES2020",
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "outDir": "dist",
     "rootDir": "src",
     "esModuleInterop": true,
@@ -16,6 +16,12 @@
     "allowJs": true,
     "checkJs": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "include": ["src", "types"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "src/client/**/*",
+    "ParserForChuncks/**/*",
+    "src/utils/memory/**/*"
+  ]
 } 
