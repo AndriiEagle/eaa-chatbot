@@ -36,14 +36,14 @@
     "npm": ">=8.0.0"
   },
   "scripts": {
-    "install": "cd ParserForChuncks && npm install",
+    "install": "cd ParserForChuncks && npm install --legacy-peer-deps",
     "build": "cd ParserForChuncks && npm run build",
     "start": "cd ParserForChuncks && npm run start",
     "dev": "cd ParserForChuncks && npm run dev",
     "test": "cd ParserForChuncks && npm run test",
     "build-and-run": "cd ParserForChuncks && npm run build-and-run",
     "setup": "npm run install && cp env.example ParserForChuncks/.env && echo 'Please edit ParserForChuncks/.env with your API keys'",
-    "clean": "cd ParserForChuncks && rm -rf dist node_modules && npm install",
+    "clean": "cd ParserForChuncks && rm -rf dist node_modules && npm install --legacy-peer-deps",
     "lint": "cd ParserForChuncks && npx eslint src --ext .ts,.tsx",
     "format": "cd ParserForChuncks && npx prettier --write src/**/*.{ts,tsx,js,jsx}",
     "typecheck": "cd ParserForChuncks && npx tsc --noEmit",
@@ -70,8 +70,16 @@
     "CONTRIBUTING.md"
   ],
   "devDependencies": {
+    "@types/node": "^24.1.0",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "zod": "^3.23.8"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.53.0",
+    "@types/uuid": "^10.0.0",
+    "openai": "^5.10.2",
+    "uuid": "^11.1.0"
   }
 }
