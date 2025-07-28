@@ -12,27 +12,29 @@ const envSchema = z.object({
 // Type definition for environment variables
 type EnvType = z.infer<typeof envSchema>;
 
-let env: EnvType;
-
-// Skip validation in test environment for consistency
-if (
-  process.env.NODE_ENV === 'test' ||
-  process.env.VITEST ||
-  process.env.CI === 'true' ||
-  process.env.SKIP_ENV_VALIDATION === 'true'
-) {
-  console.log('🧪 Skipping environment variable validation in test mode.');
-  env = {
-    OPENAI_API_KEY: 'test',
-    SUPABASE_URL: 'http://test.co',
-    SUPABASE_SERVICE_KEY: 'test',
-  };
-} else {
+// Create validated environment object with explicit typing
+const createEnv = (): EnvType => {
+  // Skip validation in test environment for consistency
+  if (
+    process.env.NODE_ENV === 'test' ||
+    process.env.VITEST ||
+    process.env.CI === 'true' ||
+    process.env.SKIP_ENV_VALIDATION === 'true'
+  ) {
+    console.log('🧪 Skipping environment variable validation in test mode.');
+    return {
+      OPENAI_API_KEY: 'test',
+      SUPABASE_URL: 'http://test.co',
+      SUPABASE_SERVICE_KEY: 'test',
+    };
+  }
+  
   // Environment variables validation
-  env = envSchema.parse(process.env);
-}
+  return envSchema.parse(process.env);
+};
 
-export { env };
+// Export the validated environment variables with explicit type
+export const env: EnvType = createEnv();
 
 // Configuration settings
 export const PORT = Number(env.PORT ?? 3000);
