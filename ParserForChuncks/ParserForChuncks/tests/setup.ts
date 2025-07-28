@@ -1,3 +1,9 @@
+// Set up test environment variables BEFORE any imports
+process.env.NODE_ENV = 'test';
+process.env.OPENAI_API_KEY = 'sk-test-mock-openai-key-for-ci-testing';
+process.env.SUPABASE_URL = 'https://test-project-ci.supabase.co';
+process.env.SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-mock-service-key-for-ci';
+
 import { beforeAll } from 'vitest';
 import { chatMemory } from '../src/utils/memory';
 import { supabase } from '../src/services/supabaseService';
