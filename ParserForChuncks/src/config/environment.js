@@ -11,9 +11,15 @@ const envSchema = z.object({
 
 // Function to provide clear error messages when environment variables are missing
 function validateEnvironmentVariables() {
-  // Skip validation in test environment
+  // Skip validation in test environment but provide dummy keys
   if (process.env.NODE_ENV === 'test' || process.env.VITEST) {
-    return;
+    return {
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || 'test-openai-key',
+      SUPABASE_URL: process.env.SUPABASE_URL || 'http://test.supabase.co',
+      SUPABASE_SERVICE_KEY:
+        process.env.SUPABASE_SERVICE_KEY || 'test-supabase-service-key',
+      PORT: process.env.PORT,
+    };
   }
 
   try {

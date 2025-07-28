@@ -12,7 +12,9 @@
     "resolveJsonModule": true,
     "types": ["node"],
     "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "checkJs": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
