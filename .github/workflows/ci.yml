@@ -67,7 +67,7 @@ jobs:
         
       - name: Type checking
         working-directory: ParserForChuncks
-        run: npm run typecheck
+        run: npm run type-check
         
       - name: Lint code
         working-directory: ParserForChuncks
