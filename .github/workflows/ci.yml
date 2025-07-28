@@ -110,6 +110,8 @@ jobs:
           cp ../env.example .env.test
           echo "NODE_ENV=test" >> .env.test
           echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_TEST }}" >> .env.test
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL_TEST }}" >> .env.test
+          echo "SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY_TEST }}" >> .env.test
           
       - name: Run tests
         working-directory: ParserForChuncks
@@ -120,10 +122,6 @@ jobs:
             ai) npm run test:ai ;;
             frustration) npm run test:frustration ;;
           esac
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_TEST }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL_TEST }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY_TEST }}
 
   # Build Application
   build:
