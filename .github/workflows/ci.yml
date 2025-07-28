@@ -123,7 +123,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_TEST }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL_TEST }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_TEST }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY_TEST }}
 
   # Build Application
   build:
