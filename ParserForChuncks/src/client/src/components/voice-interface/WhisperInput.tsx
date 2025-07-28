@@ -75,15 +75,15 @@ interface Suggestion {
   isActive: boolean;
 }
 
-const WhisperInput: React.FC<WhisperInputProps> = ({ 
-  onTranscriptReceived, 
+const WhisperInput: React.FC<WhisperInputProps> = ({
+  onTranscriptReceived,
   onSuggestionContextUpdated,
   messageSentTrigger,
-  disabled, 
-  userId, 
-  sessionId, 
-  currentInput, 
-  isProactiveAgentEnabled 
+  disabled,
+  userId,
+  sessionId,
+  currentInput,
+  isProactiveAgentEnabled,
 }) => {
   const [status, setStatus] = useState<RecordingStatus>('idle');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -99,7 +99,9 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
     if (messageSentTrigger && messageSentTrigger > 0) {
       setSuggestionCount(0);
       setSuggestions([]);
-      console.log('🔄 [WhisperInput] Suggestion counter reset due to message sent');
+      console.log(
+        '🔄 [WhisperInput] Suggestion counter reset due to message sent'
+      );
     }
   }, [messageSentTrigger]);
 
@@ -124,7 +126,7 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
         });
       }, 30000);
     }
-    
+
     return () => {
       if (suggestionTimerRef.current) {
         clearTimeout(suggestionTimerRef.current);
@@ -140,9 +142,16 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
   }, [suggestions.length]);
 
   const handleStartRecording = async () => {
-    console.log('🎤 [WhisperInput] Попытка начать запись, status:', status, 'disabled:', disabled);
+    console.log(
+      '🎤 [WhisperInput] Попытка начать запись, status:',
+      status,
+      'disabled:',
+      disabled
+    );
     if (status !== 'idle' || disabled) {
-      console.log('🎤 [WhisperInput] Запись заблокирована - неправильный статус или отключена');
+      console.log(
+        '🎤 [WhisperInput] Запись заблокирована - неправильный статус или отключена'
+      );
       return;
     }
 
@@ -151,14 +160,16 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log('🎤 [WhisperInput] Доступ к микрофону получен');
       mediaRecorderRef.current = new MediaRecorder(stream);
-      
-      mediaRecorderRef.current.ondataavailable = (event) => {
+
+      mediaRecorderRef.current.ondataavailable = event => {
         audioChunksRef.current.push(event.data);
       };
-      
+
       mediaRecorderRef.current.onstop = async () => {
         setStatus('transcribing');
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: 'audio/webm',
+        });
         audioChunksRef.current = [];
 
         // 1. Отправляем на транскрибацию
@@ -181,7 +192,6 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
           if (isProactiveAgentEnabled) {
             analyzeProactively(newTranscript);
           }
-
         } catch (error) {
           console.error('Error sending audio to server:', error);
         } finally {
@@ -205,7 +215,9 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
   const analyzeProactively = async (transcript: string) => {
     // Проверяем, не превысили ли мы лимит подсказок
     if (suggestionCount >= maxSuggestions) {
-      console.log('🔄 [ProactiveAgent] Reached maximum suggestions limit, skipping analysis');
+      console.log(
+        '🔄 [ProactiveAgent] Reached maximum suggestions limit, skipping analysis'
+      );
       return;
     }
 
@@ -216,7 +228,7 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
         body: JSON.stringify({
           currentText: `${currentInput} ${transcript}`.trim(),
           userId,
-          sessionId
+          sessionId,
         }),
       });
       if (response.ok) {
@@ -228,14 +240,14 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
               id: Date.now().toString(),
               text: data.suggestion,
               timestamp: Date.now(),
-              isActive: true
+              isActive: true,
             };
             // Возвращаем массив с ОДНОЙ актуальной подсказкой
             return [newSuggestion];
           });
           // Увеличиваем счетчик подсказок
           setSuggestionCount(prev => prev + 1);
-          
+
           // Передаем контекст подсказки в родительский компонент
           if (onSuggestionContextUpdated) {
             onSuggestionContextUpdated(data.suggestion);
@@ -248,12 +260,19 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
   };
 
   const handleStopRecording = () => {
-    console.log('🎤 [WhisperInput] Остановка записи, mediaRecorder:', !!mediaRecorderRef.current, 'status:', status);
+    console.log(
+      '🎤 [WhisperInput] Остановка записи, mediaRecorder:',
+      !!mediaRecorderRef.current,
+      'status:',
+      status
+    );
     if (mediaRecorderRef.current && status === 'recording') {
       console.log('🎤 [WhisperInput] Останавливаем MediaRecorder');
       mediaRecorderRef.current.stop();
     } else {
-      console.log('🎤 [WhisperInput] Не удалось остановить запись - неправильное состояние');
+      console.log(
+        '🎤 [WhisperInput] Не удалось остановить запись - неправильное состояние'
+      );
     }
   };
 
@@ -265,43 +284,62 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
       case 'transcribing':
         // Новая стильная волновая анимация
         return (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '2px' }}>
-            <span style={{ position: 'absolute', left: '-9999px' }}>Обработка...</span>
-            <div style={{ 
-              width: '3px', 
-              backgroundColor: '#93c5fd', 
-              borderRadius: '2px',
-              height: '12px',
-              animation: 'wave-animation-1 1.2s infinite ease-in-out'
-            }}></div>
-            <div style={{ 
-              width: '3px', 
-              backgroundColor: '#93c5fd', 
-              borderRadius: '2px',
-              height: '16px',
-              animation: 'wave-animation-2 1.2s infinite ease-in-out 0.1s'
-            }}></div>
-            <div style={{ 
-              width: '3px', 
-              backgroundColor: '#93c5fd', 
-              borderRadius: '2px',
-              height: '8px',
-              animation: 'wave-animation-3 1.2s infinite ease-in-out 0.2s'
-            }}></div>
-            <div style={{ 
-              width: '3px', 
-              backgroundColor: '#93c5fd', 
-              borderRadius: '2px',
-              height: '14px',
-              animation: 'wave-animation-4 1.2s infinite ease-in-out 0.3s'
-            }}></div>
-            <div style={{ 
-              width: '3px', 
-              backgroundColor: '#93c5fd', 
-              borderRadius: '2px',
-              height: '10px',
-              animation: 'wave-animation-5 1.2s infinite ease-in-out 0.4s'
-            }}></div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '2px',
+            }}
+          >
+            <span style={{ position: 'absolute', left: '-9999px' }}>
+              Обработка...
+            </span>
+            <div
+              style={{
+                width: '3px',
+                backgroundColor: '#93c5fd',
+                borderRadius: '2px',
+                height: '12px',
+                animation: 'wave-animation-1 1.2s infinite ease-in-out',
+              }}
+            ></div>
+            <div
+              style={{
+                width: '3px',
+                backgroundColor: '#93c5fd',
+                borderRadius: '2px',
+                height: '16px',
+                animation: 'wave-animation-2 1.2s infinite ease-in-out 0.1s',
+              }}
+            ></div>
+            <div
+              style={{
+                width: '3px',
+                backgroundColor: '#93c5fd',
+                borderRadius: '2px',
+                height: '8px',
+                animation: 'wave-animation-3 1.2s infinite ease-in-out 0.2s',
+              }}
+            ></div>
+            <div
+              style={{
+                width: '3px',
+                backgroundColor: '#93c5fd',
+                borderRadius: '2px',
+                height: '14px',
+                animation: 'wave-animation-4 1.2s infinite ease-in-out 0.3s',
+              }}
+            ></div>
+            <div
+              style={{
+                width: '3px',
+                backgroundColor: '#93c5fd',
+                borderRadius: '2px',
+                height: '10px',
+                animation: 'wave-animation-5 1.2s infinite ease-in-out 0.4s',
+              }}
+            ></div>
           </div>
         );
       case 'idle':
@@ -311,7 +349,12 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
   };
 
   const handleClick = () => {
-    console.log('🎤 [WhisperInput] Кнопка нажата, status:', status, 'disabled:', disabled);
+    console.log(
+      '🎤 [WhisperInput] Кнопка нажата, status:',
+      status,
+      'disabled:',
+      disabled
+    );
     if (disabled) {
       console.log('🎤 [WhisperInput] Кнопка отключена, игнорируем нажатие');
       return;
@@ -329,13 +372,20 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
     <>
       {/* Внедряем стили для анимации */}
       <style>{animationStyle}</style>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+      <div
+        style={{ position: 'relative', display: 'flex', alignItems: 'center' }}
+      >
         <button
           onClick={handleClick}
           disabled={disabled}
           className={status === 'recording' ? 'recording-button-animation' : ''}
           style={{
-            backgroundColor: status === 'recording' ? '#dc2626' : (status === 'transcribing' ? '#2563eb' : '#374151'),
+            backgroundColor:
+              status === 'recording'
+                ? '#dc2626'
+                : status === 'transcribing'
+                  ? '#2563eb'
+                  : '#374151',
             cursor: disabled ? 'not-allowed' : 'pointer',
             padding: '0.75rem',
             borderRadius: '50%',
@@ -352,27 +402,36 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
         >
           {renderIcon()}
         </button>
-        
+
         {suggestions.length > 0 && (
-          <div style={{ position: 'fixed', bottom: '120px', right: '20px', zIndex: 9999 }}>
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '120px',
+              right: '20px',
+              zIndex: 9999,
+            }}
+          >
             {suggestions.map((suggestion, index) => {
               const isActive = suggestion.isActive;
               // Активная подсказка всегда видна, неактивные имеют уменьшенную прозрачность
-              const opacity = isActive ? 1 : Math.max(0.4, 1 - (suggestions.length - index - 1) * 0.1);
+              const opacity = isActive
+                ? 1
+                : Math.max(0.4, 1 - (suggestions.length - index - 1) * 0.1);
               const bottomOffset = index * 110; // Увеличенное расстояние между подсказками (избегаем наложения)
-              
+
               // Если сейчас идет запись, делаем все подсказки слегка прозрачными
               const recordingOpacity = status === 'recording' ? 0.7 : 1;
-              
+
               return (
-                <div 
+                <div
                   key={suggestion.id}
                   className={`voice-input-suggestion ${isActive ? 'active' : 'inactive'} ${status === 'recording' ? 'recording' : ''}`}
                   style={{
                     position: 'absolute',
                     bottom: `${bottomOffset}px`,
                     right: '0',
-                    background: isActive 
+                    background: isActive
                       ? 'linear-gradient(135deg, #fbbf24, #f59e0b)'
                       : 'linear-gradient(135deg, #6b7280, #4b5563)',
                     color: isActive ? '#1f2937' : '#d1d5db',
@@ -382,13 +441,13 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
                     fontWeight: isActive ? '600' : '500',
                     maxWidth: '350px',
                     minWidth: '300px',
-                    boxShadow: isActive 
+                    boxShadow: isActive
                       ? '0 8px 25px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(245, 158, 11, 0.5)'
                       : '0 4px 15px rgba(0, 0, 0, 0.2)',
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '0.75rem',
-                    border: isActive 
+                    border: isActive
                       ? '2px solid rgba(245, 158, 11, 0.8)'
                       : '1px solid rgba(107, 114, 128, 0.5)',
                     backdropFilter: 'blur(10px)',
@@ -397,26 +456,36 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
                     transition: 'all 0.3s ease',
                     zIndex: 9999 - index,
                     // Специальная анимация появления
-                    animation: isActive ? 'slideInFromRight 0.4s ease-out' : 'none'
+                    animation: isActive
+                      ? 'slideInFromRight 0.4s ease-out'
+                      : 'none',
                   }}
                 >
-                  <Lightbulb 
-                    size={18} 
-                    style={{ 
-                      marginTop: '2px', 
+                  <Lightbulb
+                    size={18}
+                    style={{
+                      marginTop: '2px',
                       flexShrink: 0,
-                      opacity: isActive ? 1 : 0.7
-                    }} 
+                      opacity: isActive ? 1 : 0.7,
+                    }}
                   />
-                  <span style={{ 
-                    lineHeight: '1.4',
-                    wordWrap: 'break-word',
-                    whiteSpace: 'normal',
-                    flex: 1,
-                    opacity: isActive ? 1 : 0.8
-                  }}>{suggestion.text}</span>
+                  <span
+                    style={{
+                      lineHeight: '1.4',
+                      wordWrap: 'break-word',
+                      whiteSpace: 'normal',
+                      flex: 1,
+                      opacity: isActive ? 1 : 0.8,
+                    }}
+                  >
+                    {suggestion.text}
+                  </span>
                   <button
-                    onClick={() => setSuggestions(prev => prev.filter(s => s.id !== suggestion.id))}
+                    onClick={() =>
+                      setSuggestions(prev =>
+                        prev.filter(s => s.id !== suggestion.id)
+                      )
+                    }
                     style={{
                       background: 'transparent',
                       border: 'none',
@@ -429,17 +498,25 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
                       flexShrink: 0,
                       marginTop: '1px',
                       opacity: 1,
-                      transition: 'all 0.2s ease'
+                      transition: 'all 0.2s ease',
                     }}
                     title="Close this suggestion"
-                    onMouseEnter={(e) => {
+                    onMouseEnter={e => {
                       e.currentTarget.style.transform = 'scale(1.2)';
                     }}
-                    onMouseLeave={(e) => {
+                    onMouseLeave={e => {
                       e.currentTarget.style.transform = 'scale(1)';
                     }}
                   >
-                    <X size={28} color="#000000" strokeWidth={5} style={{ filter: 'drop-shadow(0 2px 4px rgba(255,255,255,0.8)) drop-shadow(0 0 2px rgba(255,255,255,1))' }} />
+                    <X
+                      size={28}
+                      color="#000000"
+                      strokeWidth={5}
+                      style={{
+                        filter:
+                          'drop-shadow(0 2px 4px rgba(255,255,255,0.8)) drop-shadow(0 0 2px rgba(255,255,255,1))',
+                      }}
+                    />
                   </button>
                 </div>
               );
@@ -451,4 +528,4 @@ const WhisperInput: React.FC<WhisperInputProps> = ({
   );
 };
 
-export default WhisperInput; 
+export default WhisperInput;

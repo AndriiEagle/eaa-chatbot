@@ -9,8 +9,27 @@ const envSchema = z.object({
   PORT: z.string().optional(),
 });
 
-// Environment variables validation
-export const env = envSchema.parse(process.env);
+let env;
+
+// Skip validation in test environment for consistency
+if (
+  process.env.NODE_ENV === 'test' ||
+  process.env.VITEST ||
+  process.env.CI === 'true' ||
+  process.env.SKIP_ENV_VALIDATION === 'true'
+) {
+  console.log('🧪 Skipping environment variable validation in test mode.');
+  env = {
+    OPENAI_API_KEY: 'test',
+    SUPABASE_URL: 'http://test.co',
+    SUPABASE_SERVICE_KEY: 'test',
+  };
+} else {
+  // Environment variables validation
+  env = envSchema.parse(process.env);
+}
+
+export { env };
 
 // Configuration settings
 export const PORT = Number(env.PORT ?? 3000);

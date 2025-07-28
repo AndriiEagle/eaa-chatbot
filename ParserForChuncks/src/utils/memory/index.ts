@@ -12,4 +12,4 @@ export { ChatMemoryManager, chatMemory } from './chatMemoryManager.js';
 export { SessionManager } from './sessionManager.js';
 export { MessageManager } from './messageManager.js';
 export { FactManager } from './factManager.js';
-export { SummaryManager } from './summaryManager.js'; 
+export { SummaryManager } from './summaryManager.js';

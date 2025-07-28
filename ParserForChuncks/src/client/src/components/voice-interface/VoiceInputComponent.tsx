@@ -5,13 +5,17 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { WhisperAdvancedProcessor, ProcessingProgress, VoiceProcessingResult } from '../../services/voice-processing/WhisperAdvancedProcessor';
-import { 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  Settings, 
+import {
+  WhisperAdvancedProcessor,
+  ProcessingProgress,
+  VoiceProcessingResult,
+} from '../../services/voice-processing/WhisperAdvancedProcessor';
+import {
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
+  Settings,
   Languages,
   Play,
   Pause,
@@ -20,7 +24,7 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
-  Headphones
+  Headphones,
 } from 'lucide-react';
 
 // HACK: Provide a dummy interface for SpeechRecognition for TypeScript
@@ -108,7 +112,7 @@ interface VoiceError {
   suggestions?: string[];
 }
 
-type VoiceErrorType = 
+type VoiceErrorType =
   | 'not_supported'
   | 'no_microphone'
   | 'permission_denied'
@@ -174,7 +178,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
   enableRealTime = true,
   maxDuration = 300, // 5 minutes default
   theme = 'light',
-  showAdvancedControls = false
+  showAdvancedControls = false,
 }) => {
   // Core state
   const [recordingState, setRecordingState] = useState<RecordingState>({
@@ -182,25 +186,29 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
     isPaused: false,
     duration: 0,
     audioLevel: 0,
-    quality: 0
+    quality: 0,
   });
 
   const [processingState, setProcessingState] = useState<ProcessingState>({
     isProcessing: false,
     progress: null,
     stage: '',
-    estimatedTime: 0
+    estimatedTime: 0,
   });
 
-  const [visualizationData, setVisualizationData] = useState<VisualizationData>({
-    waveform: new Array(128).fill(0),
-    frequency: new Array(64).fill(0),
-    volume: 0,
-    speechDetected: false
-  });
+  const [visualizationData, setVisualizationData] = useState<VisualizationData>(
+    {
+      waveform: new Array(128).fill(0),
+      frequency: new Array(64).fill(0),
+      volume: 0,
+      speechDetected: false,
+    }
+  );
 
   // Advanced settings
-  const [audioQuality, setAudioQuality] = useState<'fast' | 'balanced' | 'quality'>('balanced');
+  const [audioQuality, setAudioQuality] = useState<
+    'fast' | 'balanced' | 'quality'
+  >('balanced');
   const [noiseReduction, setNoiseReduction] = useState(true);
   const [voiceActivation, setVoiceActivation] = useState(true);
 
@@ -228,7 +236,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
     alternatives: [],
     audioLevel: 0,
     sessionDuration: 0,
-    errorCount: 0
+    errorCount: 0,
   });
 
   // State для настроек
@@ -244,7 +252,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
     enableSpeakerRecognition: false,
     autoLanguageDetection: true,
     customWakeWords: ['привет ассистент', 'hello assistant'],
-    confidenceThreshold: 0.7
+    confidenceThreshold: 0.7,
   });
 
   // State для доступности
@@ -256,7 +264,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
     largeButtons: false,
     keyboardShortcuts: true,
     screenReaderSupport: true,
-    captionsEnabled: false
+    captionsEnabled: false,
   });
 
   // State для интерфейса
@@ -264,13 +272,14 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
   const [showTranscript, setShowTranscript] = useState(true);
 
   // State для аудиовизуализации
-  const [audioVisualization, setAudioVisualization] = useState<AudioVisualization>({
-    enabled: true,
-    type: 'volume',
-    sensitivity: 1.0,
-    color: '#3b82f6',
-    showLevels: true
-  });
+  const [audioVisualization, setAudioVisualization] =
+    useState<AudioVisualization>({
+      enabled: true,
+      type: 'volume',
+      sensitivity: 1.0,
+      color: '#3b82f6',
+      showLevels: true,
+    });
 
   // Refs
   const recognitionRef = useRef<SpeechRecognition | null>(null);
@@ -311,8 +320,8 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
           noiseSuppression: noiseReduction,
           autoGainControl: true,
           sampleRate: 44100,
-          channelCount: 1
-        }
+          channelCount: 1,
+        },
       });
 
       audioStreamRef.current = stream;
@@ -325,8 +334,12 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
       // Настройка MediaRecorder
       const mediaRecorder = new MediaRecorder(stream, {
         mimeType: 'audio/webm;codecs=opus',
-        bitsPerSecond: audioQuality === 'quality' ? 128000 : 
-                      audioQuality === 'balanced' ? 64000 : 32000
+        bitsPerSecond:
+          audioQuality === 'quality'
+            ? 128000
+            : audioQuality === 'balanced'
+              ? 64000
+              : 32000,
       });
 
       mediaRecorderRef.current = mediaRecorder;
@@ -345,7 +358,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
         ...prev,
         isRecording: true,
         isPaused: false,
-        duration: 0
+        duration: 0,
       }));
 
       // Start visualization and timers
@@ -362,12 +375,11 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
             language: language === 'auto' ? undefined : language,
             enableNoiseReduction: noiseReduction,
             enableVAD: voiceActivation,
-            qualityLevel: audioQuality
+            qualityLevel: audioQuality,
           },
           handleRealTimeTranscript
         );
       }
-
     } catch (error) {
       onError?.(`Failed to start recording: ${(error as Error).message}`);
       console.error('Recording start failed:', error);
@@ -381,10 +393,10 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
   const stopRecording = useCallback(async () => {
     if (mediaRecorderRef.current && recordingState.isRecording) {
       mediaRecorderRef.current.stop();
-      
+
       setRecordingState(prev => ({
         ...prev,
-        isRecording: false
+        isRecording: false,
       }));
 
       stopVisualization();
@@ -403,10 +415,10 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
       } else {
         mediaRecorderRef.current.pause();
       }
-      
+
       setRecordingState(prev => ({
         ...prev,
-        isPaused: !prev.isPaused
+        isPaused: !prev.isPaused,
       }));
     }
   }, [recordingState.isPaused]);
@@ -416,15 +428,16 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
    * Настройка анализа аудио для визуализации
    */
   const setupAudioAnalysis = async (stream: MediaStream) => {
-    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const audioContext = new (window.AudioContext ||
+      (window as any).webkitAudioContext)();
     const analyser = audioContext.createAnalyser();
     const source = audioContext.createMediaStreamSource(stream);
-    
+
     analyser.fftSize = 256;
     analyser.smoothingTimeConstant = 0.8;
-    
+
     source.connect(analyser);
-    
+
     audioContextRef.current = audioContext;
     analyserRef.current = analyser;
   };
@@ -436,37 +449,37 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
   const startVisualization = () => {
     const animate = () => {
       if (!analyserRef.current || !recordingState.isRecording) return;
-      
+
       const analyser = analyserRef.current;
       const bufferLength = analyser.frequencyBinCount;
       const dataArray = new Uint8Array(bufferLength);
       const waveformArray = new Uint8Array(analyser.fftSize);
-      
+
       analyser.getByteFrequencyData(dataArray);
       analyser.getByteTimeDomainData(waveformArray);
-      
+
       // Calculate volume and quality metrics
       // Вычисление громкости и метрик качества
       const volume = Math.max(...Array.from(dataArray)) / 255;
       const speechDetected = volume > 0.1; // Simple VAD
       const quality = calculateAudioQuality(dataArray);
-      
+
       setVisualizationData({
         waveform: Array.from(waveformArray).map(x => (x - 128) / 128),
         frequency: Array.from(dataArray).map(x => x / 255),
         volume,
-        speechDetected
+        speechDetected,
       });
-      
+
       setRecordingState(prev => ({
         ...prev,
         audioLevel: volume,
-        quality
+        quality,
       }));
-      
+
       animationRef.current = requestAnimationFrame(animate);
     };
-    
+
     animate();
   };
 
@@ -481,13 +494,13 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
     recordingTimerRef.current = setInterval(() => {
       setRecordingState(prev => {
         const newDuration = prev.duration + 1;
-        
+
         // Auto-stop at max duration
         // Автоостановка при достижении максимальной длительности
         if (newDuration >= maxDuration) {
           stopRecording();
         }
-        
+
         return { ...prev, duration: newDuration };
       });
     }, 1000);
@@ -516,14 +529,14 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
    */
   const handleRecordingStop = async () => {
     if (audioChunksRef.current.length === 0) return;
-    
+
     const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-    
+
     setProcessingState({
       isProcessing: true,
       progress: null,
       stage: 'Preparing audio...',
-      estimatedTime: 0
+      estimatedTime: 0,
     });
 
     try {
@@ -535,7 +548,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
             enableNoiseReduction: noiseReduction,
             enableVAD: voiceActivation,
             qualityLevel: audioQuality,
-            responseFormat: 'verbose_json'
+            responseFormat: 'verbose_json',
           },
           handleProcessingProgress
         );
@@ -545,7 +558,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
           language: result.language,
           duration: result.duration,
           emotions: result.emotions,
-          segments: result.segments
+          segments: result.segments,
         });
       }
     } catch (error) {
@@ -555,9 +568,9 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
         isProcessing: false,
         progress: null,
         stage: '',
-        estimatedTime: 0
+        estimatedTime: 0,
       });
-      
+
       cleanupAudioResources();
     }
   };
@@ -583,16 +596,16 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
       ...prev,
       progress,
       stage: getStageDescription(progress.stage),
-      estimatedTime: progress.estimatedTimeRemaining || 0
+      estimatedTime: progress.estimatedTimeRemaining || 0,
     }));
   };
 
   const getStageDescription = (stage: string): string => {
     const stages: Record<string, string> = {
-      'preprocessing': 'Preparing audio / Подготовка аудио',
-      'chunking': 'Segmenting audio / Сегментация аудио',
-      'transcription': 'Converting speech / Конвертация речи',
-      'postprocessing': 'Finalizing / Финализация'
+      preprocessing: 'Preparing audio / Подготовка аудио',
+      chunking: 'Segmenting audio / Сегментация аудио',
+      transcription: 'Converting speech / Конвертация речи',
+      postprocessing: 'Finalizing / Финализация',
     };
     return stages[stage] || stage;
   };
@@ -601,7 +614,8 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
     // Simple quality calculation based on frequency distribution
     // Простое вычисление качества на основе распределения частот
     const midRange = Array.from(frequencyData.slice(20, 80));
-    const average = midRange.reduce((sum, val) => sum + val, 0) / midRange.length;
+    const average =
+      midRange.reduce((sum, val) => sum + val, 0) / midRange.length;
     return Math.min(1, average / 128);
   };
 
@@ -610,12 +624,12 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
       audioStreamRef.current.getTracks().forEach(track => track.stop());
       audioStreamRef.current = null;
     }
-    
+
     if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
       audioContextRef.current.close();
       audioContextRef.current = null;
     }
-    
+
     audioChunksRef.current = [];
   };
 
@@ -631,7 +645,9 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
   };
 
   return (
-    <div className={`voice-input-component ${theme} ${disabled ? 'disabled' : ''}`}>
+    <div
+      className={`voice-input-component ${theme} ${disabled ? 'disabled' : ''}`}
+    >
       {/* Main recording interface */}
       <div className="voice-main-interface">
         {/* Recording button with visual feedback */}
@@ -640,9 +656,9 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
           onClick={recordingState.isRecording ? stopRecording : startRecording}
           disabled={disabled || processingState.isProcessing}
           style={{
-            background: recordingState.isRecording 
+            background: recordingState.isRecording
               ? `radial-gradient(circle, rgba(255,0,0,${0.3 + visualizationData.volume * 0.7}) 0%, rgba(255,0,0,0.1) 100%)`
-              : undefined
+              : undefined,
           }}
         >
           <div className="voice-btn-icon">
@@ -654,14 +670,13 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
               <div className="mic-icon" />
             )}
           </div>
-          
+
           <div className="voice-btn-text">
-            {processingState.isProcessing 
-              ? 'Processing...' 
-              : recordingState.isRecording 
-                ? 'Stop Recording' 
-                : 'Start Recording'
-            }
+            {processingState.isProcessing
+              ? 'Processing...'
+              : recordingState.isRecording
+                ? 'Stop Recording'
+                : 'Start Recording'}
           </div>
         </button>
 
@@ -670,7 +685,7 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
           <button
             className="voice-pause-btn"
             onClick={togglePause}
-            title={recordingState.isPaused ? "Resume" : "Pause"}
+            title={recordingState.isPaused ? 'Resume' : 'Pause'}
           >
             {recordingState.isPaused ? '▶️' : '⏸️'}
           </button>
@@ -684,52 +699,60 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
             <>
               <div className="status-item">
                 <span className="status-label">Duration:</span>
-                <span className="status-value">{formatDuration(recordingState.duration)}</span>
+                <span className="status-value">
+                  {formatDuration(recordingState.duration)}
+                </span>
               </div>
-              
+
               <div className="status-item">
                 <span className="status-label">Quality:</span>
                 <div className="quality-bar">
-                  <div 
+                  <div
                     className="quality-fill"
                     style={{ width: `${recordingState.quality * 100}%` }}
                   />
                 </div>
               </div>
-              
+
               <div className="status-item">
                 <span className="status-label">Speech:</span>
-                <span className={`speech-indicator ${visualizationData.speechDetected ? 'active' : ''}`}>
+                <span
+                  className={`speech-indicator ${visualizationData.speechDetected ? 'active' : ''}`}
+                >
                   {visualizationData.speechDetected ? '🎙️' : '🔇'}
                 </span>
               </div>
             </>
           )}
-          
+
           {processingState.isProcessing && (
             <>
               <div className="status-item">
                 <span className="status-label">Stage:</span>
                 <span className="status-value">{processingState.stage}</span>
               </div>
-              
+
               {processingState.progress && (
                 <div className="status-item">
                   <span className="status-label">Progress:</span>
                   <div className="progress-bar">
-                    <div 
+                    <div
                       className="progress-fill"
                       style={{ width: `${processingState.progress.progress}%` }}
                     />
                   </div>
-                  <span className="progress-text">{Math.round(processingState.progress.progress)}%</span>
+                  <span className="progress-text">
+                    {Math.round(processingState.progress.progress)}%
+                  </span>
                 </div>
               )}
-              
+
               {processingState.estimatedTime > 0 && (
                 <div className="status-item">
                   <span className="status-label">ETA:</span>
-                  <span className="status-value">{formatTimeRemaining(processingState.estimatedTime)}</span>
+                  <span className="status-value">
+                    {formatTimeRemaining(processingState.estimatedTime)}
+                  </span>
                 </div>
               )}
             </>
@@ -748,15 +771,17 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
                 className="waveform-bar"
                 style={{
                   height: `${Math.abs(amplitude) * 100}%`,
-                  backgroundColor: visualizationData.speechDetected ? '#4CAF50' : '#9E9E9E'
+                  backgroundColor: visualizationData.speechDetected
+                    ? '#4CAF50'
+                    : '#9E9E9E',
                 }}
               />
             ))}
           </div>
-          
+
           {/* Volume meter */}
           <div className="volume-meter">
-            <div 
+            <div
               className="volume-level"
               style={{ width: `${visualizationData.volume * 100}%` }}
             />
@@ -769,9 +794,9 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
         <div className="voice-advanced-controls">
           <div className="control-group">
             <label>Audio Quality:</label>
-            <select 
-              value={audioQuality} 
-              onChange={(e) => setAudioQuality(e.target.value as any)}
+            <select
+              value={audioQuality}
+              onChange={e => setAudioQuality(e.target.value as any)}
               disabled={recordingState.isRecording}
             >
               <option value="fast">Fast</option>
@@ -779,25 +804,25 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
               <option value="quality">High Quality</option>
             </select>
           </div>
-          
+
           <div className="control-group">
             <label>
               <input
                 type="checkbox"
                 checked={noiseReduction}
-                onChange={(e) => setNoiseReduction(e.target.checked)}
+                onChange={e => setNoiseReduction(e.target.checked)}
                 disabled={recordingState.isRecording}
               />
               Noise Reduction
             </label>
           </div>
-          
+
           <div className="control-group">
             <label>
               <input
                 type="checkbox"
                 checked={voiceActivation}
-                onChange={(e) => setVoiceActivation(e.target.checked)}
+                onChange={e => setVoiceActivation(e.target.checked)}
                 disabled={recordingState.isRecording}
               />
               Voice Activation
@@ -809,4 +834,4 @@ const VoiceInputComponent: React.FC<VoiceInputProps> = ({
   );
 };
 
-export default VoiceInputComponent; 
+export default VoiceInputComponent;

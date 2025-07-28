@@ -65,7 +65,9 @@ jobs:
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: npm ci
+        run: |
+          npm ci
+          cd src/client && npm ci
         
       - name: Type checking
         working-directory: ParserForChuncks
@@ -107,7 +109,14 @@ jobs:
         run: |
           cp ../env.example .env.test
           echo "NODE_ENV=test" >> .env.test
-          echo "OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY_TEST }}" >> .env.test
+          # Use mock values if secrets are not available (for security)
+          echo "OPENAI_API_KEY=${OPENAI_API_KEY_TEST:-sk-test-mock-openai-key-for-ci-testing}" >> .env.test
+          echo "SUPABASE_URL=${SUPABASE_URL_TEST:-https://test-project-ci.supabase.co}" >> .env.test
+          echo "SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY_TEST:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test-mock-service-key-for-ci}" >> .env.test
+        env:
+          OPENAI_API_KEY_TEST: ${{ secrets.OPENAI_API_KEY_TEST }}
+          SUPABASE_URL_TEST: ${{ secrets.SUPABASE_URL_TEST }}
+          SUPABASE_SERVICE_KEY_TEST: ${{ secrets.SUPABASE_SERVICE_KEY_TEST }}
           
       - name: Run tests
         working-directory: ParserForChuncks
@@ -118,10 +127,6 @@ jobs:
             ai) npm run test:ai ;;
             frustration) npm run test:frustration ;;
           esac
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY_TEST }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL_TEST }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY_TEST }}
 
   # Build Application
   build:
@@ -142,7 +147,9 @@ jobs:
           
       - name: Install dependencies
         working-directory: ParserForChuncks
-        run: npm ci
+        run: |
+          npm ci
+          cd src/client && npm ci
         
       - name: Build application
         working-directory: ParserForChuncks

@@ -31,9 +31,9 @@ export function createTimer(): Timer {
       this.start = performance.now();
       this.end = null;
       this.duration = 0;
-    }
+    },
   };
-  
+
   return timer;
 }
 
@@ -52,19 +52,17 @@ export interface PerformanceMetrics {
  * @param options Объект с таймерами для различных операций
  * @returns {PerformanceMetrics} Объект с метриками производительности
  */
-export function createPerformanceMetrics(
-  options: {
-    embedding?: Timer;
-    search?: Timer;
-    generate?: Timer;
-    total: Timer;
-  }
-): PerformanceMetrics {
+export function createPerformanceMetrics(options: {
+  embedding?: Timer;
+  search?: Timer;
+  generate?: Timer;
+  total: Timer;
+}): PerformanceMetrics {
   return {
     embedding_ms: options.embedding?.duration || 0,
     search_ms: options.search?.duration || 0,
     generate_ms: options.generate?.duration || 0,
-    total_ms: Math.round(performance.now() - options.total.start)
+    total_ms: Math.round(performance.now() - options.total.start),
   };
 }
 
@@ -79,4 +77,4 @@ export function formatTime(ms: number): string {
   } else {
     return `${(ms / 1000).toFixed(1)}s`;
   }
-} 
+}

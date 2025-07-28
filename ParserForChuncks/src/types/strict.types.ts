@@ -122,7 +122,7 @@ export interface BusinessEntity {
   complianceStatus: ComplianceStatus;
 }
 
-export type BusinessType = 
+export type BusinessType =
   | 'ecommerce'
   | 'saas'
   | 'healthcare'
@@ -134,7 +134,7 @@ export type BusinessType =
   | 'retail'
   | 'other';
 
-export type BusinessSize = 
+export type BusinessSize =
   | 'startup'
   | 'small'
   | 'medium'
@@ -166,7 +166,7 @@ export interface AccessibilityFeature {
   lastAudit?: string;
 }
 
-export type AccessibilityType = 
+export type AccessibilityType =
   | 'screen_reader'
   | 'keyboard_navigation'
   | 'color_contrast'
@@ -247,7 +247,7 @@ export interface EmotionScores {
   confused: number;
 }
 
-export type UserIntent = 
+export type UserIntent =
   | 'information_seeking'
   | 'problem_solving'
   | 'compliance_check'
@@ -263,11 +263,34 @@ export interface UserAnalysisProfile {
   technicalSkill: TechnicalSkillLevel;
 }
 
-export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced' | 'expert';
-export type ProfessionalRole = 'developer' | 'designer' | 'manager' | 'compliance_officer' | 'business_owner' | 'other';
-export type CommunicationStyle = 'formal' | 'casual' | 'technical' | 'business_focused';
-export type LearningPreference = 'visual' | 'textual' | 'hands_on' | 'conceptual';
-export type TechnicalSkillLevel = 'non_technical' | 'basic' | 'intermediate' | 'advanced' | 'expert';
+export type ExperienceLevel =
+  | 'beginner'
+  | 'intermediate'
+  | 'advanced'
+  | 'expert';
+export type ProfessionalRole =
+  | 'developer'
+  | 'designer'
+  | 'manager'
+  | 'compliance_officer'
+  | 'business_owner'
+  | 'other';
+export type CommunicationStyle =
+  | 'formal'
+  | 'casual'
+  | 'technical'
+  | 'business_focused';
+export type LearningPreference =
+  | 'visual'
+  | 'textual'
+  | 'hands_on'
+  | 'conceptual';
+export type TechnicalSkillLevel =
+  | 'non_technical'
+  | 'basic'
+  | 'intermediate'
+  | 'advanced'
+  | 'expert';
 
 export interface BusinessAnalysisContext {
   entity: BusinessEntity;
@@ -277,7 +300,11 @@ export interface BusinessAnalysisContext {
   goals: BusinessGoal[];
 }
 
-export type BusinessMaturityLevel = 'startup' | 'growing' | 'established' | 'enterprise';
+export type BusinessMaturityLevel =
+  | 'startup'
+  | 'growing'
+  | 'established'
+  | 'enterprise';
 export type UrgencyLevel = 'low' | 'medium' | 'high' | 'critical';
 
 export interface BusinessConstraint {
@@ -287,7 +314,12 @@ export interface BusinessConstraint {
   timeline?: string;
 }
 
-export type ConstraintType = 'budget' | 'timeline' | 'resources' | 'technical' | 'regulatory';
+export type ConstraintType =
+  | 'budget'
+  | 'timeline'
+  | 'resources'
+  | 'technical'
+  | 'regulatory';
 export type ImpactLevel = 'low' | 'medium' | 'high' | 'critical';
 
 export interface BusinessGoal {
@@ -298,7 +330,12 @@ export interface BusinessGoal {
   success_criteria?: string[];
 }
 
-export type GoalType = 'compliance' | 'user_experience' | 'cost_reduction' | 'risk_mitigation' | 'competitive_advantage';
+export type GoalType =
+  | 'compliance'
+  | 'user_experience'
+  | 'cost_reduction'
+  | 'risk_mitigation'
+  | 'competitive_advantage';
 export type PriorityLevel = 'low' | 'medium' | 'high' | 'critical';
 
 // Voice processing types
@@ -408,11 +445,15 @@ export type Optional<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K>>;
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 
 // Type guards for runtime type checking
-export const isString = (value: unknown): value is string => typeof value === 'string';
-export const isNumber = (value: unknown): value is number => typeof value === 'number' && !isNaN(value);
-export const isBoolean = (value: unknown): value is boolean => typeof value === 'boolean';
-export const isObject = (value: unknown): value is Record<string, unknown> => 
+export const isString = (value: unknown): value is string =>
+  typeof value === 'string';
+export const isNumber = (value: unknown): value is number =>
+  typeof value === 'number' && !isNaN(value);
+export const isBoolean = (value: unknown): value is boolean =>
+  typeof value === 'boolean';
+export const isObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
-export const isArray = <T>(value: unknown): value is T[] => Array.isArray(value);
-export const isNonEmptyString = (value: unknown): value is string => 
-  isString(value) && value.trim().length > 0; 
+export const isArray = <T>(value: unknown): value is T[] =>
+  Array.isArray(value);
+export const isNonEmptyString = (value: unknown): value is string =>
+  isString(value) && value.trim().length > 0;

@@ -50,23 +50,28 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('❌ Unhandled error:', error);
   res.status(500).json({
     error: 'Internal Server Error',
-    message: process.env.NODE_ENV === 'development' ? error.message : 'Произошла внутренняя ошибка сервера'
+    message:
+      process.env.NODE_ENV === 'development'
+        ? error.message
+        : 'Произошла внутренняя ошибка сервера',
   });
 });
 
 const startServer = (port: number) => {
   const server = createServer(app);
-  
+
   return new Promise<number>((resolve, reject) => {
     server.on('error', (err: any) => {
       if (err.code === 'EADDRINUSE') {
-        console.log(`⚠️ Порт ${port} уже используется, попробуем другой порт...`);
+        console.log(
+          `⚠️ Порт ${port} уже используется, попробуем другой порт...`
+        );
         resolve(-1);
       } else {
         reject(err);
       }
     });
-    
+
     server.listen(port, () => {
       console.log(`🚀 Сервер запущен на порту ${port}`);
       resolve(port);
@@ -89,4 +94,4 @@ const startServerWithFallback = async () => {
   }
 };
 
-startServerWithFallback(); 
+startServerWithFallback();

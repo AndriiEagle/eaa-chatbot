@@ -10,9 +10,18 @@ import { v4 as uuidv4 } from 'uuid';
 export class MessageManager {
   constructor(
     private supabase: SupabaseClient,
-    private openai: OpenAI
+    private openai: OpenAI,
+    private factManager?: any // Add factManager reference for automatic fact extraction
   ) {}
-  
+
+  /**
+   * Sets the fact manager instance for automatic fact extraction
+   * This is called by ChatMemoryManager during initialization
+   */
+  setFactManager(factManager: any): void {
+    this.factManager = factManager;
+  }
+
   /**
    * Сохраняет сообщение в истории чата
    * @param content Текст сообщения
@@ -32,7 +41,9 @@ export class MessageManager {
     try {
       // Validate required parameters
       if (!content || !role || !sessionId) {
-        console.error('❌ [MESSAGES] Missing required parameters for saving message');
+        console.error(
+          '❌ [MESSAGES] Missing required parameters for saving message'
+        );
         throw new Error('Missing required parameters for saving message');
       }
 
@@ -43,23 +54,26 @@ export class MessageManager {
       let embedding: number[] | null = null;
       try {
         embedding = await createEmbedding(content);
-        console.log(`🧠 [MESSAGES] Created embedding for message (${embedding.length} dimensions)`);
+        console.log(
+          `🧠 [MESSAGES] Created embedding for message (${embedding.length} dimensions)`
+        );
       } catch (embeddingError) {
-        console.warn('⚠️ [MESSAGES] Failed to create embedding for message:', embeddingError);
+        console.warn(
+          '⚠️ [MESSAGES] Failed to create embedding for message:',
+          embeddingError
+        );
       }
 
       // Save message to database
-      const { error } = await this.supabase
-        .from('chat_messages')
-        .insert({
-          id,
-          session_id: sessionId,
-          role,
-          content,
-          created_at: timestamp,
-          metadata: metadata || {},
-          embedding
-        });
+      const { error } = await this.supabase.from('chat_messages').insert({
+        id,
+        session_id: sessionId,
+        role,
+        content,
+        created_at: timestamp,
+        metadata: metadata || {},
+        embedding,
+      });
 
       if (error) {
         console.error('❌ [MESSAGES] Error saving message:', error);
@@ -67,8 +81,28 @@ export class MessageManager {
       }
 
       console.log(`✅ [MESSAGES] Message saved successfully: ${id}`);
-      return id;
 
+      // 🎯 AUTOMATIC FACT EXTRACTION FOR USER MESSAGES
+      if (role === 'user' && this.factManager) {
+        try {
+          console.log(
+            `🔍 [MESSAGES] Starting automatic fact extraction for user message...`
+          );
+          await this.factManager.extractFactsFromUserMessage(
+            content,
+            sessionId,
+            id
+          );
+        } catch (factError) {
+          console.warn(
+            '⚠️ [MESSAGES] Failed to extract facts from user message (non-critical):',
+            factError
+          );
+          // Don't throw error for fact extraction failure - it's not critical for message saving
+        }
+      }
+
+      return id;
     } catch (error) {
       console.error('❌ [MESSAGES] Error in saveMessage:', error);
       throw error;
@@ -90,13 +124,19 @@ export class MessageManager {
         .order('created_at', { ascending: true });
 
       if (error) {
-        console.error(`❌ [MEMORY] Error getting session messages ${sessionId}:`, error);
+        console.error(
+          `❌ [MEMORY] Error getting session messages ${sessionId}:`,
+          error
+        );
         return [];
       }
 
       return data as ChatMessage[];
     } catch (e) {
-      console.error(`❌ [MEMORY] Exception getting session messages ${sessionId}:`, e);
+      console.error(
+        `❌ [MEMORY] Exception getting session messages ${sessionId}:`,
+        e
+      );
       return [];
     }
   }
@@ -121,15 +161,21 @@ export class MessageManager {
         query_embedding: embedding,
         user_id: userId,
         similarity_threshold: threshold,
-        match_count: limit
+        match_count: limit,
       });
 
       if (error) {
         // Логируем специфичную ошибку PGRST202, если она возникает
         if (error.code === 'PGRST202') {
-          console.error('❌ [MEMORY] PGRST202 Error: match_chat_messages function not found or invalid parameters. Check function name and definition in DB.', error);
+          console.error(
+            '❌ [MEMORY] PGRST202 Error: match_chat_messages function not found or invalid parameters. Check function name and definition in DB.',
+            error
+          );
         } else {
-          console.error('❌ [MEMORY] Error in vector search for messages (match_chat_messages):', error);
+          console.error(
+            '❌ [MEMORY] Error in vector search for messages (match_chat_messages):',
+            error
+          );
         }
         return [];
       }
@@ -141,7 +187,7 @@ export class MessageManager {
         content: m.content,
         role: m.role,
         created_at: m.created_at,
-        similarity: m.similarity
+        similarity: m.similarity,
       }));
     } catch (e) {
       console.error('❌ [MEMORY] Exception searching similar messages:', e);
@@ -167,14 +213,20 @@ export class MessageManager {
     try {
       // Validate required parameters
       if (!sessionId) {
-        throw new Error('❌ [MEMORY] Session ID not specified when saving conversation');
+        throw new Error(
+          '❌ [MEMORY] Session ID not specified when saving conversation'
+        );
       }
 
       if (!userQuestion || !assistantResponse) {
-        throw new Error('❌ [MEMORY] User question or assistant response is empty');
+        throw new Error(
+          '❌ [MEMORY] User question or assistant response is empty'
+        );
       }
 
-      console.log(`💬 [MEMORY] Saving conversation pair for session: ${sessionId}`);
+      console.log(
+        `💬 [MEMORY] Saving conversation pair for session: ${sessionId}`
+      );
 
       // Save user message
       const userMessageId = await this.saveMessage(
@@ -194,10 +246,9 @@ export class MessageManager {
 
       console.log(`✅ [MEMORY] Conversation pair saved successfully`);
       return [userMessageId, assistantMessageId];
-
     } catch (error) {
       console.error('❌ [MEMORY] Error saving conversation pair:', error);
       throw error;
     }
   }
-} 
+}

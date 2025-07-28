@@ -8,7 +8,7 @@ const suggestionService = new SuggestionService(openai);
 
 /**
  * 🎯 NEW REVOLUTIONARY SUGGESTION CONTROLLER
- * 
+ *
  * This is how a controller SHOULD look like:
  * - Thin and focused
  * - Only handles HTTP concerns
@@ -16,14 +16,17 @@ const suggestionService = new SuggestionService(openai);
  * - Clean error handling
  * - Single responsibility: HTTP request/response handling
  */
-export const generateRevolutionarySuggestions = async (req: Request, res: Response) => {
+export const generateRevolutionarySuggestions = async (
+  req: Request,
+  res: Response
+) => {
   const { userId, sessionId, currentQuestion = '', metadata = {} } = req.body;
 
   // Input validation
   if (!userId || !sessionId) {
-    return res.status(400).json({ 
+    return res.status(400).json({
       error: 'Missing required parameters',
-      required: ['userId', 'sessionId']
+      required: ['userId', 'sessionId'],
     });
   }
 
@@ -33,20 +36,19 @@ export const generateRevolutionarySuggestions = async (req: Request, res: Respon
       userId,
       sessionId,
       currentQuestion,
-      metadata
+      metadata,
     });
 
     // Return the result
     res.status(200).json(result);
-
   } catch (error: any) {
     console.error('❌ [CONTROLLER] Error in suggestion generation:', error);
-    
+
     // Return error response
     res.status(500).json({
       error: 'Internal server error',
       message: 'Failed to generate suggestions',
-      generated_by: 'error_handler'
+      generated_by: 'error_handler',
     });
   }
 };
@@ -58,23 +60,24 @@ export const suggestionsController = {
 
       if (!user_id || !session_id) {
         return res.status(400).json({
-          error: 'Missing required fields: user_id, session_id'
+          error: 'Missing required fields: user_id, session_id',
         });
       }
 
-      const suggestions = await suggestionService.generateRevolutionarySuggestions({
-        userId: user_id,
-        sessionId: session_id,
-        currentQuestion: current_question || ''
-      });
+      const suggestions =
+        await suggestionService.generateRevolutionarySuggestions({
+          userId: user_id,
+          sessionId: session_id,
+          currentQuestion: current_question || '',
+        });
 
       res.json(suggestions);
     } catch (error: any) {
       console.error('Suggestions error:', error);
       res.status(500).json({
         error: 'Failed to generate suggestions',
-        details: error.message
+        details: error.message,
       });
     }
-  }
-}; 
+  },
+};

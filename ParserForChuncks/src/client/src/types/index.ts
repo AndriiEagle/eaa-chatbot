@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 // Перечисление для типов сообщений
 export enum MessageType {
   USER = 'user',
-  BOT = 'bot'
+  BOT = 'bot',
 }
 
 // Интерфейс для предварительного анализа
@@ -87,4 +87,4 @@ export interface MessageBubbleProps {
   getRelevanceColor: (score: number) => string;
   onSelectSuggestion: (question: string) => void;
   loading?: boolean;
-} 
+}

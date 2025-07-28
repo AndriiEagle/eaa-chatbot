@@ -37,11 +37,15 @@ export class FactManager {
 
       // Validate confidence range
       if (confidence < 0 || confidence > 1) {
-        console.warn(`⚠️ [FACTS] Invalid confidence value: ${confidence}, using 1.0`);
+        console.warn(
+          `⚠️ [FACTS] Invalid confidence value: ${confidence}, using 1.0`
+        );
         confidence = 1.0;
       }
 
-      console.log(`💾 [FACTS] Saving fact for user ${userId}: ${factType} = ${factValue}`);
+      console.log(
+        `💾 [FACTS] Saving fact for user ${userId}: ${factType} = ${factValue}`
+      );
 
       const factId = uuidv4();
       const timestamp = new Date().toISOString();
@@ -62,7 +66,7 @@ export class FactManager {
             fact_value: factValue,
             confidence: confidence,
             source_message_id: sourceMessageId,
-            updated_at: timestamp
+            updated_at: timestamp,
           })
           .eq('id', existingFact.id);
 
@@ -75,18 +79,16 @@ export class FactManager {
         return existingFact.id;
       } else {
         // Create new fact
-        const { error } = await this.supabase
-          .from('user_facts')
-          .insert({
-            id: factId,
-            user_id: userId,
-            fact_type: factType,
-            fact_value: factValue,
-            confidence: confidence,
-            source_message_id: sourceMessageId,
-            created_at: timestamp,
-            updated_at: timestamp
-          });
+        const { error } = await this.supabase.from('user_facts').insert({
+          id: factId,
+          user_id: userId,
+          fact_type: factType,
+          fact_value: factValue,
+          confidence: confidence,
+          source_message_id: sourceMessageId,
+          created_at: timestamp,
+          updated_at: timestamp,
+        });
 
         if (error) {
           console.error('❌ [FACTS] Error saving fact:', error);
@@ -96,7 +98,6 @@ export class FactManager {
         console.log(`✅ [FACTS] New fact saved successfully: ${factType}`);
         return factId;
       }
-
     } catch (error) {
       console.error('❌ [FACTS] Error in saveUserFact:', error);
       throw error;
@@ -118,7 +119,10 @@ export class FactManager {
         .order('updated_at', { ascending: false });
 
       if (error) {
-        console.error(`❌ [MEMORY] Error getting facts for user ${userId}:`, error);
+        console.error(
+          `❌ [MEMORY] Error getting facts for user ${userId}:`,
+          error
+        );
         return [];
       }
 
@@ -149,86 +153,138 @@ export class FactManager {
         .single();
 
       if (sessionError) {
-        console.error(`❌ [MEMORY] Error getting user from session ${sessionId}:`, sessionError);
+        console.error(
+          `❌ [MEMORY] Error getting user from session ${sessionId}:`,
+          sessionError
+        );
         return;
       }
 
       const userId = sessionData.user_id;
 
-      // Проверяем, содержит ли сообщение информацию о бизнесе
-      const containsBusinessInfo = /компан|бизнес|организац|предприяти|фирм|работа|сайт|магазин|банк|финанс|транспорт|отрасл|индустр/i.test(messageContent);
-      
+      // Проверяем, содержит ли сообщение информацию о бизнесе (English and Russian)
+      const containsBusinessInfo =
+        /компан|бизнес|организац|предприяти|фирм|работа|сайт|магазин|банк|финанс|транспорт|отрасл|индустр|company|business|organization|enterprise|firm|work|website|shop|store|bank|financ|transport|industry|startup|corporat|retail|ecommerce|e-commerce|application|app|platform|service|customer|client|market|sale|revenue|product|digital|technology|tech/i.test(
+          messageContent
+        );
+
       if (!containsBusinessInfo) {
-        console.log(`ℹ️ [MEMORY] Message does not contain business information, skipping fact extraction`);
+        console.log(
+          `ℹ️ [MEMORY] Message does not contain business information, skipping fact extraction`
+        );
         return;
       }
 
       // Извлекаем факты с помощью GPT-4o-mini
       console.log(`ℹ️ [MEMORY] Analyzing message for business facts...`);
-      
+
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           {
             role: 'system',
-            content: `Ты аналитик текста. Твоя задача - проанализировать сообщение пользователя и извлечь из него факты о бизнесе/организации пользователя. 
+            content: `You are a professional business analyst. Extract comprehensive business facts from user messages.
 
-Извлекай следующие типы информации:
-- business_type: тип бизнеса или организации
-- business_location: страна, регион или город расположения бизнеса
-- business_size: размер бизнеса (малый, средний, крупный, стартап и т.д.)
-- business_digital_presence: какое присутствие в интернете (веб-сайт, мобильное приложение, электронный магазин и т.д.)
-- business_sector: сектор экономики (B2B, B2C, государственный и т.д.)
+🎯 CRITICAL REQUIREMENTS:
+1. ALL FACTS MUST BE IN ENGLISH LANGUAGE ONLY
+2. Extract ALL possible business information, not just obvious ones
+3. Be thorough - extract multiple facts per category when possible
+4. Use standardized business terminology
 
-Для каждого извлеченного факта укажи степень уверенности от 0 до 1, где:
-- 0.9-1.0: факт явно и прямо упомянут
-- 0.7-0.8: факт сильно подразумевается
-- 0.5-0.6: факт вероятно верен, но есть неоднозначность
-- < 0.5: слишком неопределенно, не включай в результат
+📊 EXTRACT THESE FACT TYPES:
+- business_type: specific business type (e.g., "restaurant", "online retailer", "software company", "consulting firm")
+- business_location: specific location (e.g., "Berlin, Germany", "San Francisco, USA", "London, UK")
+- business_size: company size (e.g., "small business", "startup", "medium enterprise", "large corporation")
+- business_digital_presence: digital channels (e.g., "website", "mobile app", "e-commerce platform", "social media")
+- business_sector: market sector (e.g., "B2B", "B2C", "B2B2C", "government", "nonprofit")
+- customer_base: target customers (e.g., "individual consumers", "small businesses", "enterprise clients", "tourists")
+- service_types: products/services (e.g., "food service", "consulting", "software development", "retail sales")
+- compliance_status: compliance requirements (e.g., "GDPR compliant", "accessibility standards", "financial regulations")
+- industry: specific industry (e.g., "hospitality", "technology", "healthcare", "finance", "education")
+- business_model: revenue model (e.g., "subscription", "one-time sales", "commission-based", "freemium")
+- technology_stack: tech used (e.g., "React", "Node.js", "WordPress", "Shopify", "custom platform")
+- target_market: market focus (e.g., "local market", "international", "niche market", "mass market")
 
-Верни массив объектов в формате JSON:
-[
-  {
-    "fact_type": "тип_факта",
-    "fact_value": "значение",
-    "confidence": число_от_0_до_1
-  }
-]
+🔍 EXTRACTION RULES:
+- Extract facts from ANY language input but ALWAYS output in English
+- If location mentioned in another language, translate to English
+- If business type mentioned in another language, use English equivalent
+- Be specific - "restaurant" not "food business"
+- Extract multiple facts when possible
+- Use confidence levels properly:
+  * 0.9-1.0: explicitly stated facts
+  * 0.7-0.8: strongly implied facts
+  * 0.5-0.6: reasonably inferred facts
 
-Если не удалось извлечь никаких фактов с уверенностью >= 0.5, верни пустой массив [].`
+Return JSON in this exact format:
+{
+  "facts": [
+    {
+      "fact_type": "business_type",
+      "fact_value": "restaurant",
+      "confidence": 0.9
+    },
+    {
+      "fact_type": "business_location", 
+      "fact_value": "Berlin, Germany",
+      "confidence": 0.8
+    }
+  ]
+}
+
+If message contains business info, extract ALL applicable facts. Be thorough!`,
           },
           {
             role: 'user',
-            content: messageContent
-          }
+            content: messageContent,
+          },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.1
+        temperature: 0.1,
       });
 
-      let extractedFacts: Array<{ fact_type: string; fact_value: string; confidence: number }> = [];
-      
+      let extractedFacts: Array<{
+        fact_type: string;
+        fact_value: string;
+        confidence: number;
+      }> = [];
+
       try {
-        const content = completion.choices[0].message.content || '{"facts": []}';
+        const content =
+          completion.choices[0].message.content || '{"facts": []}';
         const response = JSON.parse(content);
         extractedFacts = response.facts || [];
+
+        console.log(
+          `🔍 [MEMORY] AI extracted ${extractedFacts.length} potential facts from message`
+        );
       } catch (e) {
         console.error('❌ [MEMORY] Error parsing fact extraction results:', e);
         return;
       }
 
-      // Отфильтровываем факты с низкой уверенностью
-      const validFacts = extractedFacts.filter(fact => fact.confidence >= 0.5);
-      
+      // Отфильтровываем факты с низкой уверенностью (lowered threshold to extract more facts)
+      const validFacts = extractedFacts.filter(fact => fact.confidence >= 0.4);
+
       if (validFacts.length === 0) {
-        console.log(`ℹ️ [MEMORY] No facts extracted with sufficient confidence`);
+        console.log(
+          `ℹ️ [MEMORY] No facts extracted with sufficient confidence (≥0.4)`
+        );
+        console.log(
+          `🔍 [MEMORY] Raw AI response:`,
+          JSON.stringify(extractedFacts, null, 2)
+        );
         return;
       }
 
       // Сохраняем извлеченные факты
-      console.log(`✅ [MEMORY] Extracted ${validFacts.length} business facts`);
-      
+      console.log(`✅ [MEMORY] Extracted ${validFacts.length} business facts:`);
+
       for (const fact of validFacts) {
+        console.log(
+          `  📊 ${fact.fact_type}: "${fact.fact_value}" (confidence: ${fact.confidence})`
+        );
+
         // Используем переданный messageId вместо генерации нового UUID
         await this.saveUserFact(
           userId,
@@ -242,4 +298,4 @@ export class FactManager {
       console.error('❌ [MEMORY] Error extracting facts from message:', e);
     }
   }
-} 
+}

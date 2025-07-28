@@ -22,10 +22,10 @@ export class SessionManager {
 
     try {
       console.log(`📝 [SESSION] Creating new session for user: ${userId}`);
-      
+
       const sessionId = uuidv4();
       const now = new Date().toISOString();
-      
+
       const { data, error } = await this.supabase
         .from('chat_sessions')
         .insert({
@@ -33,7 +33,7 @@ export class SessionManager {
           user_id: userId,
           created_at: now,
           last_activity: now,
-          metadata: metadata || {}
+          metadata: metadata || {},
         })
         .select()
         .single();
@@ -45,7 +45,6 @@ export class SessionManager {
 
       console.log(`✅ [SESSION] Session created successfully: ${sessionId}`);
       return sessionId;
-
     } catch (error) {
       console.error('❌ [SESSION] Error in createSession:', error);
       throw error;
@@ -59,7 +58,11 @@ export class SessionManager {
    * @param metadata Метаданные сессии
    * @returns ID созданной сессии
    */
-  async createSessionWithId(sessionId: string, userId: string, metadata: any = {}): Promise<string> {
+  async createSessionWithId(
+    sessionId: string,
+    userId: string,
+    metadata: any = {}
+  ): Promise<string> {
     if (!userId || typeof userId !== 'string') {
       throw new Error('Missing user ID for session creation');
     }
@@ -68,10 +71,12 @@ export class SessionManager {
     }
 
     try {
-      console.log(`📝 [SESSION] Creating session with ID ${sessionId} for user: ${userId}`);
-      
+      console.log(
+        `📝 [SESSION] Creating session with ID ${sessionId} for user: ${userId}`
+      );
+
       const now = new Date().toISOString();
-      
+
       const { data, error } = await this.supabase
         .from('chat_sessions')
         .insert({
@@ -79,7 +84,7 @@ export class SessionManager {
           user_id: userId,
           created_at: now,
           last_activity: now,
-          metadata: metadata || {}
+          metadata: metadata || {},
         })
         .select()
         .single();
@@ -89,9 +94,10 @@ export class SessionManager {
         throw new Error(`Error creating session: ${error.message}`);
       }
 
-      console.log(`✅ [SESSION] Session created successfully with ID: ${sessionId}`);
+      console.log(
+        `✅ [SESSION] Session created successfully with ID: ${sessionId}`
+      );
       return sessionId;
-
     } catch (error) {
       console.error('❌ [SESSION] Error in createSessionWithId:', error);
       throw error;
@@ -112,13 +118,19 @@ export class SessionManager {
         .eq('id', sessionId);
 
       if (error) {
-        console.error(`❌ [MEMORY] Error checking session existence ${sessionId}:`, error);
+        console.error(
+          `❌ [MEMORY] Error checking session existence ${sessionId}:`,
+          error
+        );
         return false;
       }
 
       return count !== null && count > 0;
     } catch (e) {
-      console.error(`❌ [MEMORY] Exception checking session existence ${sessionId}:`, e);
+      console.error(
+        `❌ [MEMORY] Exception checking session existence ${sessionId}:`,
+        e
+      );
       return false;
     }
   }
@@ -136,10 +148,16 @@ export class SessionManager {
         .eq('id', sessionId);
 
       if (error) {
-        console.error(`❌ [MEMORY] Error updating session activity ${sessionId}:`, error);
+        console.error(
+          `❌ [MEMORY] Error updating session activity ${sessionId}:`,
+          error
+        );
       }
     } catch (e) {
-      console.error(`❌ [MEMORY] Exception updating session activity ${sessionId}:`, e);
+      console.error(
+        `❌ [MEMORY] Exception updating session activity ${sessionId}:`,
+        e
+      );
     }
   }
 
@@ -158,7 +176,10 @@ export class SessionManager {
         .order('last_activity', { ascending: false });
 
       if (sessionsError) {
-        console.error(`❌ [MEMORY] Error getting user sessions ${userId}:`, sessionsError);
+        console.error(
+          `❌ [MEMORY] Error getting user sessions ${userId}:`,
+          sessionsError
+        );
         return [];
       }
 
@@ -171,10 +192,13 @@ export class SessionManager {
         metadata: session.metadata || {},
         summary: session.chat_summaries?.[0]?.summary || null,
         key_topics: session.chat_summaries?.[0]?.key_topics || [],
-        business_info: session.chat_summaries?.[0]?.business_info || {}
+        business_info: session.chat_summaries?.[0]?.business_info || {},
       }));
     } catch (e) {
-      console.error(`❌ [MEMORY] Exception getting user sessions ${userId}:`, e);
+      console.error(
+        `❌ [MEMORY] Exception getting user sessions ${userId}:`,
+        e
+      );
       return [];
     }
   }
@@ -209,7 +233,6 @@ export class SessionManager {
       }
 
       console.log(`✅ [SESSION] Session deleted successfully: ${sessionId}`);
-
     } catch (error) {
       console.error('❌ [SESSION] Error in deleteSession:', error);
       throw error;
@@ -225,24 +248,26 @@ export class SessionManager {
 export async function checkSessionExists(sessionId: string): Promise<boolean> {
   try {
     console.log(`🔍 [SESSION] Checking existence of session: ${sessionId}`);
-    
+
     const { data, error } = await supabase
       .from('chat_sessions')
       .select('id')
       .eq('id', sessionId)
       .maybeSingle(); // Используем maybeSingle() вместо single()
-    
+
     if (error) {
       console.error(`❌ [SESSION] Error checking session ${sessionId}:`, error);
       return false;
     }
-    
+
     const exists = !!data;
     console.log(`✅ [SESSION] Session ${sessionId} exists: ${exists}`);
     return exists;
-    
   } catch (error) {
-    console.error(`❌ [SESSION] Exception checking session ${sessionId}:`, error);
+    console.error(
+      `❌ [SESSION] Exception checking session ${sessionId}:`,
+      error
+    );
     return false;
   }
 }
@@ -254,12 +279,18 @@ export async function checkSessionExists(sessionId: string): Promise<boolean> {
  * @param metadata Метаданные сессии
  * @returns ID созданной сессии
  */
-export async function createSessionWithId(sessionId: string, userId: string, metadata: any = {}): Promise<string> {
+export async function createSessionWithId(
+  sessionId: string,
+  userId: string,
+  metadata: any = {}
+): Promise<string> {
   try {
-    console.log(`📝 [SESSION] Creating session with ID ${sessionId} for user: ${userId}`);
-    
+    console.log(
+      `📝 [SESSION] Creating session with ID ${sessionId} for user: ${userId}`
+    );
+
     const now = new Date().toISOString();
-    
+
     const { data, error } = await supabase
       .from('chat_sessions')
       .insert({
@@ -267,7 +298,7 @@ export async function createSessionWithId(sessionId: string, userId: string, met
         user_id: userId,
         created_at: now,
         last_activity: now,
-        metadata: metadata || {}
+        metadata: metadata || {},
       })
       .select()
       .single();
@@ -277,11 +308,12 @@ export async function createSessionWithId(sessionId: string, userId: string, met
       throw new Error(`Error creating session: ${error.message}`);
     }
 
-    console.log(`✅ [SESSION] Session created successfully with ID: ${sessionId}`);
+    console.log(
+      `✅ [SESSION] Session created successfully with ID: ${sessionId}`
+    );
     return sessionId;
-
   } catch (error) {
     console.error('❌ [SESSION] Error in createSessionWithId:', error);
     throw error;
   }
-} 
+}

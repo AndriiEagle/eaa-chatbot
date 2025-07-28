@@ -25,7 +25,7 @@ const Settings: React.FC<SettingsProps> = ({
   setMaxChunks,
   clearHistory,
   isProactiveAgentEnabled,
-  setIsProactiveAgentEnabled
+  setIsProactiveAgentEnabled,
 }) => {
   const styles = {
     container: {
@@ -92,12 +92,11 @@ const Settings: React.FC<SettingsProps> = ({
 
   return (
     <div style={styles.container}>
-      <div style={styles.title}>
-        Search Settings
-      </div>
-      
+      <div style={styles.title}>Search Settings</div>
+
       <label style={styles.label}>
-        Similarity Threshold (UI): <span style={styles.mono}>{similarityThreshold}</span>
+        Similarity Threshold (UI):{' '}
+        <span style={styles.mono}>{similarityThreshold}</span>
       </label>
       <input
         type="range"
@@ -109,9 +108,10 @@ const Settings: React.FC<SettingsProps> = ({
         style={styles.slider}
       />
       <span style={styles.helpText}>
-        Higher values = more precise, but fewer results. Lower values = more results, but noisier.
+        Higher values = more precise, but fewer results. Lower values = more
+        results, but noisier.
       </span>
-      
+
       <label style={{ ...styles.label, marginTop: '0.5rem' }}>
         Max Chunks: <span style={styles.mono}>{maxChunks}</span>
       </label>
@@ -120,23 +120,25 @@ const Settings: React.FC<SettingsProps> = ({
         min="1"
         max="20"
         value={maxChunks}
-        onChange={e => setMaxChunks(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))}
+        onChange={e =>
+          setMaxChunks(Math.max(1, Math.min(20, parseInt(e.target.value) || 1)))
+        }
         style={{ ...styles.input, ...styles.inputSmall }}
       />
-      
-      <label style={{ ...styles.label, marginTop: '0.5rem' }}>dataset_id:</label>
+
+      <label style={{ ...styles.label, marginTop: '0.5rem' }}>
+        dataset_id:
+      </label>
       <input
         style={{ ...styles.input, ...styles.inputFull }}
         value={datasetId}
         onChange={e => setDatasetId(e.target.value)}
         placeholder="dataset_id"
       />
-      
-      <div style={{borderTop: '1px solid #333', margin: '0.75rem 0'}} />
 
-      <div style={styles.title}>
-        Experimental Features
-      </div>
+      <div style={{ borderTop: '1px solid #333', margin: '0.75rem 0' }} />
+
+      <div style={styles.title}>Experimental Features</div>
 
       <ToggleSwitch
         label="Proactive AI Assistant"
@@ -144,8 +146,8 @@ const Settings: React.FC<SettingsProps> = ({
         setEnabled={setIsProactiveAgentEnabled}
         helpText="Agent analyzes input text and provides suggestions in real-time."
       />
-      
-      <button 
+
+      <button
         style={styles.clearButton}
         onMouseOver={e => {
           const target = e.currentTarget;
@@ -163,4 +165,4 @@ const Settings: React.FC<SettingsProps> = ({
   );
 };
 
-export default Settings; 
+export default Settings;

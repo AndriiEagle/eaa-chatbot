@@ -340,4 +340,4 @@ Analyze user messages and extract business facts in JSON format:
   ]
 }
 
-Only extract facts with confidence > 0.7.`; 
+Only extract facts with confidence > 0.7.`;

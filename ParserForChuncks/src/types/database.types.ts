@@ -4,9 +4,17 @@
 export interface UserFact {
   id: string;
   user_id: string;
-  fact_type: 'business_type' | 'business_size' | 'customer_base' | 'physical_location' | 
-            'web_presence' | 'service_types' | 'compliance_status' | 'business_location' |
-            'business_digital_presence' | 'accessibility_audit_done';
+  fact_type:
+    | 'business_type'
+    | 'business_size'
+    | 'customer_base'
+    | 'physical_location'
+    | 'web_presence'
+    | 'service_types'
+    | 'compliance_status'
+    | 'business_location'
+    | 'business_digital_presence'
+    | 'accessibility_audit_done';
   fact_value: string;
   confidence: number; // 0-1
   source_message_id?: string;
@@ -115,14 +123,14 @@ export interface EmailDraft {
 }
 
 // Validation helpers
-export type DatabaseTableName = 
-  | 'user_facts' 
-  | 'chat_messages' 
-  | 'chat_sessions' 
-  | 'frustration_analysis' 
-  | 'query_logs' 
+export type DatabaseTableName =
+  | 'user_facts'
+  | 'chat_messages'
+  | 'chat_sessions'
+  | 'frustration_analysis'
+  | 'query_logs'
   | 'email_drafts';
 
 export type FactType = UserFact['fact_type'];
 export type MessageRole = ChatMessage['role'];
-export type FrustrationRecommendation = FrustrationAnalysis['recommendation']; 
+export type FrustrationRecommendation = FrustrationAnalysis['recommendation'];

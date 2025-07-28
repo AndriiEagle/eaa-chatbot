@@ -4,9 +4,18 @@ import { UserPersona } from '../suggestion.types';
 export class UserPersonaAnalyzer {
   constructor(private openai: OpenAI) {}
 
-  async analyze(userFacts: any[], sessionMessages: any[], currentQuestion: string): Promise<UserPersona> {
-    const factsText = userFacts.map(f => `${f.fact_type}: ${f.fact_value}`).join('\n');
-    const messagesText = sessionMessages.slice(-10).map(m => `${m.role}: ${m.content}`).join('\n');
+  async analyze(
+    userFacts: any[],
+    sessionMessages: any[],
+    currentQuestion: string
+  ): Promise<UserPersona> {
+    const factsText = userFacts
+      .map(f => `${f.fact_type}: ${f.fact_value}`)
+      .join('\n');
+    const messagesText = sessionMessages
+      .slice(-10)
+      .map(m => `${m.role}: ${m.content}`)
+      .join('\n');
 
     const prompt = `
 🎯 REVOLUTIONARY USER PERSONA ANALYSIS EAA ChatBot
@@ -58,7 +67,7 @@ STRICTLY respond in JSON:
         model: 'gpt-4o-mini',
         messages: [{ role: 'user', content: prompt }],
         temperature: 0.2,
-        max_tokens: 300
+        max_tokens: 300,
       });
 
       const result = JSON.parse(completion.choices[0].message.content || '{}');
@@ -70,7 +79,7 @@ STRICTLY respond in JSON:
         primaryMotivation: result.primaryMotivation || 'compliance',
         communicationStyle: 'business_focused',
         learningPreference: result.learningPreference || 'textual',
-        decisionMakingStyle: result.decisionMakingStyle || 'analytical'
+        decisionMakingStyle: result.decisionMakingStyle || 'analytical',
       };
     } catch (error) {
       console.error('❌ [PERSONA] Parse error:', error);
@@ -82,8 +91,8 @@ STRICTLY respond in JSON:
         primaryMotivation: 'compliance',
         communicationStyle: 'business_focused',
         learningPreference: 'textual',
-        decisionMakingStyle: 'analytical'
+        decisionMakingStyle: 'analytical',
       };
     }
   }
-} 
+}

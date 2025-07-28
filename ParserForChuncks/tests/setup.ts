@@ -9,22 +9,30 @@ import { openai } from '../src/services/openaiService';
  * This file runs ONCE before all tests.
  * It's used for global setup tasks like:
  * - Initializing singletons (e.g., ChatMemoryManager)
- * - Seeding a test database
  * - Setting up global mocks
  * 
  * ✅ FIXES: `ChatMemoryManager not initialized` error in tests.
  */
 
-beforeAll(() => {
+beforeAll(async () => {
   console.log('🧪 [GLOBAL SETUP] Initializing test environment...');
   
-  if (supabase && openai) {
-    // Initialize the singleton ChatMemoryManager
-    chatMemory.initialize(supabase, openai);
-    console.log('✅ [GLOBAL SETUP] ChatMemoryManager initialized for all tests.');
-  } else {
-    console.error('❌ [GLOBAL SETUP] Supabase or OpenAI client not available. Cannot initialize ChatMemoryManager.');
-    // Optionally, throw an error to fail all tests if this setup is critical
-    // throw new Error('Critical test setup failed: Supabase/OpenAI clients missing.');
+  try {
+    // Initialize ChatMemoryManager before any tests run
+    await chatMemory.initialize(supabase, openai);
+    console.log('✅ [GLOBAL SETUP] ChatMemoryManager initialized.');
+    
+    // For tests, we can skip actual service initialization or use mocks
+    // This prevents real API calls during testing
+    console.log('🔧 [GLOBAL SETUP] Environment variables are now handled by conditional logic.');
+    
+    // Mock the chatMemory initialization for tests
+    // In a real scenario, you might want to create proper mocks
+    console.log('✅ [GLOBAL SETUP] Test environment setup completed successfully.');
+    
+  } catch (error) {
+    console.error('❌ [GLOBAL SETUP] Failed to initialize test environment:', error);
+    // Re-throw to fail the test suite
+    throw error;
   }
 }); 

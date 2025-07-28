@@ -4,17 +4,23 @@
  * @returns Объект стилей для React
  */
 export function strToObj(styleStr: string): Record<string, string> {
-  return styleStr.split(';')
+  return styleStr
+    .split(';')
     .filter(Boolean)
     .map(style => style.trim())
-    .reduce((acc, style) => {
-      const [property, value] = style.split(':').map(s => s.trim());
-      if (property && value) {
-        const camelCaseProperty = property.replace(/-([a-z])/g, g => g[1].toUpperCase());
-        acc[camelCaseProperty] = value;
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    .reduce(
+      (acc, style) => {
+        const [property, value] = style.split(':').map(s => s.trim());
+        if (property && value) {
+          const camelCaseProperty = property.replace(/-([a-z])/g, g =>
+            g[1].toUpperCase()
+          );
+          acc[camelCaseProperty] = value;
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
 }
 
 /**
@@ -45,4 +51,4 @@ export function getRelevanceColor(score: number): string {
   if (score >= 0.85) return '#10b981'; // зеленый
   if (score >= 0.78) return '#f59e0b'; // желтый
   return '#ef4444'; // красный
-} 
+}

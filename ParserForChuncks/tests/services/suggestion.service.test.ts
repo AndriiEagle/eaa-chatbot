@@ -24,7 +24,9 @@ describe('SuggestionService - Professional Test Suite', () => {
     mockOpenAI = {
       chat: {
         completions: {
-          create: vi.fn()
+          create: vi.fn().mockResolvedValue({
+            choices: [{ message: { content: '{ "patterns": [] }' } }]
+          })
         }
       }
     } as any;
