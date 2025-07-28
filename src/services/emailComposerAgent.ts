@@ -28,7 +28,7 @@ export interface EmailGenerationContext {
 
 /**
  * 🎯 SMART EMAIL AUTO-GENERATION AGENT
- * 
+ *
  * Operating principles:
  * - Analyzes entire conversation and user context
  * - Creates personalized emails with full context
@@ -40,44 +40,53 @@ export class EmailComposerAgent {
 
   /**
    * 📧 MAIN EMAIL GENERATION METHOD
-   * 
+   *
    * @param context - Context for email generation
    * @returns Promise<EmailDraft>
    */
   async generateEmail(context: EmailGenerationContext): Promise<EmailDraft> {
-    console.log('\n📧 [EmailComposer] Starting personalized email generation...');
+    console.log(
+      '\n📧 [EmailComposer] Starting personalized email generation...'
+    );
     console.log(`👤 User: ${context.userId}`);
-    console.log(`🎯 Frustration level: ${context.frustrationAnalysis.frustrationLevel.toFixed(2)}`);
+    console.log(
+      `🎯 Frustration level: ${context.frustrationAnalysis.frustrationLevel.toFixed(2)}`
+    );
     console.log(`📊 User facts: ${context.userFacts.length}`);
 
     try {
       // Stage 1: User context analysis
       const userProfile = this.analyzeUserProfile(context.userFacts);
-      
+
       // Stage 2: Extract key conversation insights
-      const conversationInsights = this.extractConversationInsights(context.recentMessages, context.frustrationAnalysis);
-      
+      const conversationInsights = this.extractConversationInsights(
+        context.recentMessages,
+        context.frustrationAnalysis
+      );
+
       // Stage 3: Assess sales potential
-      const salesAssessment = this.assessSalesPotential(context.userFacts, context.frustrationAnalysis);
-      
+      const salesAssessment = this.assessSalesPotential(
+        context.userFacts,
+        context.frustrationAnalysis
+      );
+
       // Stage 4: Prepare context for AI
       const emailContext = this.prepareEmailGenerationContext(context);
-      
+
       // Stage 5: Generate email via GPT-4o-mini
       const emailDraft = await this.generateEmailWithAI(emailContext);
-      
+
       // Stage 6: Post-process and enhance email
       const finalEmail = this.enhanceEmail(emailDraft, salesAssessment);
-      
+
       // Stage 7: Save to database
       await this.saveEmailToDatabase(context, finalEmail);
-      
+
       console.log('✅ [EmailComposer] Email successfully generated!');
       console.log(`📝 Subject: ${finalEmail.subject}`);
       console.log(`🎯 Sales potential: ${finalEmail.salesPotential}`);
-      
+
       return finalEmail;
-      
     } catch (error) {
       console.error('❌ [EmailComposer] Error generating email:', error);
       throw error;
@@ -89,51 +98,88 @@ export class EmailComposerAgent {
    */
   private analyzeUserProfile(userFacts: UserFact[]): any {
     console.log('👤 [EmailComposer] Analyzing user profile...');
-    
+
     const profile = {
-      businessType: userFacts.find(f => f.type === 'business_type')?.value || 'Unknown',
-      businessSize: userFacts.find(f => f.type === 'business_size')?.value || 'Unknown',
-      location: userFacts.find(f => f.type === 'physical_location')?.value || 'Unknown',
-      webPresence: userFacts.find(f => f.type === 'web_presence')?.value || 'Unknown',
-      services: userFacts.find(f => f.type === 'service_types')?.value || 'Unknown',
-      customerBase: userFacts.find(f => f.type === 'customer_base')?.value || 'Unknown',
-      completeness: userFacts.filter(f => f.confidence > 0.7).length / 7 // Approximate profile completeness
+      businessType:
+        userFacts.find(f => f.type === 'business_type')?.value || 'Unknown',
+      businessSize:
+        userFacts.find(f => f.type === 'business_size')?.value || 'Unknown',
+      location:
+        userFacts.find(f => f.type === 'physical_location')?.value || 'Unknown',
+      webPresence:
+        userFacts.find(f => f.type === 'web_presence')?.value || 'Unknown',
+      services:
+        userFacts.find(f => f.type === 'service_types')?.value || 'Unknown',
+      customerBase:
+        userFacts.find(f => f.type === 'customer_base')?.value || 'Unknown',
+      completeness: userFacts.filter(f => f.confidence > 0.7).length / 7, // Approximate profile completeness
     };
 
-    console.log(`📊 Profile completeness: ${Math.round(profile.completeness * 100)}%`);
+    console.log(
+      `📊 Profile completeness: ${Math.round(profile.completeness * 100)}%`
+    );
     console.log(`🏢 Business type: ${profile.businessType}`);
-    
+
     return profile;
   }
 
   /**
    * Extracts key insights from conversation
    */
-  private extractConversationInsights(messages: ChatMessage[], frustrationAnalysis: FrustrationAnalysis): any {
+  private extractConversationInsights(
+    messages: ChatMessage[],
+    frustrationAnalysis: FrustrationAnalysis
+  ): any {
     console.log('💬 [EmailComposer] Analyzing conversation...');
-    
+
     const userMessages = messages.filter(msg => msg.role === 'user');
     const botMessages = messages.filter(msg => msg.role === 'assistant');
-    
+
     // Find main question topics
     const topicKeywords = [
-      'accessibility', 'wcag', 'audit', 'compliance', 'requirements',
-      'penalties', 'check', 'website', 'application', 'deadlines'
+      'accessibility',
+      'wcag',
+      'audit',
+      'compliance',
+      'requirements',
+      'penalties',
+      'check',
+      'website',
+      'application',
+      'deadlines',
     ];
-    
-    const mentionedTopics = topicKeywords.filter(keyword => 
+
+    const mentionedTopics = topicKeywords.filter(keyword =>
       userMessages.some(msg => msg.content.toLowerCase().includes(keyword))
     );
 
     // Determine request types
     const requestTypes = [];
-    if (userMessages.some(msg => msg.content.toLowerCase().includes('how') || msg.content.toLowerCase().includes('what'))) {
+    if (
+      userMessages.some(
+        msg =>
+          msg.content.toLowerCase().includes('how') ||
+          msg.content.toLowerCase().includes('what')
+      )
+    ) {
       requestTypes.push('Information requests');
     }
-    if (userMessages.some(msg => msg.content.toLowerCase().includes('help') || msg.content.toLowerCase().includes('assist'))) {
+    if (
+      userMessages.some(
+        msg =>
+          msg.content.toLowerCase().includes('help') ||
+          msg.content.toLowerCase().includes('assist')
+      )
+    ) {
       requestTypes.push('Help requests');
     }
-    if (userMessages.some(msg => msg.content.toLowerCase().includes('cost') || msg.content.toLowerCase().includes('price'))) {
+    if (
+      userMessages.some(
+        msg =>
+          msg.content.toLowerCase().includes('cost') ||
+          msg.content.toLowerCase().includes('price')
+      )
+    ) {
       requestTypes.push('Pricing questions');
     }
 
@@ -145,31 +191,45 @@ export class EmailComposerAgent {
       requestTypes,
       frustrationTriggers: frustrationAnalysis.triggerPhrases,
       detectedPatterns: frustrationAnalysis.detectedPatterns,
-      sessionDuration: frustrationAnalysis.contextFactors.sessionDuration
+      sessionDuration: frustrationAnalysis.contextFactors.sessionDuration,
     };
   }
 
   /**
    * Assesses user's sales potential
    */
-  private assessSalesPotential(userFacts: UserFact[], frustrationAnalysis: FrustrationAnalysis): any {
+  private assessSalesPotential(
+    userFacts: UserFact[],
+    frustrationAnalysis: FrustrationAnalysis
+  ): any {
     console.log('💰 [EmailComposer] Assessing sales potential...');
-    
+
     let salesScore = 0;
     let factors = [];
 
     // Factor 1: Business type (some types are more ready to buy)
-    const businessType = userFacts.find(f => f.type === 'business_type')?.value?.toLowerCase() || '';
-    if (businessType.includes('e-commerce') || businessType.includes('fintech') || businessType.includes('bank')) {
+    const businessType =
+      userFacts.find(f => f.type === 'business_type')?.value?.toLowerCase() ||
+      '';
+    if (
+      businessType.includes('e-commerce') ||
+      businessType.includes('fintech') ||
+      businessType.includes('bank')
+    ) {
       salesScore += 30;
       factors.push('High-risk sector (requires EAA compliance)');
-    } else if (businessType.includes('website') || businessType.includes('application')) {
+    } else if (
+      businessType.includes('website') ||
+      businessType.includes('application')
+    ) {
       salesScore += 20;
       factors.push('Digital product (requires audit)');
     }
 
     // Factor 2: Business size
-    const businessSize = userFacts.find(f => f.type === 'business_size')?.value?.toLowerCase() || '';
+    const businessSize =
+      userFacts.find(f => f.type === 'business_size')?.value?.toLowerCase() ||
+      '';
     if (businessSize.includes('large') || businessSize.includes('big')) {
       salesScore += 25;
       factors.push('Large business (bigger budget)');
@@ -185,7 +245,9 @@ export class EmailComposerAgent {
     }
 
     // Factor 4: Profile completeness (more data = more interest)
-    const profileCompleteness = userFacts.filter(f => f.confidence > 0.7).length;
+    const profileCompleteness = userFacts.filter(
+      f => f.confidence > 0.7
+    ).length;
     if (profileCompleteness >= 5) {
       salesScore += 15;
       factors.push('Detailed profile (high interest)');
@@ -210,7 +272,7 @@ export class EmailComposerAgent {
       score: salesScore,
       potential,
       urgency,
-      factors
+      factors,
     };
   }
 
@@ -218,9 +280,11 @@ export class EmailComposerAgent {
    * Prepares context for AI email generation
    * Creates a comprehensive prompt with user data and frustration analysis
    */
-  private prepareEmailGenerationContext(context: EmailGenerationContext): string {
+  private prepareEmailGenerationContext(
+    context: EmailGenerationContext
+  ): string {
     const userProfile = this.analyzeUserProfile(context.userFacts);
-    
+
     return `
 === SITUATION CONTEXT ===
 The chatbot user has shown signs of frustration (level: ${context.frustrationAnalysis.frustrationLevel.toFixed(2)}).
@@ -238,7 +302,10 @@ Frustration Analysis:
 - Detected Patterns: ${context.frustrationAnalysis.detectedPatterns.join(', ')}
 
 Recent Messages:
-${context.recentMessages.slice(-3).map((msg: ChatMessage) => `${msg.role}: ${msg.content}`).join('\n')}
+${context.recentMessages
+  .slice(-3)
+  .map((msg: ChatMessage) => `${msg.role}: ${msg.content}`)
+  .join('\n')}
 
 === TASK ===
 Generate a personalized email from a manager to this user. The email should:
@@ -264,20 +331,22 @@ Generate ONLY the email content, no additional explanations.
    * Generates email using GPT-4o-mini
    */
   private async generateEmailWithAI(context: string): Promise<any> {
-    console.log('🤖 [EmailComposer] Sending request to GPT-4o-mini for email generation...');
-    
+    console.log(
+      '🤖 [EmailComposer] Sending request to GPT-4o-mini for email generation...'
+    );
+
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         { role: 'system', content: this.SYSTEM_PROMPT },
-        { role: 'user', content: context }
+        { role: 'user', content: context },
       ],
       temperature: 0.7, // Slightly more creativity for email
       max_tokens: 1000,
     });
 
     const responseText = completion.choices[0].message.content?.trim();
-    
+
     if (!responseText) {
       throw new Error('Empty response from GPT-4o-mini');
     }
@@ -297,11 +366,12 @@ Generate ONLY the email content, no additional explanations.
    */
   private enhanceEmail(aiEmail: any, salesAssessment: any): EmailDraft {
     console.log('✨ [EmailComposer] Enhancing email...');
-    
+
     // Add subject prefix based on urgency
     let subjectPrefix = '';
     if (salesAssessment.urgency === 'high') subjectPrefix = '[URGENT] ';
-    else if (salesAssessment.urgency === 'medium') subjectPrefix = '[IMPORTANT] ';
+    else if (salesAssessment.urgency === 'medium')
+      subjectPrefix = '[IMPORTANT] ';
 
     // Add postscript with technical details
     const technicalPS = `
@@ -312,30 +382,39 @@ P.S. Technical information:
 - Recommended response time: ${salesAssessment.urgency === 'high' ? '2-4 hours' : salesAssessment.urgency === 'medium' ? '1-2 days' : '3-5 days'}`;
 
     return {
-      subject: subjectPrefix + (aiEmail.subject || 'Personal assistance with EAA'),
+      subject:
+        subjectPrefix + (aiEmail.subject || 'Personal assistance with EAA'),
       body: (aiEmail.body || 'Email not generated') + technicalPS,
       userContextSummary: aiEmail.user_context_summary || 'Context unavailable',
-      conversationHighlights: Array.isArray(aiEmail.conversation_highlights) ? aiEmail.conversation_highlights : [],
+      conversationHighlights: Array.isArray(aiEmail.conversation_highlights)
+        ? aiEmail.conversation_highlights
+        : [],
       recommendedRecipient: 'sales@company.com', // Can be configured
       salesPotential: aiEmail.sales_potential || salesAssessment.potential,
-      urgencyLevel: aiEmail.urgency_level || salesAssessment.urgency
+      urgencyLevel: aiEmail.urgency_level || salesAssessment.urgency,
     };
   }
 
   /**
    * Saves email to database and automatically sends it
    */
-  private async saveEmailToDatabase(context: EmailGenerationContext, email: EmailDraft): Promise<void> {
+  private async saveEmailToDatabase(
+    context: EmailGenerationContext,
+    email: EmailDraft
+  ): Promise<void> {
     try {
       console.log('💾 [EmailComposer] Saving email to database...');
 
       // Generate valid UUID for session_id if not in correct format
       let validSessionId: string | null = context.sessionId;
-      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
-      
+      const uuidRegex =
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
       if (!uuidRegex.test(context.sessionId)) {
         validSessionId = uuidv4();
-        console.log(`🔄 [EmailComposer] Generated valid UUID: ${validSessionId} (original: ${context.sessionId})`);
+        console.log(
+          `🔄 [EmailComposer] Generated valid UUID: ${validSessionId} (original: ${context.sessionId})`
+        );
       }
 
       // Check if session exists in database
@@ -347,7 +426,9 @@ P.S. Technical information:
 
       // If session doesn't exist, create temporary record or use null
       if (!sessionExists) {
-        console.log(`⚠️ [EmailComposer] Session ${validSessionId} not found in database, saving email without session link`);
+        console.log(
+          `⚠️ [EmailComposer] Session ${validSessionId} not found in database, saving email without session link`
+        );
         validSessionId = null; // Save without session link
       }
 
@@ -361,7 +442,7 @@ P.S. Technical information:
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
-        
+
         frustrationAnalysisId = frustrationData?.id || null;
       }
 
@@ -375,7 +456,9 @@ P.S. Technical information:
           user_context_summary: email.userContextSummary,
           conversation_highlights: email.conversationHighlights.join('\n'),
           status: 'draft', // Start as draft
-          recipient_email: process.env.ESCALATION_EMAIL_RECIPIENT || 'andriipokrovskyi@gmail.com'
+          recipient_email:
+            process.env.ESCALATION_EMAIL_RECIPIENT ||
+            'andriipokrovskyi@gmail.com',
         })
         .select()
         .single();
@@ -390,14 +473,14 @@ P.S. Technical information:
       // 📤 AUTOMATICALLY SEND EMAIL IMMEDIATELY
       try {
         console.log('📤 [EmailComposer] Automatically sending email...');
-        
+
         // Import and use existing emailService
         const { sendEscalationEmail } = await import('./emailService.js');
-        
+
         await sendEscalationEmail({
           sessionId: context.sessionId,
           messageCount: context.recentMessages.length,
-          escalationTime: new Date().toUTCString()
+          escalationTime: new Date().toUTCString(),
         });
 
         // Update status to sent
@@ -406,17 +489,17 @@ P.S. Technical information:
           .update({
             status: 'sent',
             sent_at: new Date().toISOString(),
-            user_approved: true // Auto-approved for immediate frustration response
+            user_approved: true, // Auto-approved for immediate frustration response
           })
           .eq('id', insertedEmail.id);
 
-        console.log('✅ [EmailComposer] Email automatically sent successfully!');
-
+        console.log(
+          '✅ [EmailComposer] Email automatically sent successfully!'
+        );
       } catch (sendError) {
         console.error('❌ [EmailComposer] Error sending email:', sendError);
         // Keep as draft if sending fails
       }
-
     } catch (error) {
       console.error('❌ [EmailComposer] Error saving email:', error);
     }
@@ -433,7 +516,7 @@ P.S. Technical information:
 
     try {
       console.log('📤 [EmailComposer] Sending approved email...');
-      
+
       // Get email from database
       const { data: email, error: fetchError } = await supabase
         .from('escalation_emails')
@@ -447,23 +530,22 @@ P.S. Technical information:
 
       // Send via existing emailService
       // (can integrate with existing emailService.ts here)
-      
+
       // Update email status
       await supabase
         .from('escalation_emails')
         .update({
           status: 'sent',
           sent_at: new Date().toISOString(),
-          user_approved: true
+          user_approved: true,
         })
         .eq('id', emailId);
 
       console.log('✅ [EmailComposer] Email successfully sent!');
       return true;
-
     } catch (error) {
       console.error('❌ [EmailComposer] Error sending email:', error);
       return false;
     }
   }
-} 
+}

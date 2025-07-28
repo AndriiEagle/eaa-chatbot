@@ -5,8 +5,8 @@
  * БЕЗ отправки реальных писем и с детальным логированием
  */
 
-import { FrustrationDetectionAgent } from './dist/services/frustrationDetectionAgent.js';
-import { EmailComposerAgent } from './dist/services/emailComposerAgent.js';
+import { FrustrationDetectionAgent } from '../../src/services/frustrationDetectionAgent.ts';
+import { EmailComposerAgent } from '../../src/services/emailComposerAgent.ts';
 
 // Тестовые данные для безопасного тестирования
 const TEST_SCENARIOS = [

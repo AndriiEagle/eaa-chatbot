@@ -4,4 +4,4 @@
  */
 
 // Реэкспорт всего API из legacy обертки для обратной совместимости
-export * from './chat_memory_legacy.js'; 
+export * from './chat_memory_legacy.js';

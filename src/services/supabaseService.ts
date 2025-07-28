@@ -2,9 +2,13 @@ import { createClient } from '@supabase/supabase-js';
 import { env } from '../config/environment.js';
 
 // Создаем клиент Supabase
-export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY, {
-  db: { schema: 'public' },
-});
+export const supabase = createClient(
+  env.SUPABASE_URL,
+  env.SUPABASE_SERVICE_KEY,
+  {
+    db: { schema: 'public' },
+  }
+);
 
 /**
  * Поиск релевантных чанков в базе данных
@@ -17,7 +21,7 @@ export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_KEY,
 export async function findRelevantChunks(
   queryEmbedding: number[],
   datasetId: string,
-  similarityThreshold: number, 
+  similarityThreshold: number,
   matchCount: number
 ) {
   const { data: chunks, error } = await supabase.rpc('match_documents', {
@@ -65,4 +69,4 @@ export async function logQuery(
   } catch (error) {
     console.error('❌ [LOGGING] Ошибка при логировании запроса:', error);
   }
-} 
+}

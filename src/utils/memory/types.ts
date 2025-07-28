@@ -57,4 +57,4 @@ export interface UserFact {
   fact_value: string;
   confidence: number;
   source_message_id?: string;
-} 
+}

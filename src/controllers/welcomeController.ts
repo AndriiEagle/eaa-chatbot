@@ -6,7 +6,10 @@ import { generatePersonalizedSuggestions } from '../utils/suggestions/suggestion
  * Controller for generating personalized greetings and suggestions.
  * GET /welcome/:userId
  */
-export const welcomeController = async (req: Request, res: Response): Promise<void> => {
+export const welcomeController = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const userId = req.params.userId || 'anonymous';
 
@@ -21,13 +24,25 @@ export const welcomeController = async (req: Request, res: Response): Promise<vo
     const isFirstInteraction = userFacts.length === 0;
 
     // Generate AI-powered personalized greeting based on vector database
-    let greeting = 'Hello! I\'ll help you navigate the European Accessibility Act requirements.';
+    let greeting =
+      "Hello! I'll help you navigate the European Accessibility Act requirements.";
 
     if (!isFirstInteraction) {
-      const businessType = userFacts.find((f: any) => f.fact_type === 'business_type' && f.confidence > 0.6)?.fact_value;
-      const businessLocation = userFacts.find((f: any) => f.fact_type === 'business_location' && f.confidence > 0.6)?.fact_value;
-      const digitalPresence = userFacts.find((f: any) => f.fact_type === 'business_digital_presence' && f.confidence > 0.6)?.fact_value;
-      const auditDone = userFacts.find((f: any) => f.fact_type === 'accessibility_audit_done' && f.confidence > 0.5)?.fact_value === 'true';
+      const businessType = userFacts.find(
+        (f: any) => f.fact_type === 'business_type' && f.confidence > 0.6
+      )?.fact_value;
+      const businessLocation = userFacts.find(
+        (f: any) => f.fact_type === 'business_location' && f.confidence > 0.6
+      )?.fact_value;
+      const digitalPresence = userFacts.find(
+        (f: any) =>
+          f.fact_type === 'business_digital_presence' && f.confidence > 0.6
+      )?.fact_value;
+      const auditDone =
+        userFacts.find(
+          (f: any) =>
+            f.fact_type === 'accessibility_audit_done' && f.confidence > 0.5
+        )?.fact_value === 'true';
 
       // Construct dynamic AI-powered phrase based on user vector data
       const parts: string[] = ['Hello'];
@@ -44,14 +59,14 @@ export const welcomeController = async (req: Request, res: Response): Promise<vo
 
       greeting = parts.join(' ') + '. ';
       greeting += auditDone
-        ? 'Excellent! Your accessibility audit is complete — let\'s discuss next steps for EAA compliance.'
-        : 'I\'m ready to help you with EAA requirements and accessibility auditing.';
+        ? "Excellent! Your accessibility audit is complete — let's discuss next steps for EAA compliance."
+        : "I'm ready to help you with EAA requirements and accessibility auditing.";
     }
 
     // Generate AI-powered suggestions (maximum 3) based on user vector profile
     const { clarificationQuestions } = await generatePersonalizedSuggestions(
-      userFacts, 
-      [], 
+      userFacts,
+      [],
       isFirstInteraction,
       '',
       userId,
@@ -62,6 +77,11 @@ export const welcomeController = async (req: Request, res: Response): Promise<vo
     res.status(200).json({ greeting, suggestions });
   } catch (error) {
     console.error('❌ [WELCOME] Error generating AI-powered greeting:', error);
-    res.status(500).json({ greeting: 'Hello! Let\'s discuss the European Accessibility Act.', suggestions: [] });
+    res
+      .status(500)
+      .json({
+        greeting: "Hello! Let's discuss the European Accessibility Act.",
+        suggestions: [],
+      });
   }
-}; 
+};

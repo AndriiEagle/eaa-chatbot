@@ -20,11 +20,13 @@ export function clearEmbeddingCache() {
  */
 export async function createEmbedding(text: string): Promise<number[]> {
   if (!text || typeof text !== 'string' || text.trim().length === 0) {
-    throw new Error('❌ [EMBEDDING] Text for embedding creation must be a non-empty string');
+    throw new Error(
+      '❌ [EMBEDDING] Text for embedding creation must be a non-empty string'
+    );
   }
 
   const cacheKey = text.trim();
-  
+
   // Check cache first
   if (embeddingCache.has(cacheKey)) {
     console.log('🎯 [EMBEDDING] Cache hit');
@@ -32,25 +34,28 @@ export async function createEmbedding(text: string): Promise<number[]> {
   }
 
   try {
-    console.log(`🔄 [EMBEDDING] Creating embedding for text (${text.length} chars)...`);
-    
+    console.log(
+      `🔄 [EMBEDDING] Creating embedding for text (${text.length} chars)...`
+    );
+
     const response = await openai.embeddings.create({
       model: EMBEDDING_MODEL,
       input: text.trim(),
     });
 
     const embedding = response.data[0]?.embedding;
-    
+
     if (!embedding || embedding.length === 0) {
       throw new Error('❌ [EMBEDDING] API returned empty embedding');
     }
 
     // Cache the result
     embeddingCache.set(cacheKey, embedding);
-    
-    console.log(`✅ [EMBEDDING] Created embedding with ${embedding.length} dimensions`);
+
+    console.log(
+      `✅ [EMBEDDING] Created embedding with ${embedding.length} dimensions`
+    );
     return embedding;
-    
   } catch (error) {
     console.error('❌ [EMBEDDING] Error creating embedding:', error);
     throw error;
@@ -73,8 +78,10 @@ export async function generateCompletion(
   }
 
   try {
-    console.log(`🤖 [GENERATE] Generating completion with ${messages.length} messages...`);
-    
+    console.log(
+      `🤖 [GENERATE] Generating completion with ${messages.length} messages...`
+    );
+
     const completion = await openai.chat.completions.create({
       model: CHAT_MODEL,
       messages,
@@ -83,7 +90,7 @@ export async function generateCompletion(
     });
 
     const content = completion.choices[0]?.message?.content;
-    
+
     if (!content) {
       console.warn('⚠️ [GENERATE] Empty response from OpenAI');
       return '';
@@ -91,7 +98,6 @@ export async function generateCompletion(
 
     console.log(`✅ [GENERATE] Generated completion (${content.length} chars)`);
     return content;
-    
   } catch (error) {
     console.error('❌ [GENERATE] Error generating completion:', error);
     throw error;
@@ -114,8 +120,10 @@ export async function generateStreamingCompletion(
   }
 
   try {
-    console.log(`🌊 [STREAM] Starting streaming completion with ${messages.length} messages...`);
-    
+    console.log(
+      `🌊 [STREAM] Starting streaming completion with ${messages.length} messages...`
+    );
+
     const stream = await openai.chat.completions.create({
       model: CHAT_MODEL,
       messages,
@@ -126,9 +134,8 @@ export async function generateStreamingCompletion(
 
     console.log('✅ [STREAM] Streaming started successfully');
     return stream;
-    
   } catch (error) {
     console.error('❌ [STREAM] Error starting streaming completion:', error);
     throw error;
   }
-} 
+}

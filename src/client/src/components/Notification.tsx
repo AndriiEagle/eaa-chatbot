@@ -11,9 +11,12 @@ interface NotificationProps {
  * Component for displaying notifications to user
  * Automatically hides after specified timeout
  */
-const Notification: React.FC<NotificationProps> = ({ notification, onClose }) => {
+const Notification: React.FC<NotificationProps> = ({
+  notification,
+  onClose,
+}) => {
   const { message, type, visible } = notification;
-  
+
   // Automatically hide notification after NOTIFICATION_TIMEOUT ms
   useEffect(() => {
     if (visible) {
@@ -24,17 +27,21 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose }) =>
 
   // If notification is not visible, don't render anything
   if (!visible) return null;
-  
+
   // Colors for different notification types
   const getBackgroundColor = (): string => {
     switch (type) {
-      case 'success': return '#10b981';
-      case 'error': return '#ef4444';
-      case 'warn': return '#f59e0b';
-      default: return '#3b82f6'; // info
+      case 'success':
+        return '#10b981';
+      case 'error':
+        return '#ef4444';
+      case 'warn':
+        return '#f59e0b';
+      default:
+        return '#3b82f6'; // info
     }
   };
-  
+
   const style: CSSProperties = {
     position: 'fixed',
     top: '1rem',
@@ -52,11 +59,7 @@ const Notification: React.FC<NotificationProps> = ({ notification, onClose }) =>
     opacity: visible ? 1 : 0,
   };
 
-  return (
-    <div style={style}>
-      {message}
-    </div>
-  );
+  return <div style={style}>{message}</div>;
 };
 
-export default Notification; 
+export default Notification;

@@ -1,7 +1,14 @@
-import { ProcessingResult, QuestionResult, AskRequest } from '../types/common.js';
+import {
+  ProcessingResult,
+  QuestionResult,
+  AskRequest,
+} from '../types/common.js';
 import { logger } from '../utils/logger.js';
 import { preprocessQuery } from '../utils/preprocessing/preprocessQuery.js';
-import { containsBusinessInfo, processBusinessInfo } from '../utils/business/businessInfoProcessor.js';
+import {
+  containsBusinessInfo,
+  processBusinessInfo,
+} from '../utils/business/businessInfoProcessor.js';
 import { handleSimpleQuery } from '../utils/preprocessing/simpleQueryHandler.js';
 import { smartSplitQuestions } from '../utils/questionSplitting/splitQuestions.js';
 import { openai, generateCompletion } from './openaiService.js';
@@ -22,7 +29,6 @@ interface QuestionClassification {
  * Handles all question preprocessing, classification, and routing
  */
 export class QuestionProcessingService {
-
   async preprocess(question: string): Promise<string> {
     // Return preprocessed query result directly as string
     const result = await preprocessQuery(question);
@@ -32,11 +38,11 @@ export class QuestionProcessingService {
   async classify(question: string): Promise<QuestionClassification> {
     // Check if question contains business info
     const businessInfo = containsBusinessInfo(question);
-    
+
     // Check if it's multiple questions
     const splitQuestions = await smartSplitQuestions(question);
     const isMultiple = splitQuestions.length > 1;
-    
+
     // Simple classification logic
     const isSimple = question.length < 30 && !businessInfo && !isMultiple;
 
@@ -44,13 +50,17 @@ export class QuestionProcessingService {
       isSimple,
       isMultiple,
       containsBusinessInfo: businessInfo,
-      questions: isMultiple ? splitQuestions : undefined
+      questions: isMultiple ? splitQuestions : undefined,
     };
   }
 
-  async handleSimpleQuery(question: string, sessionId: string, queryId: string): Promise<ProcessingResult> {
+  async handleSimpleQuery(
+    question: string,
+    sessionId: string,
+    queryId: string
+  ): Promise<ProcessingResult> {
     const result = await handleSimpleQuery(question);
-    
+
     return {
       answer: result.response_text || 'Спасибо за ваше сообщение!',
       sources: [],
@@ -58,24 +68,28 @@ export class QuestionProcessingService {
         embedding_ms: 0,
         search_ms: 0,
         generate_ms: 0,
-        total_ms: 0
+        total_ms: 0,
       },
       session_id: sessionId,
       query_id: queryId,
       suggestions: [],
-      suggestions_header: 'Простой запрос обработан'
+      suggestions_header: 'Простой запрос обработан',
     };
   }
 
   async handleBusinessInfo(
-    question: string, 
-    userId: string, 
-    sessionId: string, 
+    question: string,
+    userId: string,
+    sessionId: string,
     queryId: string,
-    options: { dataset_id: string; similarity_threshold: number; max_chunks: number }
+    options: {
+      dataset_id: string;
+      similarity_threshold: number;
+      max_chunks: number;
+    }
   ): Promise<ProcessingResult> {
     const timer = createTimer();
-    
+
     const result = await processBusinessInfo({
       question,
       user_id: userId,
@@ -84,7 +98,7 @@ export class QuestionProcessingService {
       similarity_threshold: options.similarity_threshold,
       max_chunks: options.max_chunks,
       isFirstInteraction: true,
-      timerTotal: timer
+      timerTotal: timer,
     });
 
     return {
@@ -94,23 +108,31 @@ export class QuestionProcessingService {
         embedding_ms: 0,
         search_ms: 0,
         generate_ms: 0,
-        total_ms: 0
+        total_ms: 0,
       },
       session_id: sessionId,
       query_id: queryId,
       suggestions: result.suggestions || [],
-      suggestions_header: result.suggestions_header || 'Информация о бизнесе обработана'
+      suggestions_header:
+        result.suggestions_header || 'Информация о бизнесе обработана',
     };
   }
 
-  async generateAnswer(question: string, chunks: any[], memoryContext: any): Promise<string> {
+  async generateAnswer(
+    question: string,
+    chunks: any[],
+    memoryContext: any
+  ): Promise<string> {
     const ragContext = formatRAGContext(chunks, question);
-    
+
     const messages = [
       { role: 'system' as const, content: STRICT_SYSTEM_PROMPT },
-      { role: 'user' as const, content: `${ragContext}\n\nQuestion: ${question}` }
+      {
+        role: 'user' as const,
+        content: `${ragContext}\n\nQuestion: ${question}`,
+      },
     ];
-    
+
     return await generateCompletion(messages);
   }
 
@@ -125,9 +147,9 @@ export class QuestionProcessingService {
       queryId: string;
     }
   ): Promise<ProcessingResult> {
-    logger.info('Processing multiple questions', { 
+    logger.info('Processing multiple questions', {
       questionCount: questions.length,
-      userId: context.user_id 
+      userId: context.user_id,
     });
 
     const results: QuestionResult[] = [];
@@ -137,12 +159,12 @@ export class QuestionProcessingService {
 
     for (const question of questions) {
       const timer = createTimer();
-      
+
       try {
         // Simplified processing for each question
         const answer = await this.generateAnswer(question, [], {});
         timer.stop();
-        
+
         results.push({
           question,
           answer,
@@ -150,10 +172,10 @@ export class QuestionProcessingService {
           performance: {
             embedding_ms: 0,
             search_ms: 0,
-            generate_ms: timer.duration
-          }
+            generate_ms: timer.duration,
+          },
         });
-        
+
         totalGenerateTime += timer.duration;
       } catch (error) {
         logger.error('Error processing question', { question, error });
@@ -164,16 +186,16 @@ export class QuestionProcessingService {
           performance: {
             embedding_ms: 0,
             search_ms: 0,
-            generate_ms: 0
-          }
+            generate_ms: 0,
+          },
         });
       }
     }
 
     // Combine all answers
-    const combinedAnswer = results.map((r, i) => 
-      `**${i + 1}. ${r.question}**\n${r.answer}`
-    ).join('\n\n');
+    const combinedAnswer = results
+      .map((r, i) => `**${i + 1}. ${r.question}**\n${r.answer}`)
+      .join('\n\n');
 
     return {
       answer: combinedAnswer,
@@ -182,13 +204,13 @@ export class QuestionProcessingService {
         embedding_ms: totalEmbeddingTime,
         search_ms: totalSearchTime,
         generate_ms: totalGenerateTime,
-        total_ms: totalEmbeddingTime + totalSearchTime + totalGenerateTime
+        total_ms: totalEmbeddingTime + totalSearchTime + totalGenerateTime,
       },
       session_id: context.sessionId,
       query_id: context.queryId,
       suggestions: [],
       suggestions_header: `Обработано ${questions.length} вопросов`,
-      results
+      results,
     };
   }
-} 
+}

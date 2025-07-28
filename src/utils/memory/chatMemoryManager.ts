@@ -1,11 +1,11 @@
 import { SupabaseClient } from '@supabase/supabase-js';
 import OpenAI from 'openai';
 import { createEmbedding } from '../../services/openaiService.js';
-import { 
-  ChatMessage, 
-  ChatSession, 
-  RelevantMessage, 
-  UserFact 
+import {
+  ChatMessage,
+  ChatSession,
+  RelevantMessage,
+  UserFact,
 } from './types.js';
 import { SessionManager } from './sessionManager.js';
 import { MessageManager } from './messageManager.js';
@@ -61,12 +61,15 @@ export class ChatMemoryManager {
       this.supabase,
       this.openai,
       (sessionId: string) => this.getSessionMessages(sessionId),
-      (embedding: number[], userId: string, limit?: number) => this.findSimilarMessages(embedding, userId, limit)
+      (embedding: number[], userId: string, limit?: number) =>
+        this.findSimilarMessages(embedding, userId, limit)
     );
 
     this.initialized = true;
     console.log('✅ [MEMORY] ChatMemoryManager successfully initialized');
-    console.log('🎯 [MEMORY] Automatic fact extraction enabled for user messages');
+    console.log(
+      '🎯 [MEMORY] Automatic fact extraction enabled for user messages'
+    );
   }
 
   /**
@@ -75,7 +78,9 @@ export class ChatMemoryManager {
    */
   private checkInitialized(): void {
     if (!this.initialized || !this.supabase || !this.openai) {
-      const error = new Error('ChatMemoryManager not initialized. Please call initialize() first');
+      const error = new Error(
+        'ChatMemoryManager not initialized. Please call initialize() first'
+      );
       console.error('❌ [MEMORY] ' + error.message);
       throw error;
     }
@@ -151,7 +156,13 @@ export class ChatMemoryManager {
     messageId?: string
   ): Promise<string> {
     this.checkInitialized();
-    return this.messageManager.saveMessage(content, role, sessionId, metadata, messageId);
+    return this.messageManager.saveMessage(
+      content,
+      role,
+      sessionId,
+      metadata,
+      messageId
+    );
   }
 
   /**
@@ -171,42 +182,53 @@ export class ChatMemoryManager {
     this.checkInitialized();
 
     // 1. Сохраняем сообщения и получаем их ID
-    const [userMessageId, assistantMessageId] = await this.messageManager.saveConversationPair(
-      sessionId,
-      userQuestion,
-      assistantResponse,
-      metadata
-    );
+    const [userMessageId, assistantMessageId] =
+      await this.messageManager.saveConversationPair(
+        sessionId,
+        userQuestion,
+        assistantResponse,
+        metadata
+      );
 
     // 2. Выполняем логику эскалации в блоке try...catch, чтобы не прерывать основной поток
     try {
-      const { data, error } = await this.supabase!.rpc('increment_session_message_count', {
-        p_session_id: sessionId
-      });
+      const { data, error } = await this.supabase!.rpc(
+        'increment_session_message_count',
+        {
+          p_session_id: sessionId,
+        }
+      );
 
       if (error) {
         throw new Error(`RPC error: ${error.message}`);
       }
-      
+
       const escalationResult = data && data[0];
 
       if (escalationResult?.should_escalate) {
-        console.log(`[ChatMemoryManager] 🔥 Сессия ${sessionId} эскалирована! Количество сообщений: ${escalationResult.current_message_count}`);
-        
+        console.log(
+          `[ChatMemoryManager] 🔥 Сессия ${sessionId} эскалирована! Количество сообщений: ${escalationResult.current_message_count}`
+        );
+
         // 3. Отправляем email-уведомление, не блокируя ответ
         sendEscalationEmail({
           sessionId: sessionId,
           messageCount: escalationResult.current_message_count,
-          escalationTime: new Date().toUTCString()
+          escalationTime: new Date().toUTCString(),
         }).catch(err => {
-            console.error(`[ChatMemoryManager] Error sending escalation email:`, err)
+          console.error(
+            `[ChatMemoryManager] Error sending escalation email:`,
+            err
+          );
         });
       }
-
     } catch (e) {
-      console.error(`[ChatMemoryManager] Error in escalation logic for session ${sessionId}:`, e);
+      console.error(
+        `[ChatMemoryManager] Error in escalation logic for session ${sessionId}:`,
+        e
+      );
     }
-    
+
     // 4. Возвращаем ID сохраненных сообщений
     return [userMessageId, assistantMessageId];
   }
@@ -220,7 +242,7 @@ export class ChatMemoryManager {
     this.checkInitialized();
     return this.messageManager.getSessionMessages(sessionId);
   }
-  
+
   /**
    * Находит семантически похожие сообщения
    * @param embedding Эмбеддинг запроса
@@ -256,7 +278,13 @@ export class ChatMemoryManager {
     sourceMessageId: string = ''
   ): Promise<string> {
     this.checkInitialized();
-    return this.factManager.saveUserFact(userId, factType, factValue, confidence, sourceMessageId);
+    return this.factManager.saveUserFact(
+      userId,
+      factType,
+      factValue,
+      confidence,
+      sourceMessageId
+    );
   }
 
   /**
@@ -288,40 +316,46 @@ export class ChatMemoryManager {
    * @returns Контекст для использования в запросе к GPT
    */
   async createContextForRequest(
-    userId: string, 
-    sessionId: string, 
+    userId: string,
+    sessionId: string,
     query: string
   ): Promise<string> {
     try {
-      console.log(`🧠 [MEMORY] Creating context for user ${userId}, session ${sessionId}`);
-      
+      console.log(
+        `🧠 [MEMORY] Creating context for user ${userId}, session ${sessionId}`
+      );
+
       // Get user facts
       const userFacts = await this.factManager.getUserFacts(userId);
-      
+
       // Get recent messages from current session
-      const recentMessages = await this.messageManager.getSessionMessages(sessionId);
-      
+      const recentMessages =
+        await this.messageManager.getSessionMessages(sessionId);
+
       // Create query embedding for similarity search
       let queryEmbedding: number[] | null = null;
       try {
         queryEmbedding = await createEmbedding(query);
       } catch (embeddingError) {
-        console.warn('⚠️ [MEMORY] Failed to create query embedding:', embeddingError);
+        console.warn(
+          '⚠️ [MEMORY] Failed to create query embedding:',
+          embeddingError
+        );
       }
-      
+
       // Find similar messages from other sessions
       let similarMessages: RelevantMessage[] = [];
       if (queryEmbedding) {
         similarMessages = await this.messageManager.findSimilarMessages(
-          queryEmbedding, 
-          userId, 
+          queryEmbedding,
+          userId,
           3 // Limit to 3 most similar messages
         );
       }
-      
+
       // Build context string
       let context = `User Context for ${userId}:\n\n`;
-      
+
       // Add user facts
       if (userFacts.length > 0) {
         context += `Known Facts:\n`;
@@ -330,7 +364,7 @@ export class ChatMemoryManager {
         });
         context += '\n';
       }
-      
+
       // Add recent conversation
       if (recentMessages.length > 0) {
         context += `Recent Conversation:\n`;
@@ -339,7 +373,7 @@ export class ChatMemoryManager {
         });
         context += '\n';
       }
-      
+
       // Add similar past conversations
       if (similarMessages.length > 0) {
         context += `Similar Past Conversations:\n`;
@@ -347,24 +381,26 @@ export class ChatMemoryManager {
           context += `${msg.role}: ${msg.content} (similarity: ${msg.similarity.toFixed(2)})\n`;
         });
       }
-      
+
       console.log(`✅ [MEMORY] Context created (${context.length} characters)`);
       return context;
-      
     } catch (error) {
       console.error('❌ [MEMORY] Error creating context:', error);
       return '';
     }
   }
 
-  private async callSupabaseRPC(functionName: string, params: any): Promise<any> {
+  private async callSupabaseRPC(
+    functionName: string,
+    params: any
+  ): Promise<any> {
     try {
       const { data, error } = await this.supabase!.rpc(functionName, params);
-      
+
       if (error) {
         throw new Error(`RPC error: ${error.message}`);
       }
-      
+
       return data;
     } catch (error) {
       console.error(`❌ [MEMORY] Error calling RPC ${functionName}:`, error);
@@ -379,10 +415,15 @@ export class ChatMemoryManager {
  * @param sessionId ID сессии
  * @returns Контекст с историей сообщений
  */
-export async function getContext(userId: string, sessionId: string): Promise<string> {
+export async function getContext(
+  userId: string,
+  sessionId: string
+): Promise<string> {
   try {
-    console.log(`🧠 [MEMORY] Creating context for user ${userId}, session ${sessionId}`);
-    
+    console.log(
+      `🧠 [MEMORY] Creating context for user ${userId}, session ${sessionId}`
+    );
+
     // Загружаем последние 10 сообщений из сессии
     const { data: messages, error } = await supabase
       .from('chat_messages')
@@ -390,30 +431,32 @@ export async function getContext(userId: string, sessionId: string): Promise<str
       .eq('session_id', sessionId)
       .order('created_at', { ascending: false })
       .limit(10);
-    
+
     if (error) {
-      console.error(`❌ [MEMORY] Error loading messages for session ${sessionId}:`, error);
+      console.error(
+        `❌ [MEMORY] Error loading messages for session ${sessionId}:`,
+        error
+      );
       return `User: ${userId}, Session: ${sessionId}, Messages: 0`;
     }
-    
+
     const messageCount = messages?.length || 0;
     console.log(`📚 [MEMORY] Loaded ${messageCount} messages for context`);
-    
+
     if (!messages || messages.length === 0) {
       return `User: ${userId}, Session: ${sessionId}, Messages: 0`;
     }
-    
+
     // Формируем контекст из последних сообщений
     const contextMessages = messages
       .reverse() // показать в хронологическом порядке
       .map(msg => `${msg.role}: ${msg.content}`)
       .join('\n');
-    
+
     const context = `User: ${userId}\nSession: ${sessionId}\nRecent conversation:\n${contextMessages}`;
-    
+
     console.log(`✅ [MEMORY] Context created (${context.length} characters)`);
     return context;
-    
   } catch (error) {
     console.error(`❌ [MEMORY] Exception creating context:`, error);
     return `User: ${userId}, Session: ${sessionId}, Messages: 0 (error)`;
@@ -421,4 +464,4 @@ export async function getContext(userId: string, sessionId: string): Promise<str
 }
 
 // Экземпляр-синглтон для использования во всем приложении
-export const chatMemory = new ChatMemoryManager(); 
+export const chatMemory = new ChatMemoryManager();

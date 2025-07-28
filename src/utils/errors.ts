@@ -30,7 +30,7 @@ export class AppError extends Error {
     }
   ) {
     super(message);
-    
+
     this.name = this.constructor.name;
     this.code = code;
     this.statusCode = statusCode;
@@ -60,76 +60,57 @@ export class AppError extends Error {
 // Specific error classes for different domains
 export class ValidationError extends AppError {
   constructor(message: string, field?: string, value?: unknown) {
-    super(
-      message,
-      'VALIDATION_ERROR',
-      400,
-      true,
-      {
-        context: { field, value },
-        suggestions: ['Check input format', 'Ensure all required fields are provided']
-      }
-    );
+    super(message, 'VALIDATION_ERROR', 400, true, {
+      context: { field, value },
+      suggestions: [
+        'Check input format',
+        'Ensure all required fields are provided',
+      ],
+    });
   }
 }
 
 export class DatabaseError extends AppError {
   constructor(message: string, operation: string, table?: string) {
-    super(
-      message,
-      'DATABASE_ERROR',
-      500,
-      true,
-      {
-        context: { operation, table },
-        suggestions: ['Check database connection', 'Verify query syntax']
-      }
-    );
+    super(message, 'DATABASE_ERROR', 500, true, {
+      context: { operation, table },
+      suggestions: ['Check database connection', 'Verify query syntax'],
+    });
   }
 }
 
 export class AIServiceError extends AppError {
   constructor(message: string, model: string, operation: string) {
-    super(
-      message,
-      'AI_SERVICE_ERROR',
-      500,
-      true,
-      {
-        context: { model, operation },
-        suggestions: ['Check API key', 'Verify model availability', 'Try again later']
-      }
-    );
+    super(message, 'AI_SERVICE_ERROR', 500, true, {
+      context: { model, operation },
+      suggestions: [
+        'Check API key',
+        'Verify model availability',
+        'Try again later',
+      ],
+    });
   }
 }
 
 export class AuthenticationError extends AppError {
   constructor(message: string = 'Authentication failed', context?: any) {
-    super(
-      message,
-      'AUTHENTICATION_ERROR',
-      401,
-      true,
-      {
-        context,
-        suggestions: ['Check credentials', 'Refresh token', 'Login again']
-      }
-    );
+    super(message, 'AUTHENTICATION_ERROR', 401, true, {
+      context,
+      suggestions: ['Check credentials', 'Refresh token', 'Login again'],
+    });
   }
 }
 
 export class AuthorizationError extends AppError {
-  constructor(message: string = 'Access denied', resource?: string, context?: any) {
-    super(
-      message,
-      'AUTHORIZATION_ERROR',
-      403,
-      true,
-      {
-        context: { resource, ...context },
-        suggestions: ['Check permissions', 'Contact administrator']
-      }
-    );
+  constructor(
+    message: string = 'Access denied',
+    resource?: string,
+    context?: any
+  ) {
+    super(message, 'AUTHORIZATION_ERROR', 403, true, {
+      context: { resource, ...context },
+      suggestions: ['Check permissions', 'Contact administrator'],
+    });
   }
 }
 
@@ -142,7 +123,7 @@ export class NotFoundError extends AppError {
       true,
       {
         context: { resource, identifier },
-        suggestions: ['Check identifier', 'Verify resource exists']
+        suggestions: ['Check identifier', 'Verify resource exists'],
       }
     );
   }
@@ -150,16 +131,10 @@ export class NotFoundError extends AppError {
 
 export class ConfigurationError extends AppError {
   constructor(message: string, setting?: string, context?: any) {
-    super(
-      message,
-      'CONFIGURATION_ERROR',
-      500,
-      false,
-      {
-        context: { setting, ...context },
-        suggestions: ['Check environment variables', 'Verify configuration file']
-      }
-    );
+    super(message, 'CONFIGURATION_ERROR', 500, false, {
+      context: { setting, ...context },
+      suggestions: ['Check environment variables', 'Verify configuration file'],
+    });
   }
 }
 
@@ -172,7 +147,7 @@ export class RateLimitError extends AppError {
       true,
       {
         context: { limit, window, ...context },
-        suggestions: ['Wait before retrying', 'Reduce request frequency']
+        suggestions: ['Wait before retrying', 'Reduce request frequency'],
       }
     );
   }
@@ -180,31 +155,23 @@ export class RateLimitError extends AppError {
 
 export class VoiceProcessingError extends AppError {
   constructor(message: string, stage: string, context?: any) {
-    super(
-      message,
-      'VOICE_PROCESSING_ERROR',
-      500,
-      true,
-      {
-        context: { stage, ...context },
-        suggestions: ['Check audio format', 'Verify file size', 'Try different model']
-      }
-    );
+    super(message, 'VOICE_PROCESSING_ERROR', 500, true, {
+      context: { stage, ...context },
+      suggestions: [
+        'Check audio format',
+        'Verify file size',
+        'Try different model',
+      ],
+    });
   }
 }
 
 export class BusinessLogicError extends AppError {
   constructor(message: string, operation: string, context?: any) {
-    super(
-      message,
-      'BUSINESS_LOGIC_ERROR',
-      400,
-      true,
-      {
-        context: { operation, ...context },
-        suggestions: ['Review business rules', 'Check input data']
-      }
-    );
+    super(message, 'BUSINESS_LOGIC_ERROR', 400, true, {
+      context: { operation, ...context },
+      suggestions: ['Review business rules', 'Check input data'],
+    });
   }
 }
 
@@ -226,13 +193,16 @@ export class ErrorManager {
     this.errorHandlers.set(errorType, handler);
   }
 
-  async handleError(error: Error, context?: Record<string, unknown>): Promise<void> {
+  async handleError(
+    error: Error,
+    context?: Record<string, unknown>
+  ): Promise<void> {
     // Log the error
     logger.error('Application error occurred', {
       error: error.message,
       stack: error.stack,
       name: error.name,
-      ...context
+      ...context,
     });
 
     // Call specific handler if registered
@@ -241,9 +211,10 @@ export class ErrorManager {
       try {
         await handler(error);
       } catch (handlerError) {
-        logger.error('Error handler failed', { 
+        logger.error('Error handler failed', {
           originalError: error.message,
-          handlerError: handlerError instanceof Error ? handlerError.message : 'Unknown'
+          handlerError:
+            handlerError instanceof Error ? handlerError.message : 'Unknown',
         });
       }
     }
@@ -254,13 +225,16 @@ export class ErrorManager {
     }
   }
 
-  private async sendToMonitoring(error: Error, context?: Record<string, unknown>): Promise<void> {
+  private async sendToMonitoring(
+    error: Error,
+    context?: Record<string, unknown>
+  ): Promise<void> {
     // Implementation would send to monitoring service (Sentry, DataDog, etc.)
     // For now, just log
     logger.error('Error sent to monitoring', {
       error: error.message,
       type: error.constructor.name,
-      context
+      context,
     });
   }
 }
@@ -270,20 +244,14 @@ export function normalizeError(error: unknown): AppError {
   if (error instanceof AppError) {
     return error;
   }
-  
+
   if (error instanceof Error) {
-    return new AppError(
-      error.message,
-      'UNKNOWN_ERROR',
-      500,
-      false,
-      {
-        cause: error.name,
-        context: { originalStack: error.stack }
-      }
-    );
+    return new AppError(error.message, 'UNKNOWN_ERROR', 500, false, {
+      cause: error.name,
+      context: { originalStack: error.stack },
+    });
   }
-  
+
   return new AppError(
     typeof error === 'string' ? error : 'An unknown error occurred',
     'UNKNOWN_ERROR',
@@ -301,13 +269,19 @@ export async function safeAsync<T>(
     return { success: true, data };
   } catch (error) {
     const appError = normalizeError(error);
-    logger.error('Operation failed', { error: appError.message, code: appError.code });
+    logger.error('Operation failed', {
+      error: appError.message,
+      code: appError.code,
+    });
     return { success: false, error: appError };
   }
 }
 
 // Validation helpers
-export function validateRequired<T>(value: T | null | undefined, fieldName: string): T {
+export function validateRequired<T>(
+  value: T | null | undefined,
+  fieldName: string
+): T {
   if (value === null || value === undefined) {
     throw new ValidationError(`${fieldName} is required`, fieldName, value);
   }
@@ -316,17 +290,25 @@ export function validateRequired<T>(value: T | null | undefined, fieldName: stri
 
 export function validateString(value: unknown, fieldName: string): string {
   if (typeof value !== 'string') {
-    throw new ValidationError(`${fieldName} must be a string`, fieldName, value);
+    throw new ValidationError(
+      `${fieldName} must be a string`,
+      fieldName,
+      value
+    );
   }
   return value;
 }
 
 export function validateNumber(value: unknown, fieldName: string): number {
   if (typeof value !== 'number' || isNaN(value)) {
-    throw new ValidationError(`${fieldName} must be a valid number`, fieldName, value);
+    throw new ValidationError(
+      `${fieldName} must be a valid number`,
+      fieldName,
+      value
+    );
   }
   return value;
 }
 
 // Export singleton error manager
-export const errorManager = ErrorManager.getInstance(); 
+export const errorManager = ErrorManager.getInstance();

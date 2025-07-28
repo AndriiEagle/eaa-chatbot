@@ -18,23 +18,23 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       <h1 style={styles.title}>EAA Chatbot</h1>
       <div style={styles.buttons}>
         {showHistoryButton && (
-          <button 
-            style={styles.button} 
+          <button
+            style={styles.button}
             onClick={onToggleHistory}
             title="Chat history"
           >
             <span style={styles.icon}>📋</span> Chat history
           </button>
         )}
-        <button 
-          style={styles.button} 
+        <button
+          style={styles.button}
           onClick={onCreateNewSession}
           title="Create new session"
         >
           <span style={styles.icon}>✨</span> Create new session
         </button>
-        <button 
-          style={styles.button} 
+        <button
+          style={styles.button}
           onClick={onToggleSettings}
           title="Settings"
         >
@@ -55,19 +55,19 @@ const styles = {
     borderBottom: '1px solid #333',
     height: '60px',
   } as CSSProperties,
-  
+
   title: {
     margin: 0,
     fontSize: '18px',
     color: '#fff',
     fontWeight: 'bold',
   } as CSSProperties,
-  
+
   buttons: {
     display: 'flex',
     gap: '10px',
   } as CSSProperties,
-  
+
   button: {
     backgroundColor: '#2d2d2d',
     color: '#fff',
@@ -84,10 +84,10 @@ const styles = {
       backgroundColor: '#3d3d3d',
     },
   } as CSSProperties,
-  
+
   icon: {
     fontSize: '16px',
   } as CSSProperties,
 };
 
-export default ChatHeader; 
+export default ChatHeader;

@@ -1,11 +1,14 @@
 import { FrustrationProfile } from '../suggestion.types';
-import { FrustrationAnalysis, ChatMessage } from '../../../types/database.types';
+import {
+  FrustrationAnalysis,
+  ChatMessage,
+} from '../../../types/database.types';
 import OpenAI from 'openai';
 import { extractJson } from '../../../utils/formatting/extractJson.js';
 
 /**
  * 🤖 AI-POWERED FRUSTRATION ANALYZER
- * 
+ *
  * Uses GPT-4o-mini for deep psychological analysis:
  * - Emotional state detection
  * - Escalation risk prediction
@@ -15,35 +18,51 @@ import { extractJson } from '../../../utils/formatting/extractJson.js';
 export class AIFrustrationAnalyzer {
   private openai: OpenAI;
 
-  constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+  constructor(openai: OpenAI) {
+    this.openai = openai;
   }
 
-  async analyze(frustrationHistory: FrustrationAnalysis[], sessionMessages: ChatMessage[]): Promise<FrustrationProfile> {
-    console.log(`🤖 [AI-FRUSTRATION] Starting AI emotional analysis of ${frustrationHistory.length} historical records and ${sessionMessages.length} messages`);
+  async analyze(
+    frustrationHistory: FrustrationAnalysis[],
+    sessionMessages: ChatMessage[]
+  ): Promise<FrustrationProfile> {
+    console.log(
+      `🤖 [AI-FRUSTRATION] Starting AI emotional analysis of ${frustrationHistory.length} historical records and ${sessionMessages.length} messages`
+    );
 
     try {
       // Prepare emotional data for AI analysis
-      const emotionalData = this.prepareEmotionalDataForAI(frustrationHistory, sessionMessages);
-      
+      const emotionalData = this.prepareEmotionalDataForAI(
+        frustrationHistory,
+        sessionMessages
+      );
+
       // Get AI frustration analysis
       const aiAnalysis = await this.getAIFrustrationAnalysis(emotionalData);
-      
+
       // Parse AI response into structured profile
       const profile = this.parseAIFrustrationResponse(aiAnalysis);
-      
-      console.log(`🤖 [AI-FRUSTRATION] AI analysis complete: Level ${(profile.currentLevel * 100).toFixed(1)}%, Risk ${(profile.escalationRisk * 100).toFixed(1)}%`);
-      return profile;
 
+      console.log(
+        `🤖 [AI-FRUSTRATION] AI analysis complete: Level ${(profile.currentLevel * 100).toFixed(1)}%, Risk ${(profile.escalationRisk * 100).toFixed(1)}%`
+      );
+      return profile;
     } catch (error) {
-      console.error('❌ [AI-FRUSTRATION] AI analysis failed, using fallback:', error);
-      return this.fallbackFrustrationAnalysis(frustrationHistory, sessionMessages);
+      console.error(
+        '❌ [AI-FRUSTRATION] AI analysis failed, using fallback:',
+        error
+      );
+      return this.fallbackFrustrationAnalysis(
+        frustrationHistory,
+        sessionMessages
+      );
     }
   }
 
-  private prepareEmotionalDataForAI(history: FrustrationAnalysis[], messages: ChatMessage[]): string {
+  private prepareEmotionalDataForAI(
+    history: FrustrationAnalysis[],
+    messages: ChatMessage[]
+  ): string {
     const userMessages = messages.filter(m => m.role === 'user');
     const recentMessages = userMessages.slice(-10);
 
@@ -55,10 +74,13 @@ export class AIFrustrationAnalyzer {
           escalationRisk: h.escalation_risk,
           triggers: h.trigger_phrases,
           timestamp: h.created_at,
-          recommendation: h.recommendation
+          recommendation: h.recommendation,
         })),
-        averageHistoricalLevel: history.length > 0 ? 
-          history.reduce((sum, h) => sum + h.frustration_level, 0) / history.length : 0
+        averageHistoricalLevel:
+          history.length > 0
+            ? history.reduce((sum, h) => sum + h.frustration_level, 0) /
+              history.length
+            : 0,
       },
       currentConversation: {
         totalMessages: userMessages.length,
@@ -67,33 +89,44 @@ export class AIFrustrationAnalyzer {
           timestamp: m.created_at,
           length: m.content.length,
           hasQuestions: m.content.includes('?'),
-          hasExclamations: m.content.includes('!')
+          hasExclamations: m.content.includes('!'),
         })),
         conversationLength: messages.length,
-        timeSpan: messages.length > 1 ? {
-          start: messages[0].created_at,
-          end: messages[messages.length - 1].created_at
-        } : null
+        timeSpan:
+          messages.length > 1
+            ? {
+                start: messages[0].created_at,
+                end: messages[messages.length - 1].created_at,
+              }
+            : null,
       },
       linguisticPatterns: {
-        averageMessageLength: userMessages.reduce((sum, m) => sum + m.content.length, 0) / userMessages.length,
-        questionDensity: userMessages.filter(m => m.content.includes('?')).length / userMessages.length,
-        exclamationDensity: userMessages.filter(m => m.content.includes('!')).length / userMessages.length,
+        averageMessageLength:
+          userMessages.reduce((sum, m) => sum + m.content.length, 0) /
+          userMessages.length,
+        questionDensity:
+          userMessages.filter(m => m.content.includes('?')).length /
+          userMessages.length,
+        exclamationDensity:
+          userMessages.filter(m => m.content.includes('!')).length /
+          userMessages.length,
         capsUsage: this.calculateCapsUsage(userMessages),
-        repetitivePatterns: this.detectRepetitivePatterns(userMessages)
+        repetitivePatterns: this.detectRepetitivePatterns(userMessages),
       },
       contextualFactors: {
         topicComplexity: this.assessTopicComplexity(userMessages),
         technicalLevel: this.assessTechnicalLevel(userMessages),
         urgencyIndicators: this.detectUrgencyIndicators(userMessages),
-        businessContext: this.detectBusinessContext(userMessages)
-      }
+        businessContext: this.detectBusinessContext(userMessages),
+      },
     };
 
     return JSON.stringify(emotionalProfile, null, 2);
   }
 
-  private async getAIFrustrationAnalysis(emotionalData: string): Promise<string> {
+  private async getAIFrustrationAnalysis(
+    emotionalData: string
+  ): Promise<string> {
     const prompt = `
 Ты - эксперт-психолог по анализу эмоционального состояния пользователей в системах поддержки.
 
@@ -144,7 +177,7 @@ ${emotionalData}
       model: 'gpt-4o-mini',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.2, // Lower temperature for more consistent emotional analysis
-      max_tokens: 2500
+      max_tokens: 2500,
     });
 
     return response.choices[0]?.message?.content || '{}';
@@ -154,7 +187,7 @@ ${emotionalData}
     try {
       const jsonString = extractJson(aiResponse);
       const parsed = JSON.parse(jsonString);
-      
+
       return {
         currentLevel: parsed.currentLevel || 0,
         triggers: parsed.triggers || [],
@@ -168,22 +201,24 @@ ${emotionalData}
           analysisTimestamp: new Date().toISOString(),
         },
       };
-
     } catch (error) {
       console.error('❌ [AI-FRUSTRATION] Failed to parse AI response:', error);
       return this.createFallbackProfile();
     }
   }
 
-  private fallbackFrustrationAnalysis(history: FrustrationAnalysis[], messages: ChatMessage[]): FrustrationProfile {
+  private fallbackFrustrationAnalysis(
+    history: FrustrationAnalysis[],
+    messages: ChatMessage[]
+  ): FrustrationProfile {
     const latestHistory = history[0];
     const currentLevel = latestHistory?.frustration_level || 0.0;
-    
+
     return {
       currentLevel: currentLevel,
       triggers: latestHistory?.trigger_phrases || [],
       escalationRisk: latestHistory?.escalation_risk || currentLevel * 0.8,
-      patterns: []
+      patterns: [],
     };
   }
 
@@ -192,7 +227,7 @@ ${emotionalData}
       currentLevel: 0.3,
       triggers: ['unknown'],
       escalationRisk: 0.2,
-      patterns: []
+      patterns: [],
     };
   }
 
@@ -215,11 +250,12 @@ ${emotionalData}
 
     messages.forEach(message => {
       const words = message.content.toLowerCase().split(' ');
-      
+
       // Look for repeated 2-3 word phrases
       for (let i = 0; i < words.length - 1; i++) {
         const phrase = words.slice(i, i + 2).join(' ');
-        if (phrase.length > 5) { // Ignore very short phrases
+        if (phrase.length > 5) {
+          // Ignore very short phrases
           phrases.set(phrase, (phrases.get(phrase) || 0) + 1);
         }
       }
@@ -237,8 +273,15 @@ ${emotionalData}
 
   private assessTopicComplexity(messages: ChatMessage[]): number {
     const complexityIndicators = [
-      'compliance', 'regulation', 'legal', 'requirement', 'standard',
-      'implementation', 'technical', 'specification', 'guideline'
+      'compliance',
+      'regulation',
+      'legal',
+      'requirement',
+      'standard',
+      'implementation',
+      'technical',
+      'specification',
+      'guideline',
     ];
 
     let complexityScore = 0;
@@ -256,8 +299,16 @@ ${emotionalData}
 
   private assessTechnicalLevel(messages: ChatMessage[]): number {
     const technicalTerms = [
-      'WCAG', 'API', 'HTML', 'CSS', 'JavaScript', 'accessibility',
-      'screen reader', 'alt text', 'ARIA', 'semantic'
+      'WCAG',
+      'API',
+      'HTML',
+      'CSS',
+      'JavaScript',
+      'accessibility',
+      'screen reader',
+      'alt text',
+      'ARIA',
+      'semantic',
     ];
 
     let technicalCount = 0;
@@ -275,8 +326,16 @@ ${emotionalData}
 
   private detectUrgencyIndicators(messages: ChatMessage[]): string[] {
     const urgencyWords = [
-      'urgent', 'asap', 'immediately', 'quickly', 'rush', 'deadline',
-      'critical', 'emergency', 'priority', 'time sensitive'
+      'urgent',
+      'asap',
+      'immediately',
+      'quickly',
+      'rush',
+      'deadline',
+      'critical',
+      'emergency',
+      'priority',
+      'time sensitive',
     ];
 
     const foundIndicators: string[] = [];
@@ -294,8 +353,16 @@ ${emotionalData}
 
   private detectBusinessContext(messages: ChatMessage[]): string[] {
     const businessTerms = [
-      'business', 'company', 'organization', 'website', 'customers',
-      'users', 'product', 'service', 'revenue', 'compliance cost'
+      'business',
+      'company',
+      'organization',
+      'website',
+      'customers',
+      'users',
+      'product',
+      'service',
+      'revenue',
+      'compliance cost',
     ];
 
     const foundTerms: string[] = [];
@@ -310,4 +377,4 @@ ${emotionalData}
 
     return foundTerms;
   }
-} 
+}

@@ -5,13 +5,13 @@ export interface RevolutionaryContext {
   userId: string;
   sessionId: string;
   currentQuestion: string;
-  
+
   // AI-analysis
   userPersona: UserPersona;
   businessMaturity: BusinessMaturity;
   frustrationProfile: FrustrationProfile;
   conversationStage: ConversationStage;
-  
+
   // Advanced factors
   behaviorPatterns: BehaviorPattern[];
   predictedNeeds: PredictedNeed[];
@@ -19,15 +19,36 @@ export interface RevolutionaryContext {
 }
 
 export interface UserPersona {
-  type: 'technical_expert' | 'business_owner' | 'compliance_manager' | 'developer' | 'consultant' | 'end_user' | 'newcomer';
+  type:
+    | 'technical_expert'
+    | 'business_owner'
+    | 'compliance_manager'
+    | 'developer'
+    | 'consultant'
+    | 'end_user'
+    | 'newcomer';
   confidence: number;
-  role: 'technical_expert' | 'business_owner' | 'compliance_manager' | 'developer' | 'consultant' | 'end_user';
+  role:
+    | 'technical_expert'
+    | 'business_owner'
+    | 'compliance_manager'
+    | 'developer'
+    | 'consultant'
+    | 'end_user';
   experienceLevel: 'beginner' | 'intermediate' | 'advanced';
-  primaryMotivation: 'compliance' | 'business_growth' | 'technical_excellence' | 'problem_solving';
+  primaryMotivation:
+    | 'compliance'
+    | 'business_growth'
+    | 'technical_excellence'
+    | 'problem_solving';
   communicationStyle: 'formal' | 'casual' | 'technical' | 'business_focused';
   learningPreference: 'visual' | 'textual' | 'hands_on' | 'conceptual';
-  decisionMakingStyle: 'analytical' | 'intuitive' | 'collaborative' | 'decisive';
-  
+  decisionMakingStyle:
+    | 'analytical'
+    | 'intuitive'
+    | 'collaborative'
+    | 'decisive';
+
   // AI-enhanced fields
   aiInsights?: AIInsights;
 }
@@ -44,7 +65,7 @@ export interface FrustrationProfile {
   triggers: string[];
   escalationRisk: number;
   patterns: string[];
-  
+
   // AI-enhanced fields
   insights?: {
     historicalTrend?: 'increasing' | 'decreasing' | 'stable' | 'unknown';
@@ -78,7 +99,7 @@ export interface BehaviorPattern {
   frequency: number;
   context: string;
   significance: number;
-  
+
   // AI-enhanced fields
   aiInsights?: {
     confidence: number;
@@ -109,7 +130,11 @@ export interface SmartSuggestion {
 
 export interface BaseSuggestion {
   text: string;
-  category: 'learning_path' | 'business_opportunity' | 'immediate_need' | 'problem_solving';
+  category:
+    | 'learning_path'
+    | 'business_opportunity'
+    | 'immediate_need'
+    | 'problem_solving';
   priority: 'low' | 'medium' | 'high' | 'urgent';
   reasoning: string;
   expectedOutcome: string;
@@ -181,4 +206,4 @@ export interface FrustrationRecord {
   trigger: string;
   timestamp: string;
   resolution: string;
-} 
+}

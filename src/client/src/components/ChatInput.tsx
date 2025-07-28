@@ -11,8 +11,12 @@ interface ChatInputProps {
 /**
  * Component for user message input
  */
-const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, loading, input, setInput }) => {
-  
+const ChatInput: React.FC<ChatInputProps> = ({
+  onSendMessage,
+  loading,
+  input,
+  setInput,
+}) => {
   // Component styles
   const styles = {
     form: {
@@ -57,45 +61,42 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, loading, input, se
       cursor: 'not-allowed',
     } as CSSProperties,
   };
-  
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
-    
+
     onSendMessage(input);
     setInput('');
   };
 
   return (
-    <form
-      style={styles.form}
-      onSubmit={handleSubmit}
-    >
+    <form style={styles.form} onSubmit={handleSubmit}>
       <textarea
         style={styles.textInput}
         value={input}
-        onChange={(e) => setInput(e.target.value)}
+        onChange={e => setInput(e.target.value)}
         placeholder="Enter your question or use voice input..."
         disabled={loading}
         rows={1}
         className="chat-input-focus"
-        onFocus={(e) => {
+        onFocus={e => {
           const target = e.target;
           target.style.borderColor = '#3b82f6';
           target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
         }}
-        onBlur={(e) => {
+        onBlur={e => {
           const target = e.target;
           target.style.borderColor = '#333';
           target.style.boxShadow = 'none';
         }}
-        onKeyDown={(e) => {
+        onKeyDown={e => {
           if (e.key === 'Enter' && !e.shiftKey && !loading && input.trim()) {
             e.preventDefault();
             handleSubmit(e);
           }
         }}
-        onInput={(e) => {
+        onInput={e => {
           const target = e.target as HTMLTextAreaElement;
           target.style.height = '3rem';
           target.style.height = Math.min(target.scrollHeight, 150) + 'px';
@@ -105,18 +106,18 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, loading, input, se
       <button
         style={{
           ...styles.sendButton,
-          ...(loading || !input.trim() ? styles.sendButtonDisabled : {})
+          ...(loading || !input.trim() ? styles.sendButtonDisabled : {}),
         }}
         type="submit"
         disabled={loading || !input.trim()}
         title="Send message"
-        onMouseOver={(e) => {
+        onMouseOver={e => {
           if (!loading && input.trim()) {
             const target = e.currentTarget;
             target.style.background = '#2563eb';
           }
         }}
-        onMouseOut={(e) => {
+        onMouseOut={e => {
           if (!loading && input.trim()) {
             const target = e.currentTarget;
             target.style.background = '#3b82f6';
@@ -133,4 +134,4 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage, loading, input, se
   );
 };
 
-export default ChatInput; 
+export default ChatInput;

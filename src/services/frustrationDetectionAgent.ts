@@ -33,7 +33,7 @@ export interface SafetyThresholds {
 
 /**
  * 🛡️ CONSERVATIVE FRUSTRATION DETECTION AGENT
- * 
+ *
  * Safety Principles:
  * - High thresholds to avoid false positives
  * - Multiple checks and validations
@@ -45,15 +45,19 @@ export class FrustrationDetectionAgent {
 
   private readonly DEFAULT_THRESHOLDS: SafetyThresholds = {
     minimumFrustrationLevel: 0.6, // Lowered from 0.7 - more sensitive detection
-    minimumConfidence: 0.7,       // Lowered from 0.8 - trust advanced AI analysis
-    minimumTriggers: 1            // Lowered from 2 - AI analysis is primary
+    minimumConfidence: 0.7, // Lowered from 0.8 - trust advanced AI analysis
+    minimumTriggers: 1, // Lowered from 2 - AI analysis is primary
   };
 
-  constructor(private customThresholds?: Partial<SafetyThresholds>) {}
+  private customThresholds?: Partial<SafetyThresholds>;
+
+  constructor(customThresholds?: Partial<SafetyThresholds>) {
+    this.customThresholds = customThresholds;
+  }
 
   /**
    * 🧠 MAIN FRUSTRATION ANALYSIS METHOD
-   * 
+   *
    * @param currentMessage - The user's current message
    * @param recentMessages - The last 5-10 messages for context
    * @param sessionId - Session ID
@@ -67,35 +71,49 @@ export class FrustrationDetectionAgent {
     userId: string
   ): Promise<FrustrationAnalysis> {
     const startTime = Date.now();
-    
+
     console.log('\n [FrustrationAgent] Starting frustration analysis...');
     console.log(`📝 Current message: "${currentMessage}"`);
     console.log(`📚 Context: ${recentMessages.length} recent messages`);
 
     try {
       // Step 1: Prepare the context for the AI
-      const conversationContext = this.prepareConversationContext(currentMessage, recentMessages);
-      
+      const conversationContext = this.prepareConversationContext(
+        currentMessage,
+        recentMessages
+      );
+
       // Step 2: Get the analysis from GPT-4o-mini
       const aiAnalysis = await this.getAIAnalysis(conversationContext);
-      
+
       // Step 3: Analyze contextual factors
-      const contextFactors = this.analyzeContextFactors(currentMessage, recentMessages);
-      
+      const contextFactors = this.analyzeContextFactors(
+        currentMessage,
+        recentMessages
+      );
+
       // Step 4: Apply conservative safety checks
       const finalAnalysis = this.applySafetyChecks(aiAnalysis, contextFactors);
-      
+
       // Step 5: Save the result to the database
-      await this.saveAnalysisToDatabase(finalAnalysis, sessionId, userId, startTime);
-      
-      console.log(`✅ [FrustrationAgent] Analysis complete. Frustration level: ${finalAnalysis.frustrationLevel.toFixed(2)}`);
-      console.log(`🎯 Escalation recommended: ${finalAnalysis.shouldEscalate ? 'YES' : 'NO'}`);
-      
+      await this.saveAnalysisToDatabase(
+        finalAnalysis,
+        sessionId,
+        userId,
+        startTime
+      );
+
+      console.log(
+        `✅ [FrustrationAgent] Analysis complete. Frustration level: ${finalAnalysis.frustrationLevel.toFixed(2)}`
+      );
+      console.log(
+        `🎯 Escalation recommended: ${finalAnalysis.shouldEscalate ? 'YES' : 'NO'}`
+      );
+
       return finalAnalysis;
-      
     } catch (error) {
       console.error('❌ [FrustrationAgent] Error during analysis:', error);
-      
+
       // Return a safe result on error
       return this.createSafeFailureResponse();
     }
@@ -104,11 +122,17 @@ export class FrustrationDetectionAgent {
   /**
    * Prepares the conversation context for AI analysis
    */
-  private prepareConversationContext(currentMessage: string, recentMessages: ChatMessage[]): string {
+  private prepareConversationContext(
+    currentMessage: string,
+    recentMessages: ChatMessage[]
+  ): string {
     const historyText = recentMessages
       .slice(-8) // Take a maximum of 8 recent messages
       .map((msg, index) => {
-        const timestamp = index === recentMessages.length - 1 ? '[MOST RECENT]' : `[${index + 1}]`;
+        const timestamp =
+          index === recentMessages.length - 1
+            ? '[MOST RECENT]'
+            : `[${index + 1}]`;
         return `${timestamp} ${msg.role === 'user' ? 'USER' : 'BOT'}: ${msg.content}`;
       })
       .join('\n');
@@ -117,7 +141,9 @@ export class FrustrationDetectionAgent {
     const userMessages = recentMessages.filter(msg => msg.role === 'user');
     const conversationLength = recentMessages.length;
     const userQuestionCount = userMessages.length;
-    const averageMessageLength = userMessages.reduce((sum, msg) => sum + msg.content.length, 0) / Math.max(userMessages.length, 1);
+    const averageMessageLength =
+      userMessages.reduce((sum, msg) => sum + msg.content.length, 0) /
+      Math.max(userMessages.length, 1);
 
     return `
 === CONVERSATION ANALYSIS REQUEST ===
@@ -165,19 +191,19 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
   private async getAIAnalysis(context: string): Promise<any> {
     try {
       console.log('🤖 [FrustrationAgent] Sending request to GPT-4o-mini...');
-      
+
       const completion = await openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: this.SYSTEM_PROMPT },
-          { role: 'user', content: context }
+          { role: 'user', content: context },
         ],
         temperature: 0.1, // Low temperature for consistent analysis
         max_tokens: 500,
       });
 
       const responseText = completion.choices[0].message.content?.trim();
-      
+
       if (!responseText) {
         throw new Error('Empty response from GPT-4o-mini');
       }
@@ -192,7 +218,6 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
         console.error('Raw response:', responseText);
         throw new Error(`Invalid JSON from AI: ${responseText}`);
       }
-
     } catch (error) {
       console.error('❌ [FrustrationAgent] Error getting AI analysis:', error);
       throw error;
@@ -202,31 +227,65 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
   /**
    * Analyzes contextual factors of frustration
    */
-  private analyzeContextFactors(currentMessage: string, recentMessages: ChatMessage[]): FrustrationAnalysis['contextFactors'] {
+  private analyzeContextFactors(
+    currentMessage: string,
+    recentMessages: ChatMessage[]
+  ): FrustrationAnalysis['contextFactors'] {
     const userMessages = recentMessages.filter(msg => msg.role === 'user');
     const messageCount = recentMessages.length;
-    
+
     // Look for repeated questions
     const repeatedQuestions = this.detectRepeatedQuestions(userMessages);
-    
+
     // Count negative keywords (English + Russian)
     const negativeKeywords = [
       // English
-      'doesn\'t work', 'not helping', 'useless', 'in vain', 'bad', 
-      'terrible', 'awful', 'disappointed', 'don\'t understand',
+      "doesn't work",
+      'not helping',
+      'useless',
+      'in vain',
+      'bad',
+      'terrible',
+      'awful',
+      'disappointed',
+      "don't understand",
       // Russian
-      'не работает', 'не помогает', 'бесполезно', 'зря', 'плохо',
-      'ужасно', 'неверно', 'не понимаю', 'не получается', 'третий раз',
-      'четвертый раз', 'пятый раз', 'опять', 'снова', 'всё время',
-      'не то', 'не так', 'ошибка', 'неправильно'
+      'не работает',
+      'не помогает',
+      'бесполезно',
+      'зря',
+      'плохо',
+      'ужасно',
+      'неверно',
+      'не понимаю',
+      'не получается',
+      'третий раз',
+      'четвертый раз',
+      'пятый раз',
+      'опять',
+      'снова',
+      'всё время',
+      'не то',
+      'не так',
+      'ошибка',
+      'неправильно',
     ];
-    const negativeKeywordsCount = negativeKeywords.filter(keyword => 
+    const negativeKeywordsCount = negativeKeywords.filter(keyword =>
       currentMessage.toLowerCase().includes(keyword)
     ).length;
-    
+
     // Check for swear words (basic list - English + Russian)
-    const swearWords = ['fuck', 'shit', 'damn', 'hell', 'херня', 'блять', 'черт', 'дерьмо'];
-    const hasSwearing = swearWords.some(word => 
+    const swearWords = [
+      'fuck',
+      'shit',
+      'damn',
+      'hell',
+      'херня',
+      'блять',
+      'черт',
+      'дерьмо',
+    ];
+    const hasSwearing = swearWords.some(word =>
       currentMessage.toLowerCase().includes(word)
     );
 
@@ -250,7 +309,7 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
       hasExcessiveExclamations,
       hasAllCaps,
       exclamationCount,
-      allCapsWords
+      allCapsWords,
     };
   }
 
@@ -259,24 +318,27 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
    */
   private detectRepeatedQuestions(userMessages: ChatMessage[]): boolean {
     if (userMessages.length < 2) return false;
-    
+
     const lastMessages = userMessages.slice(-3); // Last 3 user messages
-    
+
     // Simple check for message similarity (by words)
     for (let i = 0; i < lastMessages.length - 1; i++) {
       for (let j = i + 1; j < lastMessages.length; j++) {
         const similarity = this.calculateMessageSimilarity(
-          lastMessages[i].content, 
+          lastMessages[i].content,
           lastMessages[j].content
         );
-        
-        if (similarity > 0.6) { // 60% similarity
-          console.log(`🔄 [FrustrationAgent] Detected repeated questions (similarity: ${similarity.toFixed(2)})`);
+
+        if (similarity > 0.6) {
+          // 60% similarity
+          console.log(
+            `🔄 [FrustrationAgent] Detected repeated questions (similarity: ${similarity.toFixed(2)})`
+          );
           return true;
         }
       }
     }
-    
+
     return false;
   }
 
@@ -284,71 +346,109 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
    * Calculates the similarity of two messages (simple algorithm)
    */
   private calculateMessageSimilarity(msg1: string, msg2: string): number {
-    const words1 = msg1.toLowerCase().split(/\s+/).filter(word => word.length > 2);
-    const words2 = msg2.toLowerCase().split(/\s+/).filter(word => word.length > 2);
-    
+    const words1 = msg1
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(word => word.length > 2);
+    const words2 = msg2
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(word => word.length > 2);
+
     if (words1.length === 0 || words2.length === 0) return 0;
-    
+
     const commonWords = words1.filter(word => words2.includes(word));
     const totalWords = new Set([...words1, ...words2]).size;
-    
+
     return commonWords.length / totalWords;
   }
 
   /**
    * 🛡️ APPLIES CONSERVATIVE SAFETY CHECKS
-   * 
+   *
    * This is the key method - it decides whether to escalate
    */
-  private applySafetyChecks(aiAnalysis: any, contextFactors: FrustrationAnalysis['contextFactors']): FrustrationAnalysis {
+  private applySafetyChecks(
+    aiAnalysis: any,
+    contextFactors: FrustrationAnalysis['contextFactors']
+  ): FrustrationAnalysis {
     const thresholds = { ...this.DEFAULT_THRESHOLDS, ...this.customThresholds };
-    
+
     console.log('🛡️ [FrustrationAgent] Applying safety checks...');
-    console.log(`📊 AI analysis - level: ${aiAnalysis.frustration_level}, confidence: ${aiAnalysis.confidence}`);
-    console.log(`🧠 AI reasoning: ${aiAnalysis.reasoning || 'No reasoning provided'}`);
-    
+    console.log(
+      `📊 AI analysis - level: ${aiAnalysis.frustration_level}, confidence: ${aiAnalysis.confidence}`
+    );
+    console.log(
+      `🧠 AI reasoning: ${aiAnalysis.reasoning || 'No reasoning provided'}`
+    );
+
     // Parse AI result with checks
-    const frustrationLevel = Math.max(0, Math.min(1, aiAnalysis.frustration_level || 0));
-    const confidenceScore = Math.max(0, Math.min(1, aiAnalysis.confidence || 0));
-    const detectedPatterns = Array.isArray(aiAnalysis.patterns) ? aiAnalysis.patterns : [];
-    const triggerPhrases = Array.isArray(aiAnalysis.triggers) ? aiAnalysis.triggers : [];
-    
+    const frustrationLevel = Math.max(
+      0,
+      Math.min(1, aiAnalysis.frustration_level || 0)
+    );
+    const confidenceScore = Math.max(
+      0,
+      Math.min(1, aiAnalysis.confidence || 0)
+    );
+    const detectedPatterns = Array.isArray(aiAnalysis.patterns)
+      ? aiAnalysis.patterns
+      : [];
+    const triggerPhrases = Array.isArray(aiAnalysis.triggers)
+      ? aiAnalysis.triggers
+      : [];
+
     // 🎯 PRIORITY: AI ANALYSIS FIRST, CONTEXTUAL FACTORS AS SUPPORT
     let shouldEscalate = false;
     let escalationReason = '';
-    
+
     // 🧠 PRIMARY CHECK: AI Analysis Results
-    if (frustrationLevel >= thresholds.minimumFrustrationLevel && confidenceScore >= thresholds.minimumConfidence) {
-      
+    if (
+      frustrationLevel >= thresholds.minimumFrustrationLevel &&
+      confidenceScore >= thresholds.minimumConfidence
+    ) {
       // ✅ AI DETECTED HIGH FRUSTRATION - Now verify with contextual support
       const supportingFactors = [];
-      
+
       if (contextFactors.hasSwearing) supportingFactors.push('профанизм');
-      if (contextFactors.repeatedQuestions) supportingFactors.push('повторные вопросы');
-      if (contextFactors.hasExcessiveExclamations) supportingFactors.push('избыточные восклицания');
+      if (contextFactors.repeatedQuestions)
+        supportingFactors.push('повторные вопросы');
+      if (contextFactors.hasExcessiveExclamations)
+        supportingFactors.push('избыточные восклицания');
       if (contextFactors.hasAllCaps) supportingFactors.push('заглавные буквы');
-      if (contextFactors.negativeKeywordsCount >= 2) supportingFactors.push(`${contextFactors.negativeKeywordsCount} негативных слов`);
-      
+      if (contextFactors.negativeKeywordsCount >= 2)
+        supportingFactors.push(
+          `${contextFactors.negativeKeywordsCount} негативных слов`
+        );
+
       // 🚨 ESCALATE: AI confirms high frustration + at least some supporting evidence
-      if (supportingFactors.length > 0 || triggerPhrases.length >= thresholds.minimumTriggers) {
+      if (
+        supportingFactors.length > 0 ||
+        triggerPhrases.length >= thresholds.minimumTriggers
+      ) {
         shouldEscalate = true;
         escalationReason = `ИИ-анализ показал высокую фрустрацию (${frustrationLevel.toFixed(2)}) с уверенностью ${confidenceScore.toFixed(2)}. Поддерживающие факторы: ${supportingFactors.join(', ')}. Триггеры: ${triggerPhrases.join(', ')}`;
-        
+
         console.log('🚨 [FrustrationAgent] ESCALATION RECOMMENDED BY AI!');
         console.log(`📋 AI Reasoning: ${aiAnalysis.reasoning}`);
         console.log(`🔍 Supporting factors: ${supportingFactors.join(', ')}`);
       } else {
-        console.log(`⚡ [Safety] AI detected high frustration but no supporting contextual evidence`);
+        console.log(
+          `⚡ [Safety] AI detected high frustration but no supporting contextual evidence`
+        );
         escalationReason = `AI detected frustration but insufficient supporting evidence`;
       }
-      
     } else {
       // 📊 Log why escalation was NOT triggered
       if (frustrationLevel < thresholds.minimumFrustrationLevel) {
-        console.log(`⚡ [Safety] AI frustration level ${frustrationLevel.toFixed(2)} below threshold ${thresholds.minimumFrustrationLevel}`);
+        console.log(
+          `⚡ [Safety] AI frustration level ${frustrationLevel.toFixed(2)} below threshold ${thresholds.minimumFrustrationLevel}`
+        );
       }
       if (confidenceScore < thresholds.minimumConfidence) {
-        console.log(`⚡ [Safety] AI confidence ${confidenceScore.toFixed(2)} below threshold ${thresholds.minimumConfidence}`);
+        console.log(
+          `⚡ [Safety] AI confidence ${confidenceScore.toFixed(2)} below threshold ${thresholds.minimumConfidence}`
+        );
       }
     }
 
@@ -359,7 +459,7 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
       triggerPhrases,
       contextFactors,
       shouldEscalate,
-      escalationReason
+      escalationReason,
     };
   }
 
@@ -367,8 +467,8 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
    * Saves the analysis result to the database
    */
   private async saveAnalysisToDatabase(
-    analysis: FrustrationAnalysis, 
-    sessionId: string, 
+    analysis: FrustrationAnalysis,
+    sessionId: string,
     userId: string,
     startTime: number
   ): Promise<void> {
@@ -385,20 +485,18 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
         .limit(1)
         .single();
 
-      const { error } = await supabase
-        .from('frustration_analysis')
-        .insert({
-          session_id: sessionId,
-          message_id: lastMessage?.id || null,
-          frustration_level: analysis.frustrationLevel,
-          confidence_score: analysis.confidenceScore,
-          detected_patterns: analysis.detectedPatterns,
-          trigger_phrases: analysis.triggerPhrases,
-          context_factors: analysis.contextFactors,
-          should_escalate: analysis.shouldEscalate,
-          escalation_reason: analysis.escalationReason,
-          processing_time_ms: processingTimeMs
-        });
+      const { error } = await supabase.from('frustration_analysis').insert({
+        session_id: sessionId,
+        message_id: lastMessage?.id || null,
+        frustration_level: analysis.frustrationLevel,
+        confidence_score: analysis.confidenceScore,
+        detected_patterns: analysis.detectedPatterns,
+        trigger_phrases: analysis.triggerPhrases,
+        context_factors: analysis.contextFactors,
+        should_escalate: analysis.shouldEscalate,
+        escalation_reason: analysis.escalationReason,
+        processing_time_ms: processingTimeMs,
+      });
 
       if (error) {
         console.error('❌ [FrustrationAgent] Error saving to DB:', error);
@@ -410,10 +508,9 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
       if (analysis.shouldEscalate) {
         await supabase.rpc('update_user_behavior_stats', {
           p_user_id: userId,
-          p_new_frustration_incident: true
+          p_new_frustration_incident: true,
         });
       }
-
     } catch (error) {
       console.error('❌ [FrustrationAgent] Error during save:', error);
     }
@@ -424,10 +521,10 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
    */
   private createSafeFailureResponse(): FrustrationAnalysis {
     console.log('🛡️ [FrustrationAgent] Returning safe response on error');
-    
+
     return {
       frustrationLevel: 0.0, // Safe value
-      confidenceScore: 0.0,  // Zero confidence
+      confidenceScore: 0.0, // Zero confidence
       detectedPatterns: [],
       triggerPhrases: [],
       contextFactors: {
@@ -439,10 +536,11 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
         hasExcessiveExclamations: false,
         hasAllCaps: false,
         exclamationCount: 0,
-        allCapsWords: []
+        allCapsWords: [],
       },
       shouldEscalate: false, // NEVER escalate on error
-      escalationReason: 'Analysis error - escalation blocked for safety reasons'
+      escalationReason:
+        'Analysis error - escalation blocked for safety reasons',
     };
   }
-} 
+}

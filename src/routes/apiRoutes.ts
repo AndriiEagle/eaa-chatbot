@@ -1,15 +1,20 @@
 import { Router } from 'express';
-import { askController, healthController, configController, welcomeController } from '../controllers/index.js';
+import {
+  askController,
+  healthController,
+  configController,
+  welcomeController,
+} from '../controllers/index.js';
 import { transcribeAudio } from '../controllers/whisperController.js';
 import { analyzeTextProactively } from '../controllers/proactiveAgentController.js';
 import { generateAISuggestions } from '../controllers/aiSuggestionsController.js';
 import { chatMemory } from '../utils/memory/index.js';
 import { RequestHandler, Request, Response } from 'express';
 import { explainTermController } from '../controllers/explainTermController.js';
-import { 
-  generateModernSuggestions, 
-  generateFallbackSuggestions, 
-  checkSuggestionsHealth 
+import {
+  generateModernSuggestions,
+  generateFallbackSuggestions,
+  checkSuggestionsHealth,
 } from '../controllers/modernSuggestionsController.js';
 
 const router = Router();
@@ -26,14 +31,20 @@ router.get('/welcome/:userId', welcomeController as RequestHandler);
 router.post('/whisper/transcribe', transcribeAudio as RequestHandler);
 
 // Маршрут для проактивного агента
-router.post('/agent/proactive-analysis', analyzeTextProactively as RequestHandler);
+router.post(
+  '/agent/proactive-analysis',
+  analyzeTextProactively as RequestHandler
+);
 
 // Маршрут для ИИ-генерации подсказок
 router.post('/agent/ai-suggestions', generateAISuggestions as RequestHandler);
 
 // 🚀 MODERN PROFESSIONAL SUGGESTIONS ROUTES
 router.post('/suggestions/modern', generateModernSuggestions as RequestHandler);
-router.post('/suggestions/fallback', generateFallbackSuggestions as RequestHandler);
+router.post(
+  '/suggestions/fallback',
+  generateFallbackSuggestions as RequestHandler
+);
 router.get('/suggestions/health', checkSuggestionsHealth as RequestHandler);
 
 // Добавляем новый endpoint для объяснения терминов
@@ -60,14 +71,19 @@ router.get('/chat/messages/:sessionId', async (req: Request, res: Response) => {
   }
 });
 
-router.delete('/chat/sessions/:sessionId', async (req: Request, res: Response) => {
+router.delete(
+  '/chat/sessions/:sessionId',
+  async (req: Request, res: Response) => {
     try {
       await chatMemory.deleteSession(req.params.sessionId);
-      res.status(200).json({ success: true, message: 'Сессия успешно удалена' });
+      res
+        .status(200)
+        .json({ success: true, message: 'Сессия успешно удалена' });
     } catch (error) {
       console.error('❌ Error deleting session:', error);
       res.status(500).json({ error: 'Ошибка при удалении сессии' });
     }
-});
+  }
+);
 
-export default router; 
+export default router;
