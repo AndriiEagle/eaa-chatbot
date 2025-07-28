@@ -37,11 +37,15 @@ export class FactManager {
 
       // Validate confidence range
       if (confidence < 0 || confidence > 1) {
-        console.warn(`⚠️ [FACTS] Invalid confidence value: ${confidence}, using 1.0`);
+        console.warn(
+          `⚠️ [FACTS] Invalid confidence value: ${confidence}, using 1.0`
+        );
         confidence = 1.0;
       }
 
-      console.log(`💾 [FACTS] Saving fact for user ${userId}: ${factType} = ${factValue}`);
+      console.log(
+        `💾 [FACTS] Saving fact for user ${userId}: ${factType} = ${factValue}`
+      );
 
       const factId = uuidv4();
       const timestamp = new Date().toISOString();
@@ -62,7 +66,7 @@ export class FactManager {
             fact_value: factValue,
             confidence: confidence,
             source_message_id: sourceMessageId,
-            updated_at: timestamp
+            updated_at: timestamp,
           })
           .eq('id', existingFact.id);
 
@@ -75,18 +79,16 @@ export class FactManager {
         return existingFact.id;
       } else {
         // Create new fact
-        const { error } = await this.supabase
-          .from('user_facts')
-          .insert({
-            id: factId,
-            user_id: userId,
-            fact_type: factType,
-            fact_value: factValue,
-            confidence: confidence,
-            source_message_id: sourceMessageId,
-            created_at: timestamp,
-            updated_at: timestamp
-          });
+        const { error } = await this.supabase.from('user_facts').insert({
+          id: factId,
+          user_id: userId,
+          fact_type: factType,
+          fact_value: factValue,
+          confidence: confidence,
+          source_message_id: sourceMessageId,
+          created_at: timestamp,
+          updated_at: timestamp,
+        });
 
         if (error) {
           console.error('❌ [FACTS] Error saving fact:', error);
@@ -96,7 +98,6 @@ export class FactManager {
         console.log(`✅ [FACTS] New fact saved successfully: ${factType}`);
         return factId;
       }
-
     } catch (error) {
       console.error('❌ [FACTS] Error in saveUserFact:', error);
       throw error;
@@ -118,7 +119,10 @@ export class FactManager {
         .order('updated_at', { ascending: false });
 
       if (error) {
-        console.error(`❌ [MEMORY] Error getting facts for user ${userId}:`, error);
+        console.error(
+          `❌ [MEMORY] Error getting facts for user ${userId}:`,
+          error
+        );
         return [];
       }
 
@@ -149,23 +153,31 @@ export class FactManager {
         .single();
 
       if (sessionError) {
-        console.error(`❌ [MEMORY] Error getting user from session ${sessionId}:`, sessionError);
+        console.error(
+          `❌ [MEMORY] Error getting user from session ${sessionId}:`,
+          sessionError
+        );
         return;
       }
 
       const userId = sessionData.user_id;
 
       // Проверяем, содержит ли сообщение информацию о бизнесе
-      const containsBusinessInfo = /компан|бизнес|организац|предприяти|фирм|работа|сайт|магазин|банк|финанс|транспорт|отрасл|индустр/i.test(messageContent);
-      
+      const containsBusinessInfo =
+        /компан|бизнес|организац|предприяти|фирм|работа|сайт|магазин|банк|финанс|транспорт|отрасл|индустр/i.test(
+          messageContent
+        );
+
       if (!containsBusinessInfo) {
-        console.log(`ℹ️ [MEMORY] Message does not contain business information, skipping fact extraction`);
+        console.log(
+          `ℹ️ [MEMORY] Message does not contain business information, skipping fact extraction`
+        );
         return;
       }
 
       // Извлекаем факты с помощью GPT-4o-mini
       console.log(`ℹ️ [MEMORY] Analyzing message for business facts...`);
-      
+
       const completion = await this.openai.chat.completions.create({
         model: 'gpt-4o-mini',
         messages: [
@@ -195,21 +207,26 @@ export class FactManager {
   }
 ]
 
-Если не удалось извлечь никаких фактов с уверенностью >= 0.5, верни пустой массив [].`
+Если не удалось извлечь никаких фактов с уверенностью >= 0.5, верни пустой массив [].`,
           },
           {
             role: 'user',
-            content: messageContent
-          }
+            content: messageContent,
+          },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.1
+        temperature: 0.1,
       });
 
-      let extractedFacts: Array<{ fact_type: string; fact_value: string; confidence: number }> = [];
-      
+      let extractedFacts: Array<{
+        fact_type: string;
+        fact_value: string;
+        confidence: number;
+      }> = [];
+
       try {
-        const content = completion.choices[0].message.content || '{"facts": []}';
+        const content =
+          completion.choices[0].message.content || '{"facts": []}';
         const response = JSON.parse(content);
         extractedFacts = response.facts || [];
       } catch (e) {
@@ -219,15 +236,17 @@ export class FactManager {
 
       // Отфильтровываем факты с низкой уверенностью
       const validFacts = extractedFacts.filter(fact => fact.confidence >= 0.5);
-      
+
       if (validFacts.length === 0) {
-        console.log(`ℹ️ [MEMORY] No facts extracted with sufficient confidence`);
+        console.log(
+          `ℹ️ [MEMORY] No facts extracted with sufficient confidence`
+        );
         return;
       }
 
       // Сохраняем извлеченные факты
       console.log(`✅ [MEMORY] Extracted ${validFacts.length} business facts`);
-      
+
       for (const fact of validFacts) {
         // Используем переданный messageId вместо генерации нового UUID
         await this.saveUserFact(
@@ -242,4 +261,4 @@ export class FactManager {
       console.error('❌ [MEMORY] Error extracting facts from message:', e);
     }
   }
-} 
+}

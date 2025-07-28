@@ -7,19 +7,24 @@ export class EmbeddingService {
     return { embedding: [] };
   }
 
-  async searchSimilarChunks(embedding: any, datasetId: string, threshold: number, maxChunks: number) {
-    return { 
-      chunks: [], 
+  async searchSimilarChunks(
+    embedding: any,
+    datasetId: string,
+    threshold: number,
+    maxChunks: number
+  ) {
+    return {
+      chunks: [],
       similarity: [],
       sources: [],
       performance: {
         embedding_ms: 100,
         search_ms: 50,
         generate_ms: 200,
-        total_ms: 350
-      }
+        total_ms: 350,
+      },
     };
   }
 }
 
-export default EmbeddingService; 
+export default EmbeddingService;

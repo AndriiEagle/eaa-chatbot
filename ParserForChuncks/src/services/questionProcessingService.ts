@@ -10,29 +10,39 @@ export class QuestionProcessingService {
   }
 
   async classify(question: string) {
-    return { 
-      type: 'general', 
+    return {
+      type: 'general',
       confidence: 0.8,
       isSimple: true,
       containsBusinessInfo: false,
       isMultiple: false,
-      questions: [question]
+      questions: [question],
     };
   }
 
-  async handleSimpleQuery(question: string, sessionId: string, queryId: string) {
-    return { 
+  async handleSimpleQuery(
+    question: string,
+    sessionId: string,
+    queryId: string
+  ) {
+    return {
       success: true,
-      answer: 'Simple response', 
-      data: { sessionId, queryId }
+      answer: 'Simple response',
+      data: { sessionId, queryId },
     };
   }
 
-  async handleBusinessInfo(question: string, sessionId: string, queryId: string, context?: any, metadata?: any) {
-    return { 
+  async handleBusinessInfo(
+    question: string,
+    sessionId: string,
+    queryId: string,
+    context?: any,
+    metadata?: any
+  ) {
+    return {
       success: true,
-      answer: 'Business response', 
-      data: { sessionId, queryId, context, metadata }
+      answer: 'Business response',
+      data: { sessionId, queryId, context, metadata },
     };
   }
 
@@ -44,9 +54,9 @@ export class QuestionProcessingService {
     return {
       success: true,
       answer: 'Multiple questions processed',
-      data: { questions, processedCount: questions.length }
+      data: { questions, processedCount: questions.length },
     };
   }
 }
 
-export default QuestionProcessingService; 
+export default QuestionProcessingService;

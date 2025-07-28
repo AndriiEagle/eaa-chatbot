@@ -4,12 +4,12 @@ import { env, EMBEDDING_MODEL, CHAT_MODEL } from '../config/env';
 export const openai = {
   chat: {
     completions: {
-      create: async () => ({ choices: [{ message: { content: '' } }] })
-    }
+      create: async () => ({ choices: [{ message: { content: '' } }] }),
+    },
   },
   embeddings: {
-    create: async () => ({ data: [{ embedding: [] }] })
-  }
+    create: async () => ({ data: [{ embedding: [] }] }),
+  },
 };
 
-export default openai; 
+export default openai;

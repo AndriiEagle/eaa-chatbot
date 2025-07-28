@@ -3,7 +3,11 @@ export class MemoryService {
     return { memory: [] };
   }
 
-  async getContextForRequest(userId: string, sessionId: string, question: string) {
+  async getContextForRequest(
+    userId: string,
+    sessionId: string,
+    question: string
+  ) {
     return { context: [], history: [] };
   }
 
@@ -12,4 +16,4 @@ export class MemoryService {
   }
 }
 
-export default MemoryService; 
+export default MemoryService;

@@ -33,4 +33,4 @@ export interface ServiceResponse<T = any> {
   data?: T;
   error?: string;
   message?: string;
-} 
+}

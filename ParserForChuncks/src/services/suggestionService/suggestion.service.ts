@@ -8,12 +8,12 @@ export class SuggestionService {
   }
 
   async generateRevolutionarySuggestions(params: any) {
-    return { 
+    return {
       suggestions: ['Suggestion 1', 'Suggestion 2'],
       clarificationQuestions: ['Question 1?', 'Question 2?'],
-      suggestions_header: 'Related suggestions:'
+      suggestions_header: 'Related suggestions:',
     };
   }
 }
 
-export default SuggestionService; 
+export default SuggestionService;

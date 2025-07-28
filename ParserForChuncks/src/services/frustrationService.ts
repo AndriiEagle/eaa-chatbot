@@ -3,14 +3,19 @@ export class FrustrationService {
     return { frustration: 0 };
   }
 
-  async analyzeAndHandle(text: string, sessionId: string, question?: string, context?: any) {
-    return { 
+  async analyzeAndHandle(
+    text: string,
+    sessionId: string,
+    question?: string,
+    context?: any
+  ) {
+    return {
       success: true,
-      handled: true, 
+      handled: true,
       frustrationLevel: 0,
-      answer: 'Frustration handled'
+      answer: 'Frustration handled',
     };
   }
 }
 
-export default FrustrationService; 
+export default FrustrationService;

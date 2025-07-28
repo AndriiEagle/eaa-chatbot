@@ -1,1 +1,1 @@
-import { CHAT_MODEL } from '../config/env'; 
+import { CHAT_MODEL } from '../config/env';

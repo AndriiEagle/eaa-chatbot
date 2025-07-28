@@ -13,10 +13,10 @@ app.use(express.json());
 
 // Health check endpoint
 app.get('/api/health', (req: Request, res: Response) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
-    port: PORT 
+    port: PORT,
   });
 });
 
@@ -24,4 +24,4 @@ app.get('/api/health', (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${env.NODE_ENV}`);
-}); 
+});
