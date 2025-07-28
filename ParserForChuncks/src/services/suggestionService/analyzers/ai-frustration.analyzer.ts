@@ -15,10 +15,8 @@ import { extractJson } from '../../../utils/formatting/extractJson.js';
 export class AIFrustrationAnalyzer {
   private openai: OpenAI;
 
-  constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+  constructor(openai: OpenAI) {
+    this.openai = openai;
   }
 
   async analyze(frustrationHistory: FrustrationAnalysis[], sessionMessages: ChatMessage[]): Promise<FrustrationProfile> {

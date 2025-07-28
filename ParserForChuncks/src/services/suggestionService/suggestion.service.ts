@@ -63,9 +63,9 @@ export class SuggestionService {
     this.repository = new SuggestionRepository();
     
     // Initialize AI-powered analyzers
-    this.aiUserPersonaAnalyzer = new AIUserPersonaAnalyzer();
-    this.aiBehaviorAnalyzer = new AIBehaviorPatternAnalyzer();
-    this.aiFrustrationAnalyzer = new AIFrustrationAnalyzer();
+    this.aiUserPersonaAnalyzer = new AIUserPersonaAnalyzer(openai);
+    this.aiBehaviorAnalyzer = new AIBehaviorPatternAnalyzer(openai);
+    this.aiFrustrationAnalyzer = new AIFrustrationAnalyzer(openai);
     
     // Initialize traditional analyzers as fallback
     this.businessMaturityAnalyzer = new BusinessMaturityAnalyzer();

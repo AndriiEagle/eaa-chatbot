@@ -15,10 +15,8 @@ import { extractJson } from '../../../utils/formatting/extractJson.js';
 export class AIBehaviorPatternAnalyzer {
   private openai: OpenAI;
 
-  constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+  constructor(openai: OpenAI) {
+    this.openai = openai;
   }
 
   async analyze(userSessions: ChatSession[], sessionMessages: ChatMessage[]): Promise<BehaviorPattern[]> {

@@ -15,10 +15,8 @@ import { extractJson } from '../../../utils/formatting/extractJson.js';
 export class AIUserPersonaAnalyzer {
   private openai: OpenAI;
 
-  constructor() {
-    this.openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY
-    });
+  constructor(openai: OpenAI) {
+    this.openai = openai;
   }
 
   async analyze(userFacts: UserFact[], sessionMessages: ChatMessage[]): Promise<UserPersona> {
