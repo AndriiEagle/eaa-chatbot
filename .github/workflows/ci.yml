@@ -150,7 +150,7 @@ jobs:
           npm run fix-hooks
           
       - name: Verify build
-        working-directory: ParserForChuncks
+        working-directory: ParserForChuncks/ParserForChuncks
         run: |
           ls -la dist/
           node -e "console.log('Build verification successful')"
@@ -159,7 +159,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
-          path: ParserForChuncks/dist/
+          path: ParserForChuncks/ParserForChuncks/dist/
           retention-days: 7
 
   # Performance Tests
@@ -187,7 +187,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: ParserForChuncks/dist/
+          path: ParserForChuncks/ParserForChuncks/dist/
           
       - name: Start application
         working-directory: ParserForChuncks
@@ -220,7 +220,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: ParserForChuncks/dist/
+          path: ParserForChuncks/ParserForChuncks/dist/
           
       - name: Deploy to staging
         run: |
@@ -250,7 +250,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-artifacts
-          path: ParserForChuncks/dist/
+          path: ParserForChuncks/ParserForChuncks/dist/
           
       - name: Deploy to production
         run: |
