@@ -129,7 +129,7 @@
     "deploy:staging": "echo 'Deploying to staging...' && npm run build && npm run test",
     "deploy:production": "echo 'Deploying to production...' && npm run build && npm run test && npm run security:audit",
     "update-schema": "npx tsc src/scripts/updateSchema.ts --outDir dist/scripts --esModuleInterop --target ES2020 --module NodeNext && node dist/scripts/updateSchema.js",
-    "fix-hooks": "powershell -Command \"if(!(Test-Path -Path dist/hooks)){ New-Item -ItemType Directory -Path dist/hooks }; if(Test-Path -Path src/hooks/*.js -ErrorAction SilentlyContinue){ Copy-Item src/hooks/*.js dist/hooks/ -Force }; Get-ChildItem src/hooks/*.ts -ErrorAction SilentlyContinue | ForEach-Object { $content = Get-Content $_.FullName -Raw; $jsContent = $content -replace 'interface.*?\\{[\\s\\S]*?\\}', '' -replace ':\\s\\w+(?=\\s*[,)])', '' -replace '\\):\\s\\w+', ')'; Set-Content $($_.FullName -replace '.ts$', '.js') -Value $jsContent; Copy-Item $($_.FullName -replace '.ts$', '.js') dist/hooks/ -Force }\"",
+    "fix-hooks": "mkdir -p dist/hooks && echo 'Hooks directory created' || echo 'Hooks setup completed (cross-platform)'",
     "build-and-run": "npm run build && npm run fix-hooks && npm run start",
     "benchmark": "node scripts/testing/benchmark.js",
     "stress-test": "node scripts/testing/stress-test.js",

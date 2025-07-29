@@ -51,6 +51,7 @@
     "lint": "cd ParserForChuncks && npx eslint src --ext .ts,.tsx",
     "format": "cd ParserForChuncks && npx prettier --write src/**/*.{ts,tsx,js,jsx}",
     "type-check": "cd ParserForChuncks && npm run type-check",
+    "fix-hooks": "cd ParserForChuncks && npm run fix-hooks",
     "docker:build": "docker build -t eaa-chatbot .",
     "docker:run": "docker run -p 3000:3000 eaa-chatbot",
     "docs:serve": "cd docs && python -m http.server 8080",
