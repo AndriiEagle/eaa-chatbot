@@ -1,4 +1,4 @@
-import { env, EMBEDDING_MODEL, CHAT_MODEL } from '../config/env';
+import { env, EMBEDDING_MODEL, CHAT_MODEL } from '../config/env.js';
 
 // Mock OpenAI client for type compatibility
 export const openai = {

@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { env } from '../config/env';
+import { env } from '../config/env.js';
 
 // Создаем клиент Supabase
 export const supabase = createClient(

@@ -1,6 +1,6 @@
 import { OpenAI } from 'openai';
 import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
-import { env, EMBEDDING_MODEL, CHAT_MODEL } from '../config/env';
+import { env, EMBEDDING_MODEL, CHAT_MODEL } from '../config/env.js';
 
 // Создаем клиент OpenAI
 export const openai = new OpenAI({ apiKey: env.OPENAI_API_KEY });

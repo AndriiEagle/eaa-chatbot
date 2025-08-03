@@ -1,4 +1,4 @@
-import { CHAT_MODEL } from '../config/env';
+import { CHAT_MODEL } from '../config/env.js';
 
 export class QuestionProcessingService {
   static async processQuestion(question: string) {
