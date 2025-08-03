@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { env } from './config/env';
+import { env } from './config/env.js';
 import { chatMemory } from './utils/memory/index.js';
 import { supabase } from './services/supabaseService.js';
 import { openai } from './services/openaiService.js';

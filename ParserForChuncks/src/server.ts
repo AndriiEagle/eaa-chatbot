@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { env } from './config/env';
+import { env } from './config/env.js';
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
