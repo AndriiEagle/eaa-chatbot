@@ -47,11 +47,9 @@ app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Статические файлы только для локальной разработки
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-  const clientBuildPath = path.join(__dirname, 'client');
-  app.use(express.static(clientBuildPath));
-}
+// Обслуживаем статические файлы фронтенда
+const publicPath = path.join(__dirname, '../public');
+app.use(express.static(publicPath));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.url} - ${new Date().toISOString()}`);
@@ -70,16 +68,18 @@ app.get('/health', (req, res) => {
 // Используем единый файл для всех API маршрутов
 app.use('/api/v1', apiRoutes);
 
-// Catch-all для SPA маршрутизации (только в development)
+// Catch-all для SPA маршрутизации - возвращаем React приложение
 app.get('*', (req, res) => {
-  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
-    const clientBuildPath = path.join(__dirname, 'client');
-    res.sendFile(path.join(clientBuildPath, 'index.html'));
-  } else {
+  // Если это API запрос, возвращаем 404
+  if (req.path.startsWith('/api/')) {
     res.status(404).json({
       error: 'Not Found',
-      message: 'This is an API-only deployment. Frontend not included.',
+      message: `API endpoint ${req.path} not found.`,
     });
+  } else {
+    // Для всех остальных маршрутов возвращаем React приложение
+    const publicPath = path.join(__dirname, '../public');
+    res.sendFile(path.join(publicPath, 'index.html'));
   }
 });
 
