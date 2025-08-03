@@ -24,8 +24,11 @@ app.use(express.urlencoded({ extended: true }));
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const clientBuildPath = path.join(__dirname, 'client');
-app.use(express.static(clientBuildPath));
+// Статические файлы только для локальной разработки
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const clientBuildPath = path.join(__dirname, 'client');
+  app.use(express.static(clientBuildPath));
+}
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   console.log(`${req.method} ${req.url} - ${new Date().toISOString()}`);
@@ -35,8 +38,17 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 // Используем единый файл для всех API маршрутов
 app.use('/api/v1', apiRoutes);
 
+// Catch-all для SPA маршрутизации (только в development)
 app.get('*', (req, res) => {
-  res.sendFile(path.join(clientBuildPath, 'index.html'));
+  if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+    const clientBuildPath = path.join(__dirname, 'client');
+    res.sendFile(path.join(clientBuildPath, 'index.html'));
+  } else {
+    res.status(404).json({
+      error: 'Not Found',
+      message: 'This is an API-only deployment. Frontend not included.',
+    });
+  }
 });
 
 app.use((req: Request, res: Response) => {
@@ -79,19 +91,24 @@ const startServer = (port: number) => {
   });
 };
 
-const startServerWithFallback = async () => {
-  try {
-    let usedPort = await startServer(PORT);
-    if (usedPort === -1) {
-      for (const backupPort of BACKUP_PORTS) {
-        usedPort = await startServer(backupPort);
-        if (usedPort !== -1) break;
+// Запуск сервера только в локальной среде
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const startServerWithFallback = async () => {
+    try {
+      let usedPort = await startServer(PORT);
+      if (usedPort === -1) {
+        for (const backupPort of BACKUP_PORTS) {
+          usedPort = await startServer(backupPort);
+          if (usedPort !== -1) break;
+        }
       }
+    } catch (error) {
+      console.error('❌ Критическая ошибка при запуске сервера:', error);
+      process.exit(1);
     }
-  } catch (error) {
-    console.error('❌ Критическая ошибка при запуске сервера:', error);
-    process.exit(1);
-  }
-};
+  };
+  
+  startServerWithFallback();
+}
 
-startServerWithFallback();
+export default app;
