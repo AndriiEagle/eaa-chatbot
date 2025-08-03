@@ -76,9 +76,11 @@ public
 
 # Vuepress build output
 .vuepress/dist
-
 # Serverless directories
 .serverless/
+
+# Разрешаем public для фронтенда
+!public
 
 # FuseBox cache
 .fusebox/
