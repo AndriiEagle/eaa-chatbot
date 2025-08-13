@@ -54,6 +54,13 @@ function stableHash(input: string | number[]): string {
   return input;
 }
 
+function trimChunksBySimilarity(chunks: any[]): any[] {
+  if (!Array.isArray(chunks) || chunks.length === 0) return chunks;
+  const topSim = Number(chunks[0]?.similarity ?? 0);
+  const targetK = topSim > 0.9 ? 3 : 5;
+  return chunks.slice(0, Math.min(targetK, chunks.length));
+}
+
 /**
  * 🎯 EMBEDDING SERVICE
  *
@@ -90,9 +97,10 @@ export class EmbeddingService {
       const cacheKey = `search:${datasetId}:${similarityThreshold}:${maxChunks}:${stableHash(embedding)}`;
       const cached = searchCache.get(cacheKey);
       if (cached) {
-        const sources = formatSourcesMetadata(cached);
+        const trimmed = trimChunksBySimilarity(cached);
+        const sources = formatSourcesMetadata(trimmed);
         return {
-          chunks: cached,
+          chunks: trimmed,
           sources,
           performance: {
             embedding_ms: embeddingTimer.duration,
@@ -114,10 +122,11 @@ export class EmbeddingService {
 
       searchCache.set(cacheKey, chunks);
 
-      const sources = formatSourcesMetadata(chunks);
+      const trimmed = trimChunksBySimilarity(chunks);
+      const sources = formatSourcesMetadata(trimmed);
 
       return {
-        chunks,
+        chunks: trimmed,
         sources,
         performance: {
           embedding_ms: embeddingTimer.duration,
