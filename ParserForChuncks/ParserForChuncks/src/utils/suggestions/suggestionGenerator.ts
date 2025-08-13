@@ -43,9 +43,15 @@ export async function generatePersonalizedSuggestions(
   );
 
   try {
+    // Determine API base URL from environment
+    const envAny: any = (typeof process !== 'undefined' ? process.env : {}) as any;
+    const publicBase = (envAny.NEXT_PUBLIC_API_BASE_URL || (typeof (globalThis as any).importMeta !== 'undefined' && (globalThis as any).importMeta.env?.VITE_API_BASE_URL));
+    const serverBase = envAny.API_BASE_URL || envAny.VERCEL_URL ? `https://${envAny.VERCEL_URL}` : undefined;
+    const API_BASE = (publicBase || serverBase || 'http://localhost:3000') + '/api/v1';
+
     // Call AI agent via internal API
     const response = await fetch(
-      'http://localhost:3000/api/v1/agent/ai-suggestions',
+      `${API_BASE.replace(/\/$/, '')}/agent/ai-suggestions`,
       {
         method: 'POST',
         headers: {
