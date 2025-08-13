@@ -9,6 +9,22 @@ const LoadingIndicator = ({ loading, messages }) => {
         { id: 'search', name: 'Searching documents', completed: false, progress: 0 },
         { id: 'generation', name: 'Generating response', completed: false, progress: 0 }
     ]);
+    // Dynamically enable background stages if needed
+    useEffect(() => {
+        const bg = (window).__bgTasks || {};
+        const needFrustration = bg.frustration === 'running';
+        setStages(prev => {
+            const base = prev.filter(s => !['frustration', 'escalation'].includes(s.id));
+            if (needFrustration) {
+                return [
+                    ...base,
+                    { id: 'frustration', name: 'Analyzing frustration', completed: false, progress: 0 },
+                    { id: 'escalation', name: 'Escalation processing', completed: false, progress: 0 },
+                ];
+            }
+            return base;
+        });
+    }, [loading]);
     useEffect(() => {
         if (!loading) {
             // Reset all stages when loading stops
@@ -38,7 +54,7 @@ const LoadingIndicator = ({ loading, messages }) => {
         }, 300); // Update every 300ms
         return () => clearInterval(progressInterval);
     }, [loading, currentStageIndex]);
-    // Check if we have sources to automatically complete search stage
+    // Complete 'search' automatically if sources already present
     useEffect(() => {
         if (messages && messages.length > 0) {
             const lastMessage = messages[messages.length - 1];
@@ -60,9 +76,18 @@ const LoadingIndicator = ({ loading, messages }) => {
             }
         }
     }, [messages]);
+    // Update background stages from global flag
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const bg = (window).__bgTasks || {};
+            if (bg.frustration === 'done') {
+                setStages(prev => prev.map(s => (s.id === 'frustration' || s.id === 'escalation') ? { ...s, completed: true, progress: 100 } : s));
+            }
+        }, 500);
+        return () => clearInterval(interval);
+    }, []);
     if (!loading)
         return null;
-    // Show only the current active stage
     const currentStage = stages[currentStageIndex];
     return (_jsxs("div", { className: styles['elite-loading-container'], children: [_jsxs("div", { className: styles['elite-spinner'], children: [_jsx("div", { className: styles['spinner-ring'] }), _jsx("div", { className: styles['spinner-inner'] })] }), _jsx("div", { className: styles['elite-text-container'], children: _jsx("div", { className: styles['elite-text'], "data-text": currentStage?.name || 'Processing', children: currentStage?.name || 'Processing' }) })] }));
 };

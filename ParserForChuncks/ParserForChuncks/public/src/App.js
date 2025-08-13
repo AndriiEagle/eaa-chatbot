@@ -11,6 +11,7 @@ import ChatHeader from './components/ChatHeader';
 import SessionsList from './components/SessionsList';
 import Settings from './components/Settings';
 import { loaderPhrases, copyPhrases, defaultSettings } from './constants/phrases';
+import LoadingIndicator from './components/LoadingIndicator';
 // Инициализация логгера и очистка истории при запуске
 initLogger();
 function getHistory() {
@@ -302,6 +303,8 @@ export default function App() {
         handleMessageSent(); // Сбрасываем счетчик подсказок
         setLoading(true);
         try {
+            // Помечаем фоновые задачи (фрустрация запускается на сервере неблокирующе)
+            (window).__bgTasks = { ...(window).__bgTasks, frustration: 'running' };
             const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -342,6 +345,8 @@ export default function App() {
                     return newMsgs;
                 });
                 setLoading(false); // Убираем загрузку для JSON ответа
+                // Анализ фрустрации запускается в фоне — снимаем индикатор фоновых задач
+                (window).__bgTasks = { ...(window).__bgTasks, frustration: 'done' };
             }
             // СЦЕНАРИЙ 2: Сервер вернул потоковый ответ
             else if (contentType.includes('text/event-stream')) {
@@ -356,6 +361,7 @@ export default function App() {
                     const { done, value } = await reader.read();
                     if (done) {
                         setLoading(false); // Убираем загрузку когда стрим завершен
+                        (window).__bgTasks = { ...(window).__bgTasks, frustration: 'done' };
                         break;
                     }
                     const chunk = decoder.decode(value, { stream: true });
@@ -367,6 +373,7 @@ export default function App() {
                                 // Обработка различных типов событий
                                 if (data.type === 'done') {
                                     setLoading(false); // Убираем загрузку когда получен done
+                                    (window).__bgTasks = { ...(window).__bgTasks, frustration: 'done' };
                                     break;
                                 }
                                 else if (data.type === 'new_answer') {
@@ -460,6 +467,7 @@ export default function App() {
         }
         finally {
             setLoading(false);
+            (window).__bgTasks = { ...(window).__bgTasks, frustration: 'done' };
             await fetchSessions();
         }
     };

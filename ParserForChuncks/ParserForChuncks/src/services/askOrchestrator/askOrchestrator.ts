@@ -59,6 +59,27 @@ export class AskOrchestrator {
     return base;
   }
 
+  private normalizeText(text: string): string {
+    return text
+      .toLowerCase()
+      .replace(/\s+/g, ' ')
+      .replace(/[!?.,;:()\[\]\-_'"`]/g, '')
+      .trim();
+  }
+
+  private isSimpleReask(prev: string | undefined, current: string): boolean {
+    if (!prev) return false;
+    const a = this.normalizeText(prev);
+    const b = this.normalizeText(current);
+    if (a.length < 5 || b.length < 5) return false;
+    if (a === b) return true;
+    const wordsA = new Set(a.split(' '));
+    const wordsB = new Set(b.split(' '));
+    const common = [...wordsA].filter(w => wordsB.has(w)).length;
+    const ratio = common / Math.max(wordsA.size, wordsB.size);
+    return ratio >= 0.7; // 70% совпадения слов
+  }
+
   async processRequest(params: AskRequest): Promise<ProcessingResult> {
     const {
       question,
@@ -165,6 +186,30 @@ export class AskOrchestrator {
         return finalResult;
       }
 
+      // Детект простого переспрашивания по последнему сообщению пользователя в сессии
+      let lastUserMessage: string | undefined = undefined;
+      try {
+        const history: any[] = (await chatMemory.getSessionMessages(sessionId!)) as any[];
+        const lastUser = [...history].reverse().find(m => m.role === 'user');
+        lastUserMessage = lastUser?.content;
+      } catch {}
+      if (this.isSimpleReask(lastUserMessage, question)) {
+        return {
+          answer:
+            'It looks like you repeated the same question. Add any missing details (context, product/service, EU country, deadline) to get a more precise answer.',
+          sources: [],
+          performance: { embedding_ms: 0, search_ms: 0, generate_ms: 0, total_ms: 0 },
+          session_id: sessionId!,
+          query_id: queryId,
+          suggestions: [
+            'What has changed since the previous message?',
+            'Specify country and digital service (website/app/SaaS)',
+            'Do you need penalties/timeline or a checklist?'
+          ],
+          suggestions_header: 'Please add details:',
+        };
+      }
+
       // Step 1: Question preprocessing and classification
       const preprocessedQuestion =
         await this.questionProcessor.preprocess(question);
@@ -220,24 +265,12 @@ export class AskOrchestrator {
 
       // 🚨 UNIVERSAL FRUSTRATION ANALYSIS - RUNS FOR ALL PATHS
       try {
-        const notification = await this.frustrationService.analyzeAndHandle(
-          user_id,
-          sessionId!,
-          question,
-          finalResult.answer
-        );
-        if (notification) {
-          // Add escalation notification to the answer
-          finalResult.answer =
-            finalResult.answer + `\n\n---\n\n${notification}`;
-        }
+        // Запускаем анализ в фоне, не блокируем ответ
+        void this.frustrationService
+          .analyzeAndHandle(user_id, sessionId!, question, finalResult.answer)
+          .catch(err => logger.error('Async frustration analysis failed', { err }));
       } catch (error) {
-        logger.error('Error in frustration analysis', {
-          error,
-          user_id,
-          sessionId,
-        });
-        // Don't block the response if frustration analysis fails
+        logger.error('Error in frustration analysis', { error, user_id, sessionId });
       }
 
       return finalResult;
