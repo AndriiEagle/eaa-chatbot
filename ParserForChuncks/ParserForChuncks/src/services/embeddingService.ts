@@ -15,6 +15,45 @@ export interface SearchResult {
   };
 }
 
+// Простая LRU с TTL
+class LruCache<V> {
+  private map = new Map<string, { value: V; expiresAt: number }>();
+  constructor(private maxSize: number, private ttlMs: number) {}
+  get(key: string): V | undefined {
+    const item = this.map.get(key);
+    if (!item) return undefined;
+    if (Date.now() > item.expiresAt) {
+      this.map.delete(key);
+      return undefined;
+    }
+    // bump
+    this.map.delete(key);
+    this.map.set(key, item);
+    return item.value;
+  }
+  set(key: string, value: V) {
+    if (this.map.has(key)) this.map.delete(key);
+    this.map.set(key, { value, expiresAt: Date.now() + this.ttlMs });
+    if (this.map.size > this.maxSize) {
+      // remove oldest
+      const first = this.map.keys().next().value;
+      if (first) this.map.delete(first);
+    }
+  }
+}
+
+const DEFAULT_TTL_MS = 3 * 60 * 1000; // 3 минуты
+const embeddingCache = new LruCache<number[]>(200, DEFAULT_TTL_MS);
+const searchCache = new LruCache<any>(300, DEFAULT_TTL_MS);
+
+function stableHash(input: string | number[]): string {
+  if (Array.isArray(input)) {
+    // округлим до 5 знаков, чтобы хэш был стабильнее
+    return input.map(n => n.toFixed(5)).join(',');
+  }
+  return input;
+}
+
 /**
  * 🎯 EMBEDDING SERVICE
  *
@@ -24,7 +63,12 @@ export interface SearchResult {
 export class EmbeddingService {
   async createEmbedding(text: string): Promise<number[]> {
     logger.info('Creating embedding', { textLength: text.length });
-    return await createEmbedding(text);
+    const key = `emb:${text.length}:${text.slice(0, 64)}`;
+    const cached = embeddingCache.get(key);
+    if (cached) return cached;
+    const emb = await createEmbedding(text);
+    embeddingCache.set(key, emb);
+    return emb;
   }
 
   async searchSimilarChunks(
@@ -43,6 +87,22 @@ export class EmbeddingService {
     });
 
     try {
+      const cacheKey = `search:${datasetId}:${similarityThreshold}:${maxChunks}:${stableHash(embedding)}`;
+      const cached = searchCache.get(cacheKey);
+      if (cached) {
+        const sources = formatSourcesMetadata(cached);
+        return {
+          chunks: cached,
+          sources,
+          performance: {
+            embedding_ms: embeddingTimer.duration,
+            search_ms: 0,
+            generate_ms: 0,
+            total_ms: embeddingTimer.duration,
+          },
+        };
+      }
+
       searchTimer.reset();
       const chunks = await findRelevantChunks(
         embedding,
@@ -51,6 +111,8 @@ export class EmbeddingService {
         maxChunks
       );
       searchTimer.stop();
+
+      searchCache.set(cacheKey, chunks);
 
       const sources = formatSourcesMetadata(chunks);
 
