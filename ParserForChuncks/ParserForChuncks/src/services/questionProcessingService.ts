@@ -121,12 +121,16 @@ export class QuestionProcessingService {
   async generateAnswer(
     question: string,
     chunks: any[],
-    memoryContext: any
+    memoryContext: any,
+    targetLang: 'en' | 'ru' = 'en'
   ): Promise<string> {
     const ragContext = formatRAGContext(chunks, question);
 
+    const languageLine = targetLang === 'ru' ? 'Always reply in Russian.' : 'Always reply in English.';
+    const systemPrompt = `${STRICT_SYSTEM_PROMPT}\n\n${languageLine}`;
+
     const messages = [
-      { role: 'system' as const, content: STRICT_SYSTEM_PROMPT },
+      { role: 'system' as const, content: systemPrompt },
       {
         role: 'user' as const,
         content: `${ragContext}\n\nQuestion: ${question}`,
@@ -162,7 +166,7 @@ export class QuestionProcessingService {
 
       try {
         // Simplified processing for each question
-        const answer = await this.generateAnswer(question, [], {});
+        const answer = await this.generateAnswer(question, [], {}, 'en');
         timer.stop();
 
         results.push({

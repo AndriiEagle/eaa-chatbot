@@ -16,6 +16,17 @@ interface SimpleQueryResult {
 export async function handleSimpleQuery(
   query: string
 ): Promise<SimpleQueryResult> {
+  // Быстрая обработка коротких отрицаний — без вызова OpenAI
+  const quick = query.trim().toLowerCase().replace(/\s+/g, '');
+  const shortNegations = ['no', 'no!', 'no!!', 'no!!!', 'нет', 'нет!', 'нет!!', 'нет!!!', 'неэто', 'нето', 'nope', 'nah'];
+  if (quick.length <= 8 && shortNegations.includes(quick)) {
+    return {
+      is_simple_query: true,
+      response_text:
+        'Okay! If something is wrong, please tell me what exactly you expected — I will adjust the answer or escalate if needed.',
+    };
+  }
+
   // Запросы длиннее 50 символов вряд ли являются простыми приветствиями
   if (query.trim().length > 50) {
     return { is_simple_query: false, response_text: null };
@@ -42,9 +53,7 @@ export async function handleSimpleQuery(
     const result = response.choices[0]?.message?.content;
 
     if (!result) {
-      console.error(
-        '❌ [SimpleQueryAgent] Failed to get response from OpenAI.'
-      );
+      console.error('❌ [SimpleQueryAgent] Failed to get response from OpenAI.');
       return { is_simple_query: false, response_text: null };
     }
 
@@ -52,9 +61,7 @@ export async function handleSimpleQuery(
 
     // Дополнительная проверка, чтобы убедиться, что у нас есть правильный флаг и текст
     if (typeof parsedResult.is_simple_query !== 'boolean') {
-      console.error(
-        '❌ [SimpleQueryAgent] OpenAI response has invalid format (is_simple_query).'
-      );
+      console.error('❌ [SimpleQueryAgent] OpenAI response has invalid format (is_simple_query).');
       return { is_simple_query: false, response_text: null };
     }
 

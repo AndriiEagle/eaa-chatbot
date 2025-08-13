@@ -127,7 +127,7 @@ export class FrustrationDetectionAgent {
     recentMessages: ChatMessage[]
   ): string {
     const historyText = recentMessages
-      .slice(-8) // Take a maximum of 8 recent messages
+      .slice(-5) // Take a maximum of 5 recent messages (faster)
       .map((msg, index) => {
         const timestamp =
           index === recentMessages.length - 1
@@ -199,7 +199,7 @@ IMPORTANT: Consider whether the user's frustration (if any) is:
           { role: 'user', content: context },
         ],
         temperature: 0.1, // Low temperature for consistent analysis
-        max_tokens: 500,
+        max_tokens: 300, // smaller for speed
       });
 
       const responseText = completion.choices[0].message.content?.trim();

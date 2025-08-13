@@ -46,6 +46,19 @@ export class AskOrchestrator {
     );
   }
 
+  private detectLanguage(text: string): 'ru' | 'en' {
+    const cyr = /[А-Яа-яЁё]/.test(text);
+    if (cyr) return 'ru';
+    return 'en';
+  }
+
+  private buildSystemPrompt(preferredLang: 'en' | 'ru', userLang: 'en' | 'ru'): string {
+    // Первый ответ приложения — английский (preferredLang), дальше язык пользователя
+    const targetLang = userLang === 'en' ? 'English' : 'Russian';
+    const base = `You are an expert assistant specializing in the European Accessibility Act (EAA). Always reply in ${targetLang}.`;
+    return base;
+  }
+
   async processRequest(params: AskRequest): Promise<ProcessingResult> {
     const {
       question,
@@ -144,6 +157,14 @@ export class AskOrchestrator {
     let finalResult: ProcessingResult;
 
     try {
+      // Fast path: короткие отрицания/междометия → simple, без RAG
+      const quickText = question.trim().toLowerCase();
+      const isShortNegation = quickText.length <= 8 && /^(no+!?|нет+!?|не\s*то!?|nope!?|nah!?)$/.test(quickText.replace(/\s+/g, ''));
+      if (isShortNegation) {
+        finalResult = await this.questionProcessor.handleSimpleQuery(question, sessionId!, queryId);
+        return finalResult;
+      }
+
       // Step 1: Question preprocessing and classification
       const preprocessedQuestion =
         await this.questionProcessor.preprocess(question);
@@ -154,7 +175,7 @@ export class AskOrchestrator {
       if (questionClassification.isSimple) {
         finalResult = await this.questionProcessor.handleSimpleQuery(
           question,
-          sessionId,
+          sessionId!,
           queryId
         );
       }
@@ -163,7 +184,7 @@ export class AskOrchestrator {
         finalResult = await this.questionProcessor.handleBusinessInfo(
           question,
           user_id,
-          sessionId,
+          sessionId!,
           queryId,
           { dataset_id, similarity_threshold, max_chunks }
         );
@@ -184,6 +205,9 @@ export class AskOrchestrator {
       }
       // Step 5: Process single question via dedicated flow
       else {
+        // Язык: далее всегда язык пользователя (детект по входу)
+        const userLang = this.detectLanguage(question);
+        (global as any).__ASK_TARGET_LANG__ = userLang; // мягкая передача в сервисы
         finalResult = await this.processSingleQuestion(preprocessedQuestion, {
           user_id,
           dataset_id,
@@ -198,7 +222,7 @@ export class AskOrchestrator {
       try {
         const notification = await this.frustrationService.analyzeAndHandle(
           user_id,
-          sessionId,
+          sessionId!,
           question,
           finalResult.answer
         );
@@ -273,7 +297,8 @@ export class AskOrchestrator {
     const answer = await this.questionProcessor.generateAnswer(
       question,
       searchResult.chunks,
-      memoryContext
+      memoryContext,
+      (global as any).__ASK_TARGET_LANG__ || 'en'
     );
 
     // Use correct method name for SuggestionService
