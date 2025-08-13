@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { Rnd } from 'react-rnd';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
@@ -13,6 +13,11 @@ const ChatLayout = ({ messages, loading, onSendMessage, onCopy, onSelectSuggesti
     const chatRef = useRef(null);
     const [size, setSize] = useState({ width: '80rem', height: '90vh' });
     const [position, setPosition] = useState({ x: 0, y: 0 });
+    const MAX_RENDERED = 120; // windowed rendering size
+    const visibleMessages = useMemo(() => {
+        const start = Math.max(0, messages.length - MAX_RENDERED);
+        return messages.slice(start);
+    }, [messages]);
     // Load saved size and position on mount
     useEffect(() => {
         const savedSize = localStorage.getItem('chat-window-size');
@@ -44,7 +49,7 @@ const ChatLayout = ({ messages, loading, onSendMessage, onCopy, onSelectSuggesti
                 behavior: 'smooth'
             });
         }
-    }, [messages]);
+    }, [visibleMessages]);
     return (_jsxs(Rnd, { size: size, position: position, onDragStop: (e, d) => {
             setPosition({ x: d.x, y: d.y });
         }, onResizeStop: (e, direction, ref, delta, position) => {
@@ -87,10 +92,10 @@ const ChatLayout = ({ messages, loading, onSendMessage, onCopy, onSelectSuggesti
                     display: 'flex',
                     flexDirection: 'column',
                     gap: '1rem',
-                }, children: [messages.length === 0 && (_jsx("div", { style: {
+                }, children: [visibleMessages.length === 0 && (_jsx("div", { style: {
                             color: '#9ca3af',
                             textAlign: 'center',
-                        }, children: "No messages" })), messages.map((msg, i) => (_jsxs("div", { style: {
+                        }, children: "No messages" })), visibleMessages.map((msg, i) => (_jsxs("div", { style: {
                             display: 'flex',
                             alignItems: 'flex-end',
                             justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
@@ -109,7 +114,7 @@ const ChatLayout = ({ messages, loading, onSendMessage, onCopy, onSelectSuggesti
                                         height: '100%',
                                         borderRadius: '50%',
                                         objectFit: 'cover'
-                                    } }) })), _jsxs("div", { style: { display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }, children: [!(loading && msg.role === 'bot' && i === messages.length - 1) && (_jsx(MessageBubble, { message: msg, onCopy: onCopy, formatTime: formatTime, getRelevanceColor: getRelevanceColor, onSelectSuggestion: onSelectSuggestion, loading: false })), msg.role === 'bot' && loading && i === messages.length - 1 && (_jsx(LoadingIndicator, { loading: loading, messages: messages }))] }), msg.role === 'user' && (_jsx("div", { style: {
+                                    } }) })), _jsxs("div", { style: { display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start' }, children: [!(loading && msg.role === 'bot' && i === visibleMessages.length - 1) && (_jsx(MessageBubble, { message: msg, onCopy: onCopy, formatTime: formatTime, getRelevanceColor: getRelevanceColor, onSelectSuggestion: onSelectSuggestion, loading: false })), msg.role === 'bot' && loading && i === visibleMessages.length - 1 && (_jsx(LoadingIndicator, { loading: loading, messages: visibleMessages }))] }), msg.role === 'user' && (_jsx("div", { style: {
                                     width: '2rem',
                                     height: '2rem',
                                     borderRadius: '50%',
@@ -119,7 +124,7 @@ const ChatLayout = ({ messages, loading, onSendMessage, onCopy, onSelectSuggesti
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     fontSize: '1.25rem',
-                                }, children: "\uD83E\uDDD1" }))] }, msg.ts + '-' + i))), loading && (messages.length === 0 || messages[messages.length - 1]?.role !== 'bot') && (_jsxs("div", { style: {
+                                }, children: "\uD83E\uDDD1" }))] }, msg.ts + '-' + i))), loading && (visibleMessages.length === 0 || (visibleMessages[visibleMessages.length - 1])?.role !== 'bot') && (_jsxs("div", { style: {
                             display: 'flex',
                             alignItems: 'flex-end',
                             justifyContent: 'flex-start',
@@ -138,7 +143,7 @@ const ChatLayout = ({ messages, loading, onSendMessage, onCopy, onSelectSuggesti
                                         height: '100%',
                                         borderRadius: '50%',
                                         objectFit: 'cover'
-                                    } }) }), _jsx(LoadingIndicator, { loading: loading, messages: messages })] }))] }), _jsxs("div", { style: {
+                                    } }) }), _jsx(LoadingIndicator, { loading: loading, messages: visibleMessages })] }))] }), _jsxs("div", { style: {
                     borderTop: '1px solid #333',
                     padding: '1.5rem',
                     display: 'flex',

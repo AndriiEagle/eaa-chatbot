@@ -1,5 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { MessageType } from '../types/index';
@@ -143,6 +143,29 @@ const MessageBubble = React.memo(({ message, onCopy, formatTime, getRelevanceCol
     const { role } = message;
     const isUser = role === 'user';
     const showPerformance = !isUser && message.performance && formatTime;
+    // batching render of long content to avoid layout thrash
+    useEffect(() => {
+        if (!message?.content || typeof message.content !== 'string')
+            return;
+        if (message.content.length < 1200)
+            return; // short content — no batching
+        let raf = 0;
+        const el = document.getElementById(`msg-content-${message.ts}`);
+        if (!el)
+            return;
+        const full = message.content;
+        let i = 0;
+        const step = 400; // chunk size per frame
+        el.textContent = '';
+        const pump = () => {
+            el.textContent += full.slice(i, i + step);
+            i += step;
+            if (i < full.length)
+                raf = requestAnimationFrame(pump);
+        };
+        raf = requestAnimationFrame(pump);
+        return () => cancelAnimationFrame(raf);
+    }, [message?.content, message?.ts]);
     // Function for getting random phrase from array
     const getRandomPhrase = () => {
         return copyPhrases[Math.floor(Math.random() * copyPhrases.length)];
@@ -294,7 +317,7 @@ const MessageBubble = React.memo(({ message, onCopy, formatTime, getRelevanceCol
         if (mainContent === 'Analysis data has been processed.' || mainContent === 'Preliminary analysis (based on 100% data) was shown above.') {
             showMainContentAfterAnalysis = false;
         }
-        return (_jsxs(_Fragment, { children: [!isUser && message.preliminaryAnalysis && (_jsx(PreliminaryAnalysisDisplay, { analysisData: message.preliminaryAnalysis })), (mainContent && showMainContentAfterAnalysis && mainContent.trim() !== '') && (_jsx(ReactMarkdown, { remarkPlugins: [remarkGfm], components: {
+        return (_jsxs(_Fragment, { children: [!isUser && message.preliminaryAnalysis && (_jsx(PreliminaryAnalysisDisplay, { analysisData: message.preliminaryAnalysis })), (mainContent && showMainContentAfterAnalysis && mainContent.trim() !== '') && (_jsx("div", { id: `msg-content-${message.ts}`, children: _jsx(ReactMarkdown, { remarkPlugins: [remarkGfm], components: {
                         a: (props) => (_jsx("a", { ...props, target: "_blank", rel: "noopener noreferrer", style: { textDecoration: 'underline', color: '#93c5fd' } })),
                         p: ({ children }) => _jsx("p", { children: _jsx(SourceHighlighter, { children: children }) }),
                         li: ({ children }) => _jsx("li", { children: _jsx(SourceHighlighter, { children: children }) }),
@@ -306,7 +329,7 @@ const MessageBubble = React.memo(({ message, onCopy, formatTime, getRelevanceCol
                         h6: ({ children }) => _jsx("h6", { children: _jsx(SourceHighlighter, { children: children }) }),
                         blockquote: ({ children }) => _jsx("blockquote", { children: _jsx(SourceHighlighter, { children: children }) }),
                         strong: ({ children }) => _jsx("strong", { children: _jsx(SourceHighlighter, { children: children }) }),
-                    }, children: typeof mainContent === 'string' ? mainContent : JSON.stringify(mainContent, null, 2) })), message.sources && message.sources.length > 0 && (_jsx(SourcesList, { sources: message.sources })), message.performance && formatTime && (_jsxs("div", { style: styles.performanceStats, children: ["Time: emb: ", formatTime(message.performance.embedding_ms), " | search: ", formatTime(message.performance.search_ms), " | answer: ", formatTime(message.performance.generate_ms), " | total: ", formatTime(message.performance.total_ms)] })), ((message.clarificationQuestions ?? []).length > 0 || (message.infoTemplates ?? []).length > 0) && (_jsxs("div", { style: { marginTop: '0.75rem' }, children: [_jsx("div", { style: styles.suggestedHeader, children: message.suggestions_header || 'Please clarify for me:' }), (message.clarificationQuestions ?? []).length > 0 && (_jsx("div", { style: { marginBottom: (message.infoTemplates ?? []).length > 0 ? '0.5rem' : 0 }, children: (message.clarificationQuestions ?? []).map((q, idx) => (_jsx("div", { style: styles.suggestedQuestion, onMouseOver: e => { const target = e.currentTarget; target.style.backgroundColor = '#374151'; }, onMouseOut: e => { const target = e.currentTarget; target.style.backgroundColor = '#2d3748'; }, onClick: () => onSelectSuggestion(q), children: q }, idx))) })), (message.infoTemplates ?? []).length > 0 && (_jsx("div", { style: { opacity: 0.85 }, children: (message.infoTemplates ?? []).map((tpl, idx) => (_jsxs("div", { style: { ...styles.suggestedQuestion, backgroundColor: '#23272A', color: '#cbd5e1', borderStyle: 'dashed' }, onMouseOver: e => { const target = e.currentTarget; target.style.backgroundColor = '#2d3748'; }, onMouseOut: e => { const target = e.currentTarget; target.style.backgroundColor = '#23272A'; }, onClick: () => onSelectSuggestion(tpl), children: ["\u270F\uFE0F ", tpl] }, idx))) }))] })), message.suggestions && message.suggestions.length > 0 && (_jsxs("div", { style: { marginTop: '0.75rem' }, children: [_jsx("div", { style: styles.suggestedHeader, children: "Try asking:" }), _jsx("div", { children: message.suggestions.map((q, idx) => (_jsx("div", { style: styles.suggestedQuestion, onMouseOver: e => { const target = e.currentTarget; target.style.backgroundColor = '#374151'; }, onMouseOut: e => { const target = e.currentTarget; target.style.backgroundColor = '#2d3748'; }, onClick: () => onSelectSuggestion(q), children: q }, idx))) })] })), message.role === MessageType.BOT && message.content && message.content !== 'Server request error.' && !loading && (_jsxs(_Fragment, { children: [showCopyPhrase && (_jsx("div", { style: styles.copyPhraseContainer, children: copyPhrase })), _jsx("button", { style: styles.copyButton, onClick: () => handleCopy(message.content), title: "Copy answer", children: "\u29C9" })] }))] }));
+                    }, children: typeof mainContent === 'string' ? mainContent : JSON.stringify(mainContent, null, 2) }) })), message.sources && message.sources.length > 0 && (_jsx(SourcesList, { sources: message.sources })), message.performance && formatTime && (_jsxs("div", { style: styles.performanceStats, children: ["Time: emb: ", formatTime(message.performance.embedding_ms), " | search: ", formatTime(message.performance.search_ms), " | answer: ", formatTime(message.performance.generate_ms), " | total: ", formatTime(message.performance.total_ms)] })), ((message.clarificationQuestions ?? []).length > 0 || (message.infoTemplates ?? []).length > 0) && (_jsxs("div", { style: { marginTop: '0.75rem' }, children: [_jsx("div", { style: styles.suggestedHeader, children: message.suggestions_header || 'Please clarify for me:' }), (message.clarificationQuestions ?? []).length > 0 && (_jsx("div", { style: { marginBottom: (message.infoTemplates ?? []).length > 0 ? '0.5rem' : 0 }, children: (message.clarificationQuestions ?? []).map((q, idx) => (_jsx("div", { style: styles.suggestedQuestion, onMouseOver: e => { const target = e.currentTarget; target.style.backgroundColor = '#374151'; }, onMouseOut: e => { const target = e.currentTarget; target.style.backgroundColor = '#2d3748'; }, onClick: () => onSelectSuggestion(q), children: q }, idx))) })), (message.infoTemplates ?? []).length > 0 && (_jsx("div", { style: { opacity: 0.85 }, children: (message.infoTemplates ?? []).map((tpl, idx) => (_jsxs("div", { style: { ...styles.suggestedQuestion, backgroundColor: '#23272A', color: '#cbd5e1', borderStyle: 'dashed' }, onMouseOver: e => { const target = e.currentTarget; target.style.backgroundColor = '#2d3748'; }, onMouseOut: e => { const target = e.currentTarget; target.style.backgroundColor = '#23272A'; }, onClick: () => onSelectSuggestion(tpl), children: ["\u270F\uFE0F ", tpl] }, idx))) }))] })), message.suggestions && message.suggestions.length > 0 && (_jsxs("div", { style: { marginTop: '0.75rem' }, children: [_jsx("div", { style: styles.suggestedHeader, children: "Try asking:" }), _jsx("div", { children: message.suggestions.map((q, idx) => (_jsx("div", { style: styles.suggestedQuestion, onMouseOver: e => { const target = e.currentTarget; target.style.backgroundColor = '#374151'; }, onMouseOut: e => { const target = e.currentTarget; target.style.backgroundColor = '#2d3748'; }, onClick: () => onSelectSuggestion(q), children: q }, idx))) })] })), message.role === MessageType.BOT && message.content && message.content !== 'Server request error.' && !loading && (_jsxs(_Fragment, { children: [showCopyPhrase && (_jsx("div", { style: styles.copyPhraseContainer, children: copyPhrase })), _jsx("button", { style: styles.copyButton, onClick: () => handleCopy(message.content), title: "Copy answer", children: "\u29C9" })] }))] }));
     };
     // Function for rendering multiple responses
     const renderMultiMessage = () => {
